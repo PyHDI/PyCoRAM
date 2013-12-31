@@ -17,12 +17,12 @@ import utils.version
 from rtlconverter.convertvisitor import InstanceConvertVisitor
 from rtlconverter.convertvisitor import InstanceReplaceVisitor
 
-from pyverilog.vparser.parser import VerilogCodeParser
-from pyverilog.definition_analyzer.modulevisitor import ModuleVisitor
-from pyverilog.utils.scope import ScopeLabel, ScopeChain
-from pyverilog.ast_to_code.ast_to_code import ASTtoCode
-import pyverilog.vparser.ast as vast
 import pyverilog.utils.signaltype as signaltype
+from pyverilog.utils.scope import ScopeLabel, ScopeChain
+import pyverilog.vparser.ast as vast
+from pyverilog.vparser.parser import VerilogCodeParser
+from pyverilog.dataflow.modulevisitor import ModuleVisitor
+from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
 TEMPLATE_FILE = TEMPLATE_DIR + 'pycoram.v'
@@ -175,7 +175,7 @@ def main():
     ast = converter.generate()
     converter.dumpCoramObject()
     
-    asttocode = ASTtoCode()
+    asttocode = ASTCodeGenerator()
     code = asttocode.visit(ast)
 
     f = open(options.outputfile, 'w')

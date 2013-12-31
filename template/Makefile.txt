@@ -34,7 +34,7 @@ vcs_log:
 
 .PHONY: view
 view:
-	gtkwave uut.vcd &
+	gtkwave --giga uut.vcd &
 
 .PHONY: clean
 clean:

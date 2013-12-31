@@ -11,13 +11,13 @@ import os
 import sys
 import math
 import re
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 
 import utils.version
 from controlthread.controlthread import ControlThreadGenerator
 from rtlconverter.rtlconverter import RtlConverter
 import controlthread.coram_module as coram_module
-from pyverilog.ast_to_code.ast_to_code import ASTtoCode
+from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 import pyverilog.vparser.ast as vast
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
@@ -25,7 +25,7 @@ TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
 #-------------------------------------------------------------------------------
 class SystemBuilder(object):
     def __init__(self):
-        self.env = Environment(loader=PackageLoader('pycoram','template'))
+        self.env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
         self.env.globals['int'] = int
         self.env.globals['log'] = math.log
 
@@ -108,7 +108,7 @@ class SystemBuilder(object):
 
         converter.dumpCoramObject()
 
-        asttocode = ASTtoCode()
+        asttocode = ASTCodeGenerator()
         userlogic_code= asttocode.visit(userlogic_ast)
 
         # Control Thread
@@ -130,7 +130,7 @@ class SystemBuilder(object):
         for tname, (tmemories, tinstreams, toutstreams, tchannels, tregisters, tiochannels, tioregisters) in sorted(thread_status.items(), key=lambda x:x[0]):
             threads.append( coram_module.ControlThread(tname, tmemories, tinstreams, toutstreams, tchannels, tregisters, tiochannels, tioregisters) )
 
-        asttocode = ASTtoCode()
+        asttocode = ASTCodeGenerator()
         def_top_parameters = []
         def_top_localparams = []
         def_top_ioports = []

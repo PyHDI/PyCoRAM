@@ -32,7 +32,7 @@ import controlthread.voperator as voperator
 import pyverilog
 import pyverilog.vparser
 import pyverilog.vparser.ast as vast
-import pyverilog.optimizer.optimizer as vopt
+import pyverilog.dataflow.optimizer as vopt
 
 CORAM_MEMORY='CoramMemory'
 CORAM_INSTREAM='CoramInStream'

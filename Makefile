@@ -26,4 +26,3 @@ clean:
 	make clean -C rtlconverter
 	make clean -C utils
 	make clean -C input
-	make clean -C pyverilog

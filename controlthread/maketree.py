@@ -11,7 +11,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 from pyverilog.vparser.ast import *
-from pyverilog.utils.dataflow import *
+from pyverilog.dataflow.dataflow import *
 from pyverilog.utils.scope import *
 import pyverilog.utils.op2mark
 

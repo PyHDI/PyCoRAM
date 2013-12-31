@@ -17,11 +17,10 @@ import controlthread.maketree as maketree
 import pyverilog
 import pyverilog.vparser
 import pyverilog.vparser.ast as vast
-from pyverilog.ast_to_code.ast_to_code import ASTtoCode
-
-import pyverilog.optimizer.optimizer as vopt
-import pyverilog.utils.dataflow as vdflow
+import pyverilog.dataflow.optimizer as vopt
+import pyverilog.dataflow.dataflow as vdflow
 import pyverilog.utils.scope as vscope
+from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 
 class CodeGenerator(object):
     def __init__(self, threadname, coram_memories, coram_instreams, coram_outstreams,
@@ -1027,7 +1026,7 @@ class CodeGenerator(object):
 
     #----------------------------------------------------------------------------
     def _generateCode(self, source):
-        asttocode = ASTtoCode()
+        asttocode = ASTCodeGenerator()
         code = asttocode.visit(source)
         return code
 

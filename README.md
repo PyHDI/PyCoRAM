@@ -6,6 +6,7 @@ Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
 E-mail: takamaeda\_at\_arch.cs.titech.ac.jp
 
+
 License
 ------------------------------
 Apache License 2.0
@@ -18,7 +19,7 @@ What's PyCoRAM?
 PyCoRAM is yet another implementation of CoRAM (Connected RAM) memory architecture for FPGA-based computing.
 
 PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions.
-The generated IP-core can be used as a standard IP-core with the other common IP-cores together on vendor-provided EDK.
+The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.
 
 PyCoRAM differs in some points from the original soft-logic implementation of CoRAM on existing FPGAs.
 
@@ -38,12 +39,12 @@ Requirements
 For just simulation
 
 * Python 3.3 (or later)
-* Pyverilog 0.6.0 (or later)
+* Pyverilog 0.7.0 (or later)
     - My original Verilog HDL design analyzer
-    - 0.6.0-lite is included in this package
+    - 0.7.0-lite is included in this package
 * Jinja2 (2.7 or later)
 * Icarus Verilog (0.9.6 or later)
-    -for preprocessor in Pyverilog and for simulation
+    - for preprocessor in Pyverilog and for simulation
 
 To build a final FPGA design (bit-file)
 
@@ -77,7 +78,7 @@ Or type commands as below directly.
     iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
     ./a.out
 
-Then, PyCoRAM compiler generates a directory for IP-core (pycoram\_userlogic\_v1\_00\_a, in this example).
+PyCoRAM compiler generates a directory for IP-core (pycoram\_userlogic\_v1\_00\_a, in this example).
 
 'pycoram\_userlogic\_v1\_00\_a.v' includes 
 * IP-core RTL design (hdl/verilog/pycoram\_userlogic.v)
@@ -122,3 +123,4 @@ PyCoRAM Command Options
     - The compiler does NOT generate the system with AXI4 bus interface. default is disabled.
 * -o
     - Name of output file in no-AXI mode. default is "out.v".
+

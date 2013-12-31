@@ -69,8 +69,8 @@ initial begin
   wait(uart_tx_ready == 1);
   nclk();
 
-  wait(inst_node_userlogic.inst_userlogic.state == 'h28);
-  wait(inst_node_userlogic.inst_userlogic.state == 'h0);
+  wait(inst_uut.inst_userlogic.state == 'h28);
+  wait(inst_uut.inst_userlogic.state == 'h0);
   #1000;
 
   
@@ -110,8 +110,8 @@ initial begin
   wait(uart_tx_ready == 1);
   nclk();
 
-  wait(inst_node_userlogic.inst_userlogic.state == 'h28);
-  wait(inst_node_userlogic.inst_userlogic.state == 'h0);
+  wait(inst_uut.inst_userlogic.state == 'h28);
+  wait(inst_uut.inst_userlogic.state == 'h0);
   #1000;
   
   uart_tx_data = 'h5;
@@ -150,8 +150,8 @@ initial begin
   wait(uart_tx_ready == 1);
   nclk();
 
-  wait(inst_node_userlogic.inst_userlogic.state == 'h28);
-  wait(inst_node_userlogic.inst_userlogic.state == 'h0);
+  wait(inst_uut.inst_userlogic.state == 'h28);
+  wait(inst_uut.inst_userlogic.state == 'h0);
   #1000;
 
   
