@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>PyCoRAM by shtaxxx</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>PyCoRAM</h1>
+        <h2>Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Accelerator Development</h2>
+        <a href="https://github.com/shtaxxx/PyCoRAM" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h2>
+<a name="whats-pycoram" class="anchor" href="#whats-pycoram"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h2>
+
+<p>PyCoRAM is yet another implementation of CoRAM (Connected RAM) memory architecture for FPGA-based computing.</p>
+
+<p>PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions.
+The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.</p>
+
+<p>PyCoRAM differs in some points from the original soft-logic implementation of CoRAM on existing FPGAs.</p>
+
+<ul>
+<li>Memory access pattern representation in Python
+
+<ul>
+<li>The original CoRAM uses C. In PyCoRAM, you can describe in easier way using famous scripting language.</li>
+</ul>
+</li>
+<li>AMBA AXI4 Interconnection Support
+
+<ul>
+<li>The original CoRAM uses CONNECT to generate an on-chip interconnect. PyCoRAM compiler generates IP-core design for AXI4 interconnection from you computing kernel logic. AMBA AXI4 is standard interconnection architecture supported in various environments.</li>
+</ul>
+</li>
+<li>Parameterized RTL Design Support
+
+<ul>
+<li>The original CoRAM has some limitations in description of computing kernel logic. PyCoRAM has a sophisticated RTL analyzer to translate your logic design into suitable design for PyCoRAM.</li>
+</ul>
+</li>
+</ul><h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p><strong>Software</strong></p>
+
+<p>For just simulation</p>
+
+<ul>
+<li>Python 3.3 (or later)</li>
+<li>Pyverilog 0.7.0 (or later)
+
+<ul>
+<li>My original Verilog HDL design analyzer</li>
+<li>0.7.0 is included in this package</li>
+</ul>
+</li>
+<li>Jinja2 (2.7 or later)</li>
+<li>Icarus Verilog (0.9.6 or later)
+
+<ul>
+<li>for preprocessor in Pyverilog and for simulation</li>
+</ul>
+</li>
+</ul><p>To build a final FPGA design (bit-file)</p>
+
+<ul>
+<li>Xilinx Platform Studio (14.6 or later)</li>
+</ul><p>As the Verilog simulators, Icarus Verilog and Synopsys VCS are supported.</p>
+
+<p><strong>(Recommended) FPGA Board</strong></p>
+
+<ul>
+<li>Digilent Atlys (Spartan-6)</li>
+<li>Xilinx ML605 (Virtex-6)</li>
+<li>Xilinx VC707 (Virtex-7)</li>
+</ul><h2>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<p>You can find the sample input projects in 'input/tests/single_memory'.</p>
+
+<ul>
+<li>ctrl_thread.py : Control-thread definition in Python</li>
+<li>userlogic.v  : User-defined Verilog code using CoRAM memory blocks</li>
+</ul><p>Then type 'make' and 'make run' to simulate sample system.</p>
+
+<pre><code>make build
+make sim
+</code></pre>
+
+<p>Or type commands as below directly.</p>
+
+<pre><code>python3.3 pycoram.py -t userlogic -I ./include/ ./input/tests/single_memory/ctrl_thread.py ./input/tests/single_memory/userlogic.v
+iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
+./a.out
+</code></pre>
+
+<p>PyCoRAM compiler generates a directory for IP-core (pycoram_userlogic_v1_00_a, in this example).</p>
+
+<p>'pycoram_userlogic_v1_00_a.v' includes </p>
+
+<ul>
+<li>IP-core RTL design (hdl/verilog/pycoram_userlogic.v)</li>
+<li>Test bench (test/test_pycoram_userlogic.v) </li>
+<li>XPS setting files (pycoram_userlogic_v2_1_0.{mpd,pao,tcl})</li>
+</ul><p>A bit-stream can be synthesized by using Xilinx Platform Studio.
+Please copy the generated IP-core into 'pcores' directory of XPS project.</p>
+
+<p>This software has some sample project in 'input'.
+To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST)</p>
+
+<h2>
+<a name="pycoram-command-options" class="anchor" href="#pycoram-command-options"><span class="octicon octicon-link"></span></a>PyCoRAM Command Options</h2>
+
+<p><strong>Command</strong></p>
+
+<pre><code>python3 pycoram.py [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [--simaddrwidth=int] [--noaxi] [-o outputfile] [file]+
+</code></pre>
+
+<p><strong>Description</strong></p>
+
+<ul>
+<li>file
+
+<ul>
+<li>User-logic Verilog file (.v) and control-thread definition file (.py).
+Automatically, .v file is recognized as a user-logic Verilog file, and 
+.py file recongnized as a control-thread definition, respectively.</li>
+</ul>
+</li>
+<li>-t
+
+<ul>
+<li>Name of user-defined top module, default is "userlogic".</li>
+</ul>
+</li>
+<li>-I
+
+<ul>
+<li>Include path for input Verilog HDL files.</li>
+</ul>
+</li>
+<li>--memimg
+
+<ul>
+<li>DRAM image file in HEX DRAM (option, if you need).
+The file is copied into test directory.
+If no file is assigned, the array is initialized with incremental values.</li>
+</ul>
+</li>
+<li>--usertest
+
+<ul>
+<li>User-defined test code file (option, if you need).
+The code is copied into testbench script.</li>
+</ul>
+</li>
+<li>--simaddrwidth
+
+<ul>
+<li>DRAM address width of DRAM stub in the testbench.</li>
+</ul>
+</li>
+<li>--noaxi
+
+<ul>
+<li>The compiler does NOT generate the system with AXI4 bus interface. default is disabled.</li>
+</ul>
+</li>
+<li>-o
+
+<ul>
+<li>Name of output file in no-AXI mode. default is "out.v".</li>
+</ul>
+</li>
+</ul><h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>Apache License 2.0
+(<a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>)</p>
+
+<h2>
+<a name="copyright" class="anchor" href="#copyright"><span class="octicon octicon-link"></span></a>Copyright</h2>
+
+<p>Copyright (C) 2013, Shinya Takamaeda-Yamazaki</p>
+
+<p>E-mail: takamaeda_at_arch.cs.titech.ac.jp</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/shtaxxx/PyCoRAM/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/shtaxxx/PyCoRAM/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/shtaxxx/PyCoRAM"></a> is maintained by <a href="https://github.com/shtaxxx">shtaxxx</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
