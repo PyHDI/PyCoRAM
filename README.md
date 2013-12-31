@@ -41,7 +41,7 @@ For just simulation
 * Python 3.3 (or later)
 * Pyverilog 0.7.0 (or later)
     - My original Verilog HDL design analyzer
-    - 0.7.0-lite is included in this package
+    - 0.7.0 is included in this package
 * Jinja2 (2.7 or later)
 * Icarus Verilog (0.9.6 or later)
     - for preprocessor in Pyverilog and for simulation
