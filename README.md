@@ -43,7 +43,7 @@ Requirements
     - My original hardware design processing toolkit for Verilog HDL
     - Pyverilog 0.7.0 is included in this package.
 * Icarus Verilog (0.9.6 or later)
-   - Preprocessor of Pyverilog uses 'iverilog -E' command insted of the preprocessor.
+   - Preprocessor of Pyverilog uses 'iverilog -E' command instead of the preprocessor.
 * Jinja2 (2.7 or later)
    - Code generator requires jinja2 module.
    - 'pip3 install jinja2'
