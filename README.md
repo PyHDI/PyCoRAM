@@ -36,21 +36,23 @@ Requirements
 
 **Software**
 
-For just simulation
+*For simulation*
 
 * Python 3.3 (or later)
 * Pyverilog 0.7.0 (or later)
-    - My original Verilog HDL design analyzer
-    - 0.7.0 is included in this package
-* Jinja2 (2.7 or later)
+    - My original hardware design processing toolkit for Verilog HDL
+    - Pyverilog 0.7.0 is included in this package.
 * Icarus Verilog (0.9.6 or later)
-    - for preprocessor in Pyverilog and for simulation
+   - Preprocessor of Pyverilog uses 'iverilog -E' command insted of the preprocessor.
+* Jinja2 (2.7 or later)
+   - Code generator requires jinja2 module.
+   - 'pip3 install jinja2'
 
-To build a final FPGA design (bit-file)
+Icarus Verilog and Synopsys VCS are supported for Verilog simulation.
+
+*To build an FPGA circuit design (bit-file)*
 
 * Xilinx Platform Studio (14.6 or later)
-
-As the Verilog simulators, Icarus Verilog and Synopsys VCS are supported.
 
 **(Recommended) FPGA Board**
 
