@@ -126,3 +126,23 @@ PyCoRAM Command Options
 * -o
     - Name of output file in no-AXI mode. default is "out.v".
 
+
+Publication
+------------------------------
+
+- Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. [Paper](http://users.ece.cmu.edu/~jhoe/distribution/2013/carl13pycoram.pdf)
+[Slide](http://www.slideshare.net/shtaxxx/pycoramcarl2013)
+
+
+Related Project
+------------------------------
+
+[Pyverilog](http://shtaxxx.github.io/Pyverilog/)
+- Python-based Hardware Design Processing Toolkit for Verilog HDL
+- Used as basic code analyser and generator in PyCoRAM
+
+[CoRAM](http://www.ece.cmu.edu/coram/doku.php?id=home)
+- A General Purpose Memory Architecture for FPGAs
+- The original CoRAM developed at CMU
+
+
