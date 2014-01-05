@@ -33,7 +33,7 @@
         <h2>
 <a name="whats-pycoram" class="anchor" href="#whats-pycoram"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h2>
 
-<p>PyCoRAM is yet another implementation of CoRAM (Connected RAM) memory architecture for FPGA-based computing.</p>
+<p>PyCoRAM is Python-based Implementation of CoRAM (Connected RAM) Memory Architecture for AXI4 Interconnection on FPGAs.</p>
 
 <p>PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions.
 The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.</p>
@@ -64,31 +64,37 @@ The generated IP-core can be used as a standard IP-core with other common IP-cor
 
 <p><strong>Software</strong></p>
 
-<p>For just simulation</p>
+<p><em>For simulation</em></p>
 
 <ul>
 <li>Python 3.3 (or later)</li>
 <li>Pyverilog 0.7.0 (or later)
 
 <ul>
-<li>My original Verilog HDL design analyzer</li>
-<li>0.7.0 is included in this package</li>
+<li>My original hardware design processing toolkit for Verilog HDL</li>
+<li>Pyverilog 0.7.0 is included in this package.</li>
 </ul>
 </li>
-<li>Jinja2 (2.7 or later)</li>
 <li>Icarus Verilog (0.9.6 or later)
 
 <ul>
-<li>for preprocessor in Pyverilog and for simulation</li>
+<li>Preprocessor of Pyverilog uses 'iverilog -E' command instead of the preprocessor.</li>
 </ul>
 </li>
-</ul><p>To build a final FPGA design (bit-file)</p>
+<li>Jinja2 (2.7 or later)
+
+<ul>
+<li>Code generator requires jinja2 module.</li>
+<li>'pip3 install jinja2'</li>
+</ul>
+</li>
+</ul><p>Icarus Verilog and Synopsys VCS are supported for Verilog simulation.</p>
+
+<p><em>For synthesis of an FPGA circuit design (bit-file)</em></p>
 
 <ul>
 <li>Xilinx Platform Studio (14.6 or later)</li>
-</ul><p>As the Verilog simulators, Icarus Verilog and Synopsys VCS are supported.</p>
-
-<p><strong>(Recommended) FPGA Board</strong></p>
+</ul><p><strong>(Recommended) FPGA Board</strong></p>
 
 <ul>
 <li>Digilent Atlys (Spartan-6)</li>
@@ -197,7 +203,8 @@ The code is copied into testbench script.</li>
 <a name="publication" class="anchor" href="#publication"><span class="octicon octicon-link"></span></a>Publication</h2>
 
 <ul>
-<li>Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. <a href="http://www.ece.cmu.edu/%7Ecalcm/carl/lib/exe/fetch.php?media=carl2013_takamaeda-yamazaki.pdf">Paper</a> <a href="http://www.slideshare.net/shtaxxx/pycoramcarl2013">Slide</a>
+<li>Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. <a href="http://users.ece.cmu.edu/%7Ejhoe/distribution/2013/carl13pycoram.pdf">Paper</a>
+<a href="http://www.slideshare.net/shtaxxx/pycoramcarl2013">Slide</a>
 </li>
 </ul><h2>
 <a name="related-project" class="anchor" href="#related-project"><span class="octicon octicon-link"></span></a>Related Project</h2>
