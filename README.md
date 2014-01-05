@@ -16,7 +16,7 @@ Apache License 2.0
 What's PyCoRAM?
 ------------------------------
 
-PyCoRAM is yet another implementation of CoRAM (Connected RAM) memory architecture for FPGA-based computing.
+PyCoRAM is Python-based Implementation of CoRAM (Connected RAM) Memory Architecture for AXI4 Interconnection on FPGAs.
 
 PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions.
 The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.
@@ -50,7 +50,7 @@ Requirements
 
 Icarus Verilog and Synopsys VCS are supported for Verilog simulation.
 
-*To build an FPGA circuit design (bit-file)*
+*For synthesis of an FPGA circuit design (bit-file)*
 
 * Xilinx Platform Studio (14.6 or later)
 
