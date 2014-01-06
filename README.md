@@ -1,6 +1,6 @@
 PyCoRAM 
 ==============================
-Yet Another Implementation of CoRAM Memory Architecture for AMBA AXI4 On-chip Interconnection
+Python-based Implementation of CoRAM Memory Architecture with a Python-to-Verilog High-Level Synthesis Compiler for AXI4 Interconnections
 
 Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
@@ -16,15 +16,16 @@ Apache License 2.0
 What's PyCoRAM?
 ------------------------------
 
-PyCoRAM is Python-based Implementation of CoRAM (Connected RAM) Memory Architecture for AXI4 Interconnection on FPGAs.
-
-PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions.
+PyCoRAM is a Python-based Implementation of CoRAM (Connected RAM) Memory Architecture.
+PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions in Python.
 The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.
+PyCoRAM includes a Verilog-to-Verilog design translator and a Python-to-Verilog high-level synthesis compiler to generate a control logic of memory operations.
 
 PyCoRAM differs in some points from the original soft-logic implementation of CoRAM on existing FPGAs.
 
 * Memory access pattern representation in Python
-    - The original CoRAM uses C. In PyCoRAM, you can describe in easier way using famous scripting language.
+    - The original CoRAM uses C to represent a memory access pattern (control thread). In PyCoRAM, you can describe in easier way using popular scripting language.
+    - The Python script of memory access pattern is translated into hardware design of Verilog HDL by a Python-to-Verilog high-level synthesis compiler.
 * AMBA AXI4 Interconnection Support
     - The original CoRAM uses CONNECT to generate an on-chip interconnect. PyCoRAM compiler generates IP-core design for AXI4 interconnection from you computing kernel logic. AMBA AXI4 is standard interconnection architecture supported in various environments.
 * Parameterized RTL Design Support
