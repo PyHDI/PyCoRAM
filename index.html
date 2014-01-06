@@ -17,7 +17,7 @@
     <div class="wrapper">
       <header>
         <h1 class="header">PyCoRAM</h1>
-        <p class="header">Python-based Implementation of CoRAM Memory Architecture for AXI4 Interconnection on FPGAs</p>
+        <p class="header">Python-based Implementation of CoRAM Memory Architecture with a Python-to-Verilog High-Level Synthesis Compiler for AXI4 Interconnections</p>
 
         <ul>
           <li class="download"><a class="buttons" href="https://github.com/shtaxxx/PyCoRAM/zipball/master">Download ZIP</a></li>
@@ -33,10 +33,10 @@
         <h2>
 <a name="whats-pycoram" class="anchor" href="#whats-pycoram"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h2>
 
-<p>PyCoRAM is Python-based Implementation of CoRAM (Connected RAM) Memory Architecture for AXI4 Interconnection on FPGAs.</p>
-
-<p>PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions.
-The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.</p>
+<p>PyCoRAM is a Python-based Implementation of CoRAM (Connected RAM) Memory Architecture.
+PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions in Python.
+The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.
+PyCoRAM includes a Verilog-to-Verilog design translator and a Python-to-Verilog high-level synthesis compiler to generate a control logic of memory operations.</p>
 
 <p>PyCoRAM differs in some points from the original soft-logic implementation of CoRAM on existing FPGAs.</p>
 
@@ -44,7 +44,8 @@ The generated IP-core can be used as a standard IP-core with other common IP-cor
 <li>Memory access pattern representation in Python
 
 <ul>
-<li>The original CoRAM uses C. In PyCoRAM, you can describe in easier way using famous scripting language.</li>
+<li>The original CoRAM uses C to represent a memory access pattern (control thread). In PyCoRAM, you can describe in easier way using popular scripting language.</li>
+<li>The Python script of memory access pattern is translated into hardware design of Verilog HDL by a Python-to-Verilog high-level synthesis compiler.</li>
 </ul>
 </li>
 <li>AMBA AXI4 Interconnection Support
