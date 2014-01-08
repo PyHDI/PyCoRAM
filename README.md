@@ -8,13 +8,13 @@ E-mail: takamaeda\_at\_arch.cs.titech.ac.jp
 
 
 License
-------------------------------
+==============================
 Apache License 2.0
 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
 What's PyCoRAM?
-------------------------------
+==============================
 
 PyCoRAM is a Python-based Implementation of CoRAM (Connected RAM) Memory Architecture.
 PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions in Python.
@@ -33,11 +33,12 @@ PyCoRAM differs in some points from the original soft-logic implementation of Co
 
 
 Requirements
-------------------------------
+==============================
 
-**Software**
+Software
+--------------------------------------------------------------------------------
 
-*For simulation*
+### For simulation
 
 * Python 3.3 (or later)
 * Pyverilog 0.7.0 (or later)
@@ -51,11 +52,12 @@ Requirements
 
 Icarus Verilog and Synopsys VCS are supported for Verilog simulation.
 
-*For synthesis of an FPGA circuit design (bit-file)*
+### For synthesis of an FPGA circuit design (bit-file)
 
 * Xilinx Platform Studio (14.6 or later)
 
-**(Recommended) FPGA Board**
+(Recommended) FPGA Board
+--------------------------------------------------------------------------------
 
 * Digilent Atlys (Spartan-6)
 * Xilinx ML605 (Virtex-6)
@@ -63,7 +65,7 @@ Icarus Verilog and Synopsys VCS are supported for Verilog simulation.
 
 
 Getting Started
-------------------------------
+==============================
 
 You can find the sample input projects in 'input/tests/single\_memory'.
 
@@ -97,13 +99,15 @@ To build them, please modify 'Makefile', so that the corresponding files and par
 
 
 PyCoRAM Command Options
-------------------------------
+==============================
 
-**Command**
+Command
+------------------------------
 
     python3 pycoram.py [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [--simaddrwidth=int] [--noaxi] [-o outputfile] [file]+
 
-**Description**
+Description
+------------------------------
 
 * file
     - User-logic Verilog file (.v) and control-thread definition file (.py).
@@ -129,14 +133,14 @@ PyCoRAM Command Options
 
 
 Publication
-------------------------------
+==============================
 
 - Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. [Paper](http://users.ece.cmu.edu/~jhoe/distribution/2013/carl13pycoram.pdf)
 [Slide](http://www.slideshare.net/shtaxxx/pycoramcarl2013)
 
 
 Related Project
-------------------------------
+==============================
 
 [Pyverilog](http://shtaxxx.github.io/Pyverilog/)
 - Python-based Hardware Design Processing Toolkit for Verilog HDL
