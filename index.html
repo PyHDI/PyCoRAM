@@ -30,8 +30,8 @@
 
       </header>
       <section>
-        <h2>
-<a name="whats-pycoram" class="anchor" href="#whats-pycoram"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h2>
+        <h1>
+<a name="whats-pycoram" class="anchor" href="#whats-pycoram"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h1>
 
 <p>PyCoRAM is a Python-based Implementation of CoRAM (Connected RAM) Memory Architecture.
 PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions in Python.
@@ -60,12 +60,14 @@ PyCoRAM includes a Verilog-to-Verilog design translator and a Python-to-Verilog 
 <li>The original CoRAM has some limitations in description of computing kernel logic. PyCoRAM has a sophisticated RTL analyzer to translate your logic design into suitable design for PyCoRAM.</li>
 </ul>
 </li>
-</ul><h2>
-<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+</ul><h1>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h1>
 
-<p><strong>Software</strong></p>
+<h2>
+<a name="software" class="anchor" href="#software"><span class="octicon octicon-link"></span></a>Software</h2>
 
-<p><em>For simulation</em></p>
+<h3>
+<a name="for-simulation" class="anchor" href="#for-simulation"><span class="octicon octicon-link"></span></a>For simulation</h3>
 
 <ul>
 <li>Python 3.3 (or later)</li>
@@ -91,18 +93,20 @@ PyCoRAM includes a Verilog-to-Verilog design translator and a Python-to-Verilog 
 </li>
 </ul><p>Icarus Verilog and Synopsys VCS are supported for Verilog simulation.</p>
 
-<p><em>For synthesis of an FPGA circuit design (bit-file)</em></p>
+<h3>
+<a name="for-synthesis-of-an-fpga-circuit-design-bit-file" class="anchor" href="#for-synthesis-of-an-fpga-circuit-design-bit-file"><span class="octicon octicon-link"></span></a>For synthesis of an FPGA circuit design (bit-file)</h3>
 
 <ul>
 <li>Xilinx Platform Studio (14.6 or later)</li>
-</ul><p><strong>(Recommended) FPGA Board</strong></p>
+</ul><h2>
+<a name="recommended-fpga-board" class="anchor" href="#recommended-fpga-board"><span class="octicon octicon-link"></span></a>(Recommended) FPGA Board</h2>
 
 <ul>
 <li>Digilent Atlys (Spartan-6)</li>
 <li>Xilinx ML605 (Virtex-6)</li>
 <li>Xilinx VC707 (Virtex-7)</li>
-</ul><h2>
-<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+</ul><h1>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h1>
 
 <p>You can find the sample input projects in 'input/tests/single_memory'.</p>
 
@@ -136,15 +140,17 @@ Please copy the generated IP-core into 'pcores' directory of XPS project.</p>
 <p>This software has some sample project in 'input'.
 To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST)</p>
 
-<h2>
-<a name="pycoram-command-options" class="anchor" href="#pycoram-command-options"><span class="octicon octicon-link"></span></a>PyCoRAM Command Options</h2>
+<h1>
+<a name="pycoram-command-options" class="anchor" href="#pycoram-command-options"><span class="octicon octicon-link"></span></a>PyCoRAM Command Options</h1>
 
-<p><strong>Command</strong></p>
+<h2>
+<a name="command" class="anchor" href="#command"><span class="octicon octicon-link"></span></a>Command</h2>
 
 <pre><code>python3 pycoram.py [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [--simaddrwidth=int] [--noaxi] [-o outputfile] [file]+
 </code></pre>
 
-<p><strong>Description</strong></p>
+<h2>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h2>
 
 <ul>
 <li>file
@@ -200,15 +206,15 @@ The code is copied into testbench script.</li>
 <li>Name of output file in no-AXI mode. default is "out.v".</li>
 </ul>
 </li>
-</ul><h2>
-<a name="publication" class="anchor" href="#publication"><span class="octicon octicon-link"></span></a>Publication</h2>
+</ul><h1>
+<a name="publication" class="anchor" href="#publication"><span class="octicon octicon-link"></span></a>Publication</h1>
 
 <ul>
 <li>Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. <a href="http://users.ece.cmu.edu/%7Ejhoe/distribution/2013/carl13pycoram.pdf">Paper</a>
 <a href="http://www.slideshare.net/shtaxxx/pycoramcarl2013">Slide</a>
 </li>
-</ul><h2>
-<a name="related-project" class="anchor" href="#related-project"><span class="octicon octicon-link"></span></a>Related Project</h2>
+</ul><h1>
+<a name="related-project" class="anchor" href="#related-project"><span class="octicon octicon-link"></span></a>Related Project</h1>
 
 <p><a href="http://shtaxxx.github.io/Pyverilog/">Pyverilog</a></p>
 
@@ -220,14 +226,14 @@ The code is copied into testbench script.</li>
 <ul>
 <li>A General Purpose Memory Architecture for FPGAs</li>
 <li>The original CoRAM developed at CMU</li>
-</ul><h2>
-<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+</ul><h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h1>
 
 <p>Apache License 2.0
 (<a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>)</p>
 
-<h2>
-<a name="copyright-and-contact" class="anchor" href="#copyright-and-contact"><span class="octicon octicon-link"></span></a>Copyright and Contact</h2>
+<h1>
+<a name="copyright-and-contact" class="anchor" href="#copyright-and-contact"><span class="octicon octicon-link"></span></a>Copyright and Contact</h1>
 
 <p>Copyright (C) 2013, Shinya Takamaeda-Yamazaki</p>
 
