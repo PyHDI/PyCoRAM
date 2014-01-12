@@ -22,6 +22,7 @@ class VerilogLexer(object):
         self.filename = ''
         self.error_func = error_func
         self.directives = []
+        self.default_nettype = 'wire'
 
     def build(self, **kwargs):
         self.lexer = ply.lex.lex(object=self, **kwargs)
@@ -33,6 +34,9 @@ class VerilogLexer(object):
 
     def get_directives(self):
         return tuple(self.directives)
+
+    def get_default_nettype(self):
+        return self.default_nettype
 
     def token(self):
         return self.lexer.token()
@@ -91,6 +95,8 @@ class VerilogLexer(object):
     def t_DIRECTIVE(self, t):
         self.directives.append( (self.lexer.lineno, t.value) )
         t.lexer.lineno += t.value.count("\n")
+        m = re.match("^`default_nettype\s+(.+)\n", t.value)
+        if m: self.default_nettype = m.group(1)
         pass
 
     # Comment
@@ -262,7 +268,7 @@ if __name__ == '__main__':
         sys.write(msg + "\n")
         sys.exit()
 
-    filename = '../test/generate.v'
+    filename = '../testcode/test.v'
     text = open(filename, 'r').read()
 
     lexer = VerilogLexer(error_func = my_error_func)
