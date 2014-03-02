@@ -1470,7 +1470,7 @@ class CompileVisitor(ast.NodeVisitor):
         if op is None: raise TypeError("Unsupported BinOp: %s" % str(node.op))
         if isinstance(left, vast.StringConst) or isinstance(right, vast.StringConst):
             if op == vast.Plus:
-                return _string_operation_plus(left, right)
+                return self._string_operation_plus(left, right)
             raise TypeError("Can not generate a corresponding node")
         rslt = op( left, right )
         return self.optimize(rslt)
