@@ -130,7 +130,7 @@ module pycoram_{{ userlogic_name.lower() }} #
    // Finish 
    //---------------------------------------------------------------------------
 {%- for thread in threads | sort(attribute='name') %}
-   output {{ thread.name }}_finish,
+   output wire {{ thread.name }}_finish,
 {%- endfor %}
 
    //----------------------------------------------------------------------------

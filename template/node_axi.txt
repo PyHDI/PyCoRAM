@@ -982,7 +982,7 @@ module pycoram_{{ userlogic_name.lower() }} #
      .core_read_empty( 1'b0 ),
      .core_write_enable({{ thread.name }}_{{ instream.name }}_enq), 
      .core_write_data({{ thread.name }}_{{ instream.name }}_d),
-     .core_write_almost_full({{ thread.name }}_{{ instream.name }}_full),
+     .core_write_almost_full({{ thread.name }}_{{ instream.name }}_almost_full),
 
      .req_clk({{ thread.name }}_{{ instream.name }}_req_clk), // control thread clock
      .req_rst({{ thread.name }}_{{ instream.name }}_req_rst), // control thread reset
