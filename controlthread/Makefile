@@ -1,4 +1,4 @@
-PYTHON=python3.3
+PYTHON=python3
 #OPT=-m pdb
 TARGET=controlthread.py
 INPUT=../input/tests/single_memory/ctrl_thread.py

@@ -40,10 +40,10 @@ Software
 
 ### For simulation
 
-* Python 3.3 (or later)
-* Pyverilog 0.7.0 (or later)
+* Python3 (3.3 or later)
+* Pyverilog (0.7.0 or later)
     - My original hardware design processing toolkit for Verilog HDL
-    - Pyverilog 0.7.0 is included in this package.
+    - Pyverilog-lite is included in this package.
 * Icarus Verilog (0.9.6 or later)
    - Preprocessor of Pyverilog uses 'iverilog -E' command instead of the preprocessor.
 * Jinja2 (2.7 or later)
@@ -79,7 +79,7 @@ Then type 'make' and 'make run' to simulate sample system.
 
 Or type commands as below directly.
 
-    python3.3 pycoram.py -t userlogic -I ./include/ ./input/tests/single_memory/ctrl_thread.py ./input/tests/single_memory/userlogic.v
+    python3 pycoram.py -t userlogic -I ./include/ ./input/tests/single_memory/ctrl_thread.py ./input/tests/single_memory/userlogic.v
     iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
     ./a.out
 

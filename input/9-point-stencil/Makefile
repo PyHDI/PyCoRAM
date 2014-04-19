@@ -12,7 +12,7 @@ INPUT=$(RTL) $(THREAD)
 ################################################################################
 ROOTDIR=../../
 
-PYTHON=python3.3
+PYTHON=python3
 #OPT=-m pdb
 #OPT=-m cProfile -o profile.rslt
 TARGET=$(ROOTDIR)/pycoram.py

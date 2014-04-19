@@ -94,7 +94,7 @@ Code parser
 Let's try syntax analysis. Please type the command as below.
 
 ```
-python3.3 pyverilog/vparser/parser.py test.v
+python3 pyverilog/vparser/parser.py test.v
 ```
 
 Then you got the result as below. The result of syntax analysis is displayed.
@@ -214,7 +214,7 @@ Dataflow analyzer
 Let's try dataflow analysis. Please type the command as below.
 
 ```
-python3.3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
+python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result of each signal definition and each signal assignment are displayed.
@@ -240,7 +240,7 @@ Bind:
 Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below.
 
 ```
-python3.3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
+python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
 ```
 
 Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
@@ -304,7 +304,7 @@ print(rslt)
 Please type the command as below at the same directory with Pyverilog.
 
 ```
-python3.3 test.py
+python3 test.py
 ```
 
 Then Verilog HDL code generated from the AST instances is displayed.
