@@ -70,12 +70,12 @@ PyCoRAM includes a Verilog-to-Verilog design translator and a Python-to-Verilog 
 <a name="for-simulation" class="anchor" href="#for-simulation"><span class="octicon octicon-link"></span></a>For simulation</h3>
 
 <ul>
-<li>Python 3.3 (or later)</li>
-<li>Pyverilog 0.7.0 (or later)
+<li>Python3 (3.3 or later)</li>
+<li>Pyverilog (0.7.0 or later)
 
 <ul>
 <li>My original hardware design processing toolkit for Verilog HDL</li>
-<li>Pyverilog 0.7.0 is included in this package.</li>
+<li>Pyverilog-lite is included in this package.</li>
 </ul>
 </li>
 <li>Icarus Verilog (0.9.6 or later)
@@ -121,7 +121,7 @@ make sim
 
 <p>Or type commands as below directly.</p>
 
-<pre><code>python3.3 pycoram.py -t userlogic -I ./include/ ./input/tests/single_memory/ctrl_thread.py ./input/tests/single_memory/userlogic.v
+<pre><code>python3 pycoram.py -t userlogic -I ./include/ ./input/tests/single_memory/ctrl_thread.py ./input/tests/single_memory/userlogic.v
 iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
 ./a.out
 </code></pre>
@@ -235,7 +235,7 @@ The code is copied into testbench script.</li>
 <h1>
 <a name="copyright-and-contact" class="anchor" href="#copyright-and-contact"><span class="octicon octicon-link"></span></a>Copyright and Contact</h1>
 
-<p>Copyright (C) 2013, Shinya Takamaeda-Yamazaki</p>
+<p>Copyright (C) 2014, Shinya Takamaeda-Yamazaki</p>
 
 <p>E-mail: takamaeda_at_arch.cs.titech.ac.jp</p>
       </section>
