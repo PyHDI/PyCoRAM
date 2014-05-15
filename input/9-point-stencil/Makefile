@@ -19,7 +19,7 @@ TARGET=$(ROOTDIR)/pycoram.py
 
 IPVER=v1_00_a
 OUTPUTDIR=pycoram_$(TOPMODULE)_$(IPVER)
-INCLUDE=-I $(ROOTDIR)/include/ -I ./core/
+INCLUDE=-I $(ROOTDIR)/include/
 EXTADDRWIDTH=--extaddrwidth=32
 SIGNALWIDTH=--signalwidth=64
 SIMADDRWIDTH=--simaddrwidth=24
