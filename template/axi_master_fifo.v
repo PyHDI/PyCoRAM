@@ -569,9 +569,6 @@ module axi_data_fifo_ram #
   localparam LENGTH = 2 ** ADDR_WIDTH;
   reg [DATA_WIDTH-1:0] mem [0:LENGTH-1];
 
-  reg  [ADDR_WIDTH-1:0] d_addr0;
-  reg  [ADDR_WIDTH-1:0] d_addr1;
-  
   always @(posedge ACLK) begin
     if(write_enable0) mem[addr0] <= data_in0;
     if(write_enable1) mem[addr1] <= data_in1;

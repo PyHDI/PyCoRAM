@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
-// User Logic - AXI Master Interface Bridge (FIFO)
+// User Logic - AXI-Lite Master Interface Bridge (FIFO)
 //------------------------------------------------------------------------------
-module axi_slave_fifo #
+module axi_lite_slave_fifo #
   (
    //----------------------------------------------------------------------------
    // User Parameter
@@ -12,14 +12,8 @@ module axi_slave_fifo #
    //----------------------------------------------------------------------------
    // AXI Parameter
    //----------------------------------------------------------------------------
-   parameter integer C_S_AXI_ID_WIDTH              = 1,
    parameter integer C_S_AXI_ADDR_WIDTH            = 32,
-   parameter integer C_S_AXI_DATA_WIDTH            = 32,
-   parameter integer C_S_AXI_AWUSER_WIDTH          = 1,
-   parameter integer C_S_AXI_ARUSER_WIDTH          = 1,
-   parameter integer C_S_AXI_WUSER_WIDTH           = 1,
-   parameter integer C_S_AXI_RUSER_WIDTH           = 1,
-   parameter integer C_S_AXI_BUSER_WIDTH           = 1   
+   parameter integer C_S_AXI_DATA_WIDTH            = 32
    )
   (
    //----------------------------------------------------------------------------
@@ -43,7 +37,6 @@ module axi_slave_fifo #
    output reg [USER_ADDR_WIDTH-1:0]   user_addr,
    output reg                         user_read_enable,
    output reg                         user_write_enable,
-   output reg [8:0]                   user_word_size,
    input                              user_ready,
    
    output wire                        ERROR,
@@ -52,57 +45,31 @@ module axi_slave_fifo #
    // AXI Slave Interface
    //----------------------------------------------------------------------------
    // Slave Interface Write Address Ports
-   input  wire [C_S_AXI_ID_WIDTH-1:0]     S_AXI_AWID,
    input  wire [C_S_AXI_ADDR_WIDTH-1:0]   S_AXI_AWADDR,
-   input  wire [8-1:0]                    S_AXI_AWLEN,
-   input  wire [3-1:0]                    S_AXI_AWSIZE,
-   input  wire [2-1:0]                    S_AXI_AWBURST,
-   input  wire [2-1:0]                    S_AXI_AWLOCK,
-   input  wire [4-1:0]                    S_AXI_AWCACHE,
    input  wire [3-1:0]                    S_AXI_AWPROT,
-   input  wire [4-1:0]                    S_AXI_AWREGION,
-   input  wire [4-1:0]                    S_AXI_AWQOS,
-   input  wire [C_S_AXI_AWUSER_WIDTH-1:0] S_AXI_AWUSER,
    input  wire                            S_AXI_AWVALID,
    output wire                            S_AXI_AWREADY,
 
    // Slave Interface Write Data Ports
-   input wire [C_S_AXI_ID_WIDTH-1:0]      S_AXI_WID,
    input  wire [C_S_AXI_DATA_WIDTH-1:0]   S_AXI_WDATA,
    input  wire [C_S_AXI_DATA_WIDTH/8-1:0] S_AXI_WSTRB,
-   input  wire                            S_AXI_WLAST,
-   input  wire [C_S_AXI_WUSER_WIDTH-1:0]  S_AXI_WUSER,
    input  wire                            S_AXI_WVALID,
    output wire                            S_AXI_WREADY,
 
    // Slave Interface Write Response Ports
-   output wire [C_S_AXI_ID_WIDTH-1:0]     S_AXI_BID,
    output wire [2-1:0]                    S_AXI_BRESP,
-   output wire [C_S_AXI_BUSER_WIDTH-1:0]  S_AXI_BUSER,
    output wire                            S_AXI_BVALID,
    input  wire                            S_AXI_BREADY,
 
    // Slave Interface Read Address Ports
-   input  wire [C_S_AXI_ID_WIDTH-1:0]     S_AXI_ARID,
    input  wire [C_S_AXI_ADDR_WIDTH-1:0]   S_AXI_ARADDR,
-   input  wire [8-1:0]                    S_AXI_ARLEN,
-   input  wire [3-1:0]                    S_AXI_ARSIZE,
-   input  wire [2-1:0]                    S_AXI_ARBURST,
-   input  wire [2-1:0]                    S_AXI_ARLOCK,
-   input  wire [4-1:0]                    S_AXI_ARCACHE,
    input  wire [3-1:0]                    S_AXI_ARPROT,
-   input  wire [4-1:0]                    S_AXI_ARREGION,
-   input  wire [4-1:0]                    S_AXI_ARQOS,
-   input  wire [C_S_AXI_ARUSER_WIDTH-1:0] S_AXI_ARUSER,
    input  wire                            S_AXI_ARVALID,
    output wire                            S_AXI_ARREADY,
 
    // Slave Interface Read Data Ports
-   output wire [C_S_AXI_ID_WIDTH-1:0]     S_AXI_RID,
    output wire [C_S_AXI_DATA_WIDTH-1:0]   S_AXI_RDATA,
    output wire [2-1:0]                    S_AXI_RRESP,
-   output wire                            S_AXI_RLAST,
-   output wire [C_S_AXI_RUSER_WIDTH-1:0]  S_AXI_RUSER,
    output wire                            S_AXI_RVALID,
    input  wire                            S_AXI_RREADY
    );
@@ -131,7 +98,7 @@ module axi_slave_fifo #
   wire                          axi_read_empty;
 
   // Write (AXI -> FIFO)
-  axi_slave_data_fifo 
+  axi_lite_slave_data_fifo 
   #(
     .DATA_WIDTH(C_S_AXI_DATA_WIDTH),
     .ADDR_WIDTH(FIFO_ADDR_WIDTH)
@@ -144,7 +111,7 @@ module axi_slave_fifo #
    );
 
   // Read (FIFO -> AXI)
-  axi_slave_data_fifo 
+  axi_lite_slave_data_fifo 
   #(
     .DATA_WIDTH(C_S_AXI_DATA_WIDTH),
     .ADDR_WIDTH(FIFO_ADDR_WIDTH)
@@ -161,27 +128,17 @@ module axi_slave_fifo #
   //------------------------------------------------------------------------------
   reg                            awready;
   reg                            wready;
-  reg [C_S_AXI_ID_WIDTH-1:0]     bid;
   reg [2-1:0]                    bresp;
   reg                            bvalid;
   reg                            arready;
-  reg [C_S_AXI_ID_WIDTH-1:0]     rid;
   reg [C_S_AXI_DATA_WIDTH-1:0]   rdata;
   reg [2-1:0]                    rresp;
-  reg                            rlast;
   reg                            rvalid;
 
   reg error_reg;
   
   reg read_busy;
-  reg [C_S_AXI_ID_WIDTH-1:0] cur_arid;
-  reg [8:0] cur_arlen;
-  reg [8:0] read_cnt;
-
   reg write_busy;
-  reg [C_S_AXI_ID_WIDTH-1:0] cur_awid;
-  reg [8:0] cur_awlen;
-  reg [8:0] write_cnt;
   
   //----------------------------------------------------------------------------
   // Write Address (AW)
@@ -196,9 +153,7 @@ module axi_slave_fifo #
   //----------------------------------------------------------------------------
   // Write Response (B)
   //----------------------------------------------------------------------------
-  assign S_AXI_BID = bid;
   assign S_AXI_BRESP = bresp;
-  assign S_AXI_BUSER = 'h0;
   assign S_AXI_BVALID = bvalid;
 
   //----------------------------------------------------------------------------
@@ -209,11 +164,8 @@ module axi_slave_fifo #
   //----------------------------------------------------------------------------
   // Read and Read Response (R)
   //----------------------------------------------------------------------------
-  assign S_AXI_RID = rid;
   assign S_AXI_RDATA = rdata;
   assign S_AXI_RRESP = rresp;
-  assign S_AXI_RLAST = rlast;
-  assign S_AXI_RUSER = 'h0;
   assign S_AXI_RVALID = rvalid;
   
   //----------------------------------------------------------------------------
@@ -237,8 +189,7 @@ module axi_slave_fifo #
   //----------------------------------------------------------------------------
   // User State Machine
   //----------------------------------------------------------------------------
-  assign axi_read_deq = read_busy && (read_cnt <= cur_arlen) &&
-                        (!rvalid || (rvalid && S_AXI_RREADY)) && !axi_read_empty;
+  assign axi_read_deq = read_busy && !rvalid && !axi_read_empty;
 
   always @(posedge ACLK) begin
     if(aresetn_rrr == 0) begin
@@ -248,21 +199,13 @@ module axi_slave_fifo #
       bvalid <= 0;
       bresp <= 0;
       rvalid <= 0;
-      rlast <= 0;
       rdata <= 0;
       rresp <= 0;
       axi_write_enq <= 0;
       axi_write_data <= 0;
       read_busy <= 0;
       write_busy <= 0;
-      read_cnt <= 0;
-      write_cnt <= 0;
-      cur_arid <= 0;
-      cur_awid <= 0;
-      cur_arlen <= 0;
-      cur_awlen <= 0;
       user_addr <= 0;
-      user_word_size <= 0;
       user_read_enable <= 0;
       user_write_enable <= 0;
     end else begin
@@ -274,65 +217,42 @@ module axi_slave_fifo #
       wready <= 0;
       bvalid <= 0;
       rvalid <= 0;
-      rlast <= 0;
       axi_write_enq <= 0;
       user_read_enable <= 0;
       user_write_enable <= 0;
 
       //----------------------------------------------------------------------
       if(read_busy) begin
-        if(rvalid && S_AXI_RREADY && read_cnt == cur_arlen + 1) begin
+        if(rvalid && S_AXI_RREADY) begin
           read_busy <= 0;
         end
         if(rvalid && !S_AXI_RREADY) begin
           rvalid <= 1;
-          if(read_cnt == cur_arlen + 1) begin
-            rlast <= 1;
-          end
         end
-        if(read_cnt <= cur_arlen) begin
-          if((!rvalid || rvalid && S_AXI_RREADY) && !axi_read_empty) begin
-            rvalid <= 1;
-            rid <= cur_arid;
-            rdata <= axi_read_data;
-            read_cnt <= read_cnt + 1;
-            if(read_cnt == cur_arlen) begin
-              rlast <= 1;
-            end
-          end
+        if(!rvalid && !axi_read_empty) begin
+          rvalid <= 1;
+          rdata <= axi_read_data;
         end
       //----------------------------------------------------------------------
       end else if(write_busy) begin
         if(S_AXI_WVALID && !axi_write_almost_full) begin
           wready <= 1;
           bvalid <= 1;
-          bid <= cur_awid;
           axi_write_enq <= 1;
           axi_write_data <= S_AXI_WDATA;
-          write_cnt <= write_cnt + 1;
-          if(write_cnt == cur_awlen) begin
-            write_busy <= 0;
-          end
+          write_busy <= 0;
         end
       //----------------------------------------------------------------------
       end else if(S_AXI_ARVALID && !user_ready) begin // user_ready is ack
         read_busy <= 1;
-        read_cnt <= 0;
         arready <= 1;
-        cur_arid <= S_AXI_ARID;
-        cur_arlen <= S_AXI_ARLEN;
         user_addr <= S_AXI_ARADDR[USER_ADDR_WIDTH-1:0];
-        user_word_size <= S_AXI_ARLEN + 1;
         user_read_enable <= 1;
       //----------------------------------------------------------------------
       end else if(S_AXI_AWVALID && !user_ready) begin // user_ready is ack
         write_busy <= 1;
-        write_cnt <= 0;
         awready <= 1;
-        cur_awid <= S_AXI_AWID;
-        cur_awlen <= S_AXI_AWLEN;
         user_addr <= S_AXI_ARADDR[USER_ADDR_WIDTH-1:0];
-        user_word_size <= S_AXI_ARLEN + 1;
         user_write_enable <= 1;
       end
       //----------------------------------------------------------------------
@@ -343,7 +263,7 @@ module axi_slave_fifo #
 endmodule
 
 //------------------------------------------------------------------------------
-module axi_slave_data_fifo #
+module axi_lite_slave_data_fifo #
   (
    parameter integer DATA_WIDTH = 32,
    parameter integer ADDR_WIDTH = 4,
@@ -438,7 +358,7 @@ module axi_slave_data_fifo #
   assign bram_addr1 = tail;
   assign data_out = bram_data_out1;
   
-  axi_slave_data_fifo_ram
+  axi_lite_slave_data_fifo_ram
   #(.DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH)
     )
@@ -454,7 +374,7 @@ module axi_slave_data_fifo #
 endmodule
 
 //------------------------------------------------------------------------------
-module axi_slave_data_fifo_ram #
+module axi_lite_slave_data_fifo_ram #
   (
    parameter integer DATA_WIDTH = 32,
    parameter integer ADDR_WIDTH = 4

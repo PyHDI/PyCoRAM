@@ -266,8 +266,8 @@ PARAMETER C_{{ thread.name }}_{{ iochannel.name }}_AXI_RNG03_BASEADDR = 0xFFFFFF
 PARAMETER C_{{ thread.name }}_{{ iochannel.name }}_AXI_RNG03_HIGHADDR = 0x00000000, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DT = std_logic_vector, ADDRESS = HIGH, PAIR = C_{{ thread.name }}_{{ iochannel.name }}_AXI_RNG03_BASEADDR, ISVALID = (C_{{ thread.name }}_{{ iochannel.name }}_AXI_NUM_ADDR_RANGES >= 4), TYPE = NON_HDL
 
 ## Ports
-PORT {{ thread.name }}_{{ iochannel.name }}_ACLK = "", BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, SIGIS = CLK
-PORT {{ thread.name }}_{{ iochannel.name }}_ARESETN = ARESETN, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, SIGIS = RST
+PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ACLK = "", BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, SIGIS = CLK
+PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARESETN = ARESETN, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, SIGIS = RST
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWID = AWID, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH-1):0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWADDR = AWADDR, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1):0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWLEN = AWLEN, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [7:0]
@@ -340,8 +340,8 @@ PARAMETER C_{{ thread.name }}_{{ ioregister.name }}_AXI_RNG03_BASEADDR = 0xFFFFF
 PARAMETER C_{{ thread.name }}_{{ ioregister.name }}_AXI_RNG03_HIGHADDR = 0x00000000, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DT = std_logic_vector, ADDRESS = HIGH, PAIR = C_{{ thread.name }}_{{ ioregister.name }}_AXI_RNG03_BASEADDR, ISVALID = (C_{{ thread.name }}_{{ ioregister.name }}_AXI_NUM_ADDR_RANGES >= 4), TYPE = NON_HDL
 
 ## Ports
-PORT {{ thread.name }}_{{ ioregister.name }}_ACLK = "", BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, SIGIS = CLK
-PORT {{ thread.name }}_{{ ioregister.name }}_ARESETN = ARESETN, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, SIGIS = RST
+PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ACLK = "", BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, SIGIS = CLK
+PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARESETN = ARESETN, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, SIGIS = RST
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWID = AWID, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH-1):0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWADDR = AWADDR, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH-1):0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWLEN = AWLEN, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [7:0]
