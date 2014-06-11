@@ -5,4 +5,3 @@ clean:
 	make clean -C cache
 	make clean -C 9-point-stencil
 	make clean -C matrix-matrix-mult
-	make clean -C coram-tutorial

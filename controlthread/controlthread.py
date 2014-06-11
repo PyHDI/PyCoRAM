@@ -1500,7 +1500,18 @@ class CompileVisitor(ast.NodeVisitor):
                 ret = r
         return ret
 
+    def visit_NameConstant(self, node):
+        # for Python 3.4
+        if node.value == True:
+            return vast.IntConst('1')
+        if node.value == False:
+            return vast.IntConst('0')
+        if node.value == None:
+            return vast.IntConst('0')
+        raise TypeError("%s in NameConst.value is not supported." % str(node.value))
+
     def visit_Name(self, node):
+        # for Python 3.3 or before
         if node.id == 'True':
             return vast.IntConst('1')
         if node.id == 'False':
