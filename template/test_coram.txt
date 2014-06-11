@@ -1678,6 +1678,7 @@ module axi_dram_stub #
     input [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] data;
     integer pos;
     begin
+      #1;
       for(pos=0; pos < size; pos=pos+1) begin
         memory[addr+pos] = (data >> (8*pos)) & 'hFF;
       end
@@ -1690,6 +1691,7 @@ module axi_dram_stub #
     output [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] data;
     integer pos;
     begin
+      #1;
       data = 0;
       for(pos=0; pos < size; pos=pos+1) begin
         data = data | memory[addr+pos] << (8*pos);
@@ -1705,6 +1707,7 @@ module axi_dram_stub #
     input [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] data;
     integer pos;
     begin
+      #1;
       for(pos=0; pos < size; pos=pos+1) begin
         memory[addr+pos] = (data >> (8*pos)) & 'hFF;
       end
@@ -1717,6 +1720,7 @@ module axi_dram_stub #
     output [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] data;
     integer pos;
     begin
+      #1;
       data = 0;
       for(pos=0; pos < size; pos=pos+1) begin
         data = data | memory[addr+pos] << (8*pos);
@@ -1732,6 +1736,7 @@ module axi_dram_stub #
     input [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] data;
     integer pos;
     begin
+      #1;
       for(pos=0; pos < size; pos=pos+1) begin
         memory[addr+pos] = (data >> (8*pos)) & 'hFF;
       end
@@ -1744,6 +1749,7 @@ module axi_dram_stub #
     output [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] data;
     integer pos;
     begin
+      #1;
       data = 0;
       for(pos=0; pos < size; pos=pos+1) begin
         data = data | memory[addr+pos] << (8*pos);
