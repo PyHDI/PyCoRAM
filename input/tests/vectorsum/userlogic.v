@@ -4,10 +4,10 @@
 
 module userlogic #  
   (
-   parameter W_A = 15,
+   parameter W_A = 14,
    parameter W_COMM_A = 4,
    parameter W_D = 32,
-   parameter SIZE = (1024 * 32)
+   parameter SIZE = (1024 * 16)
    )
   (
    input CLK,

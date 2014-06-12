@@ -1,5 +1,5 @@
-DATA_SIZE = 1024 * 1024 # byte
-RAM_SIZE = 1024 * 32 # entry
+DATA_SIZE = 1024 * 256 # entry
+RAM_SIZE = 1024 * 16 # entry
 
 REPEAT = DATA_SIZE / RAM_SIZE
 
@@ -11,7 +11,7 @@ channel = CoramChannel(0, 32)
 
 def ctrl_thread():
     read_addr = 0
-    write_addr = DATA_SIZE
+    write_addr = DATA_SIZE * 4
     sum = 0
 
     read_ram0.write_nonblocking(0, read_addr, RAM_SIZE) # from DRAM to BlockRAM
