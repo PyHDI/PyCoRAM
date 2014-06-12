@@ -10,6 +10,7 @@ import sys
 import os
 import subprocess
 import copy
+import collections
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 
@@ -37,9 +38,9 @@ class RtlConverter(object):
         self.single_clock = single_clock
         self.template_file = TEMPLATE_FILE
 
-        self.top_parameters = {}
-        self.top_ioports = {}
-        self.coram_object = {}
+        self.top_parameters = collections.OrderedDict()
+        self.top_ioports = collections.OrderedDict()
+        self.coram_object = collections.OrderedDict()
 
     def getTopParameters(self):
         return self.top_parameters
