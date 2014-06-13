@@ -4,6 +4,16 @@
 `define DUMP_VCD
 `define MEM_LATENCY 4
 
+module test_top;
+`ifdef DUMP_VCD
+  initial begin
+    $dumpfile("uut.vcd");
+    $dumpvars(0, uut);
+  end
+`endif
+  test uut ();
+endmodule
+
 module test;
   parameter SIM_CYCLE = 1000 * 1000 * 1000;
   parameter MEMIMG = "{{ memimg }}";
@@ -1301,22 +1311,6 @@ module test;
     $finish;
   end
 
-`ifdef DUMP_VCD
-  initial begin
-    $dumpfile("uut.vcd");
-    $dumpvars(0, inst_uut,
-{%- for thread in threads | sort(attribute='name') -%}
-{%- for iochannel in thread.iochannels | sort(attribute='name') -%}
-              inst_axi_master_fifo_{{ thread.name }}_{{ iochannel.name }},
-{%- endfor %}
-{%- for ioregister in thread.ioregisters | sort(attribute='name') -%}
-              inst_axi_master_fifo_{{ thread.name }}_{{ ioregister.name }},
-{%- endfor %}
-{%- endfor %}
-              inst_axi_dram_stub);
-  end
-`endif
-
 {%- for thread in threads | sort(attribute='name') %}
 {% for iochannel in thread.iochannels | sort(attribute='name') %}
   task iochannel_write_{{ thread.name }}_{{ iochannel.name }};
@@ -1816,14 +1810,14 @@ module axi_dram_stub #
         if({{ thread.name }}_{{ memory.name }}_AXI_WVALID) begin
           {{ thread.name }}_{{ memory.name }}_AXI_WREADY <= 1;
           if({{ thread.name }}_{{ memory.name }}_AXI_WREADY != 0) begin
-            //memory[ {{ thread.name }}_{{ memory.name }}_AXI_write_addr ] <= {{ thread.name }}_{{ memory.name }}_AXI_WDATA;
-            mem_write_{{ thread.name }}_{{ memory.name }}({{ thread.name }}_{{ memory.name }}_AXI_write_addr, C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ memory.name }}_AXI_WDATA);
             d_{{ thread.name }}_{{ memory.name }}_AXI_AWADDR <= d_{{ thread.name }}_{{ memory.name }}_AXI_AWADDR + (C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH / 8);
             d_{{ thread.name }}_{{ memory.name }}_AXI_AWLEN <= d_{{ thread.name }}_{{ memory.name }}_AXI_AWLEN - 1;
             if(d_{{ thread.name }}_{{ memory.name }}_AXI_AWLEN == 0 || {{ thread.name }}_{{ memory.name }}_AXI_WLAST) begin // actual burst length -1
               {{ thread.name }}_{{ memory.name }}_AXI_BVALID <= 1;
               {{ thread.name }}_{{ memory.name }}_AXI_write_mode <= 0;
             end
+            //memory[ {{ thread.name }}_{{ memory.name }}_AXI_write_addr ] <= {{ thread.name }}_{{ memory.name }}_AXI_WDATA;
+            mem_write_{{ thread.name }}_{{ memory.name }}({{ thread.name }}_{{ memory.name }}_AXI_write_addr, C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ memory.name }}_AXI_WDATA);
           end
         end
       end
@@ -1831,14 +1825,14 @@ module axi_dram_stub #
       if({{ thread.name }}_{{ memory.name }}_AXI_read_mode) begin
         if({{ thread.name }}_{{ memory.name }}_AXI_RREADY) begin
           {{ thread.name }}_{{ memory.name }}_AXI_RVALID <= 1;
-          //{{ thread.name }}_{{ memory.name }}_AXI_RDATA <= memory[ {{ thread.name }}_{{ memory.name }}_AXI_read_addr ];
-          mem_read_{{ thread.name }}_{{ memory.name }}({{ thread.name }}_{{ memory.name }}_AXI_read_addr, C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ memory.name }}_AXI_RDATA);
           d_{{ thread.name }}_{{ memory.name }}_AXI_ARADDR <= d_{{ thread.name }}_{{ memory.name }}_AXI_ARADDR + (C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH / 8);
           d_{{ thread.name }}_{{ memory.name }}_AXI_ARLEN <= d_{{ thread.name }}_{{ memory.name }}_AXI_ARLEN - 1;
           if(d_{{ thread.name }}_{{ memory.name }}_AXI_ARLEN == 0) begin // actual burst length -1
             {{ thread.name }}_{{ memory.name }}_AXI_RLAST <= 1;
             {{ thread.name }}_{{ memory.name }}_AXI_read_mode <= 0;
           end
+          //{{ thread.name }}_{{ memory.name }}_AXI_RDATA <= memory[ {{ thread.name }}_{{ memory.name }}_AXI_read_addr ];
+          mem_read_{{ thread.name }}_{{ memory.name }}({{ thread.name }}_{{ memory.name }}_AXI_read_addr, C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ memory.name }}_AXI_RDATA);
         end
       end
 
@@ -1902,14 +1896,14 @@ module axi_dram_stub #
         if({{ thread.name }}_{{ instream.name }}_AXI_WVALID) begin
           {{ thread.name }}_{{ instream.name }}_AXI_WREADY <= 1;
           if({{ thread.name }}_{{ instream.name }}_AXI_WREADY != 0) begin
-            //memory[ {{ thread.name }}_{{ instream.name }}_AXI_write_addr ] <= {{ thread.name }}_{{ instream.name }}_AXI_WDATA;
-            mem_write_{{ thread.name }}_{{ instream.name }}({{ thread.name }}_{{ instream.name }}_AXI_write_addr, C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ instream.name }}_AXI_WDATA);
             d_{{ thread.name }}_{{ instream.name }}_AXI_AWADDR <= d_{{ thread.name }}_{{ instream.name }}_AXI_AWADDR + (C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH / 8);
             d_{{ thread.name }}_{{ instream.name }}_AXI_AWLEN <= d_{{ thread.name }}_{{ instream.name }}_AXI_AWLEN - 1;
             if(d_{{ thread.name }}_{{ instream.name }}_AXI_AWLEN == 0 || {{ thread.name }}_{{ instream.name }}_AXI_WLAST) begin // actual burst length -1
               {{ thread.name }}_{{ instream.name }}_AXI_BVALID <= 1;
               {{ thread.name }}_{{ instream.name }}_AXI_write_mode <= 0;
             end
+            //memory[ {{ thread.name }}_{{ instream.name }}_AXI_write_addr ] <= {{ thread.name }}_{{ instream.name }}_AXI_WDATA;
+            mem_write_{{ thread.name }}_{{ instream.name }}({{ thread.name }}_{{ instream.name }}_AXI_write_addr, C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ instream.name }}_AXI_WDATA);
           end
         end
       end
@@ -1917,14 +1911,14 @@ module axi_dram_stub #
       if({{ thread.name }}_{{ instream.name }}_AXI_read_mode) begin
         if({{ thread.name }}_{{ instream.name }}_AXI_RREADY) begin
           {{ thread.name }}_{{ instream.name }}_AXI_RVALID <= 1;
-          //{{ thread.name }}_{{ instream.name }}_AXI_RDATA <= memory[ {{ thread.name }}_{{ instream.name }}_AXI_read_addr ];
-          mem_read_{{ thread.name }}_{{ instream.name }}({{ thread.name }}_{{ instream.name }}_AXI_read_addr, C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ instream.name }}_AXI_RDATA);
           d_{{ thread.name }}_{{ instream.name }}_AXI_ARADDR <= d_{{ thread.name }}_{{ instream.name }}_AXI_ARADDR + (C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH / 8);
           d_{{ thread.name }}_{{ instream.name }}_AXI_ARLEN <= d_{{ thread.name }}_{{ instream.name }}_AXI_ARLEN - 1;
           if(d_{{ thread.name }}_{{ instream.name }}_AXI_ARLEN == 0) begin // actual burst length -1
             {{ thread.name }}_{{ instream.name }}_AXI_RLAST <= 1;
             {{ thread.name }}_{{ instream.name }}_AXI_read_mode <= 0;
           end
+          //{{ thread.name }}_{{ instream.name }}_AXI_RDATA <= memory[ {{ thread.name }}_{{ instream.name }}_AXI_read_addr ];
+          mem_read_{{ thread.name }}_{{ instream.name }}({{ thread.name }}_{{ instream.name }}_AXI_read_addr, C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ instream.name }}_AXI_RDATA);
         end
       end
 
@@ -1988,14 +1982,14 @@ module axi_dram_stub #
         if({{ thread.name }}_{{ outstream.name }}_AXI_WVALID) begin
           {{ thread.name }}_{{ outstream.name }}_AXI_WREADY <= 1;
           if({{ thread.name }}_{{ outstream.name }}_AXI_WREADY != 0) begin
-            //memory[ {{ thread.name }}_{{ outstream.name }}_AXI_write_addr ] <= {{ thread.name }}_{{ outstream.name }}_AXI_WDATA;
-            mem_write_{{ thread.name }}_{{ outstream.name }}({{ thread.name }}_{{ outstream.name }}_AXI_write_addr, C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ outstream.name }}_AXI_WDATA);
             d_{{ thread.name }}_{{ outstream.name }}_AXI_AWADDR <= d_{{ thread.name }}_{{ outstream.name }}_AXI_AWADDR + (C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH / 8);
             d_{{ thread.name }}_{{ outstream.name }}_AXI_AWLEN <= d_{{ thread.name }}_{{ outstream.name }}_AXI_AWLEN - 1;
             if(d_{{ thread.name }}_{{ outstream.name }}_AXI_AWLEN == 0 || {{ thread.name }}_{{ outstream.name }}_AXI_WLAST) begin // actual burst length -1
               {{ thread.name }}_{{ outstream.name }}_AXI_BVALID <= 1;
               {{ thread.name }}_{{ outstream.name }}_AXI_write_mode <= 0;
             end
+            //memory[ {{ thread.name }}_{{ outstream.name }}_AXI_write_addr ] <= {{ thread.name }}_{{ outstream.name }}_AXI_WDATA;
+            mem_write_{{ thread.name }}_{{ outstream.name }}({{ thread.name }}_{{ outstream.name }}_AXI_write_addr, C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ outstream.name }}_AXI_WDATA);
           end
         end
       end
@@ -2003,14 +1997,14 @@ module axi_dram_stub #
       if({{ thread.name }}_{{ outstream.name }}_AXI_read_mode) begin
         if({{ thread.name }}_{{ outstream.name }}_AXI_RREADY) begin
           {{ thread.name }}_{{ outstream.name }}_AXI_RVALID <= 1;
-          //{{ thread.name }}_{{ outstream.name }}_AXI_RDATA <= memory[ {{ thread.name }}_{{ outstream.name }}_AXI_read_addr ];
-          mem_read_{{ thread.name }}_{{ outstream.name }}({{ thread.name }}_{{ outstream.name }}_AXI_read_addr, C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ outstream.name }}_AXI_RDATA);
           d_{{ thread.name }}_{{ outstream.name }}_AXI_ARADDR <= d_{{ thread.name }}_{{ outstream.name }}_AXI_ARADDR + (C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH / 8);
           d_{{ thread.name }}_{{ outstream.name }}_AXI_ARLEN <= d_{{ thread.name }}_{{ outstream.name }}_AXI_ARLEN - 1;
           if(d_{{ thread.name }}_{{ outstream.name }}_AXI_ARLEN == 0) begin // actual burst length -1
             {{ thread.name }}_{{ outstream.name }}_AXI_RLAST <= 1;
             {{ thread.name }}_{{ outstream.name }}_AXI_read_mode <= 0;
           end
+          //{{ thread.name }}_{{ outstream.name }}_AXI_RDATA <= memory[ {{ thread.name }}_{{ outstream.name }}_AXI_read_addr ];
+          mem_read_{{ thread.name }}_{{ outstream.name }}({{ thread.name }}_{{ outstream.name }}_AXI_read_addr, C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH/8, {{ thread.name }}_{{ outstream.name }}_AXI_RDATA);
         end
       end
 
