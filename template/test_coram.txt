@@ -1201,7 +1201,7 @@ module test;
     end
   endtask
 
-  integer i;
+  integer cycle_count;
   
   initial begin
     if(SINGLE_CLOCK &&
@@ -1292,11 +1292,11 @@ module test;
 
     nclk();
 
-    for(i=0; i<SIM_CYCLE; i=i+1) begin
+    for(cycle_count=0; cycle_count<SIM_CYCLE; cycle_count=cycle_count+1) begin
       nclk();
     end
     
-    $display("[CoRAM] time:%d simulation time out. cycle:%d", $stime, i);
+    $display("[CoRAM] time:%d simulation time out. cycle:%d", $stime, cycle_count);
     $finish;
   end
 
