@@ -15,7 +15,10 @@ setup(name='pycoram',
       author='Shinya Takamaeda-Yamazaki',
       url='http://shtaxxx.github.io/Pycoram/',
       packages=find_packages(),
-      package_data={ 'pycoram.template' : ['*.*'],  },
+      package_data={ 'pycoram.template' : ['*.*'],
+                     'pycoram.pyverilog.ast_code_generator' : ['template/*'], 
+                     'pycoram.pyverilog' : ['testcode/*'],
+                 },
       entry_points="""
       [console_scripts]
       %s = pycoram.pycoram:main

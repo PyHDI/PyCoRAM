@@ -71,7 +71,7 @@ If Python 3.x is used,
 
     python3 setup.py install
 
-Then you can use the pycoram command from your console.
+Then you can use the pycoram command from your console (the version number depends on your environment).
 
     pycoram-0.9.0-py3.4.1
 
@@ -79,9 +79,9 @@ Then you can use the pycoram command from your console.
 Getting Started
 ==============================
 
-First, please check 'base.mk' in 'sample'. If you use the installed pycoram command on your environment, please modify 'TARGET' in base.mk as below (the version number depends on your environment)
+First, please make sure TARGET in 'base.mk' in 'sample' is correctly defined. If you use the installed pycoram command on your environment, please modify 'TARGET' in base.mk as below (the version number depends on your environment)
 
-    TARGET=pycoram-0.9.0-py2.7.0
+    TARGET=pycoram-0.9.0-py3.4.1
 
 You can find the sample projects in 'sample/tests/single\_memory'.
 
@@ -95,7 +95,7 @@ Then type 'make' and 'make run' to simulate sample system.
 
 Or type commands as below directly.
 
-    python3 pycoram/pycoram.py sample/default.config -t userlogic -I include/ sample/tests/single_memory/ctrl_thread.py sample/tests/single_memory/userlogic.v
+    python pycoram/pycoram.py sample/default.config -t userlogic -I include/ sample/tests/single_memory/ctrl_thread.py sample/tests/single_memory/userlogic.v
     iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
     ./a.out
 
@@ -120,7 +120,7 @@ PyCoRAM Command Options
 Command
 ------------------------------
 
-    python3 pycoram.py config.conf [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+
+    python pycoram.py [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+
 
 Description
 ------------------------------
@@ -129,6 +129,8 @@ Description
     - User-logic Verilog file (.v) and control-thread definition file (.py).
       Automatically, .v file is recognized as a user-logic Verilog file, and 
       .py file recongnized as a control-thread definition, respectively.
+* config
+    - Configuration file which includes memory and device specification 
 * -t
     - Name of user-defined top module, default is "userlogic".
 * -I

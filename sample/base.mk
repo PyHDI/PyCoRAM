@@ -1,10 +1,10 @@
-PYTHON=python
-#PYTHON=python3
+PYTHON=python3
+#PYTHON=python
 #OPT=-m pdb
 #OPT=-m cProfile -o profile.rslt
 
 ## If you installed pycoram in your environment (site-packages)
-#TARGET=pycoram-0.9.0-py2.7.0 
+#TARGET=pycoram-0.9.0-py3.4.1
 ## If you directly execute pycoram.py without installation
 TARGET=$(ROOTDIR)/pycoram/pycoram.py
 
