@@ -1,0 +1,96 @@
+`include "pycoram.v"
+
+`define THREAD_NAME "ctrl_thread"
+
+module userlogic(CLK, RST);
+  input CLK, RST;
+
+{%- for i in range(iternum) %}
+  reg [31:0] in_{{ i }};
+  wire [31:0] out_{{ i }};
+{%- endfor %}
+
+  always @(posedge CLK) begin
+    if(RST) begin
+{%- for i in range(iternum) %}
+      in_{{ i }} <= 0;
+{%- endfor %}
+    end else begin
+{%- for i in range(iternum) %}
+      in_{{ i }} <= in_{{ i }} + {{ i }};
+{%- endfor %}
+    end
+  end
+
+{%- for i in range(iternum) %}
+  SUB #
+  (
+   .ID({{ i }})
+  )
+  inst_sub_{{ i }}
+  (
+   .CLK(CLK),
+   .RST(RST),
+   .IN(in_{{ i }}),
+   .OUT(out_{{ i }})
+  );
+
+{%- endfor %}
+
+endmodule
+
+
+{% for d in range(depth) %}
+module SUB{% for dd in range(d) %}SUB{% endfor %} (CLK, RST, IN, OUT);
+  parameter ID = 0;
+  input CLK, RST;
+  input [31:0] IN;
+  output [31:0] OUT;
+  SUBSUB{% for dd in range(d) %}SUB{% endfor %} #(.ID(ID))
+  inst (.CLK(CLK), .RST(RST), .IN(IN), .OUT(OUT));
+endmodule
+{% endfor %}
+
+
+module SUB{% for d in range(depth) %}SUB{% endfor %} (CLK, RST, IN, OUT);
+  parameter ID = 0;
+  input CLK, RST;
+  input [31:0] IN;
+  output [31:0] OUT;
+
+  reg [9:0] mem_addr;
+  reg mem_we;
+  reg [31:0] d_IN;
+
+  always @(posedge CLK) begin
+    if(RST) begin
+      d_IN <= 0;
+      mem_we <= 0;
+      mem_addr <= 0;
+    end else begin
+      d_IN <= IN;
+      mem_we <= 0;
+      if(d_IN != IN) begin
+        mem_addr <= mem_addr + 1;
+        mem_we <= 1;
+      end
+    end
+  end
+
+  CoramMemory1P
+  #(
+    .CORAM_THREAD_NAME(`THREAD_NAME),
+    .CORAM_ID(ID),
+    .CORAM_ADDR_LEN(10),
+    .CORAM_DATA_WIDTH(32)
+    )
+  inst_data_memory
+  (.CLK(CLK),
+   .ADDR(mem_addr),
+   .D(IN),
+   .WE(mem_we),
+   .Q(OUT)
+   );
+
+endmodule
+

@@ -1,0 +1,289 @@
+/**********************************************************************/
+/* The 1st IPSJ SIG-ARC High-Performance Processor Design Contest     */
+/* 310_sort Version 2013-10-13                                        */
+/**********************************************************************/
+#include <stdlib.h>
+#include <stdio.h>
+
+//#include "lib.c"
+/**********************************************************************/
+/* Definitions and Working data */
+
+// Max number node is 2048. "1" added because the node number is 1-origin.
+#define MAX_NODE 2048+1
+
+// Max integer is the max positive 32-bit number : 0x7FFF_FFFF
+#define MAX_INT 2147483647
+
+// True and false logical values
+#define TRUE  1
+#define FALSE 0
+
+// message flags for debug and verbose purposes
+#define debug FALSE
+#define verbose FALSE
+
+typedef struct {
+  int currentCost;
+  int isMinimumCost;
+  int fromNodeForMinimumCost;
+} node;
+
+typedef struct {
+  int from;
+  int to;
+  int cost;
+} edge;
+
+int numberOfEdges;
+int numberOfNodes;
+edge* edgeArray;
+node nodeArray [MAX_NODE];
+
+edge edge_data [1024*1024*128];
+
+
+/**********************************************************************/
+/* Print Functions */
+
+/**
+ * Print edge array information for debug
+ */
+void printEdgeArray()
+{
+  int i;
+  printf("#Edges\n");
+  for(i=0; i<numberOfEdges; i++) {
+    edge* e = &edgeArray[i];
+    printf("[%d]\t%d\t%d\t%d\n", i, e->from, e->to, e->cost);
+  }
+}
+
+/**
+ * Print node array for debug
+ */
+void printNodeArray()
+{
+
+  printf("#Nodes\n");
+
+  int i;
+  for(i=1; i<=numberOfNodes; i++) {
+    node* n = &nodeArray[i];
+    printf("[%d]\t%d\t%d\t%d\n", i, n->currentCost, n->isMinimumCost, n->fromNodeForMinimumCost);
+  }
+}
+
+/**
+ * Print initial message 
+ */
+void printInitialMessage(int n, int m, int start, int goal) {
+  printf("spath n=%d m=%d start=%d goal=%d\n", n, m, start, goal );
+}
+
+/**
+ * Print result message
+ * @param sumOfCost sum of the cost along the route
+ * @param start start node of the route
+ * @param goal goal node of the route
+ */
+void printResultMessage(int sumOfCost, int start, int goal) {
+  int currentNode = start;
+  
+  printf("\nroute=");
+
+  while(TRUE) {
+    printf("%d", currentNode);
+    if(currentNode == 0) break;
+    if(currentNode == goal) break;
+
+    currentNode = nodeArray[currentNode].fromNodeForMinimumCost;
+    printf(",");
+  }
+  
+  printf("\ncost=%d\n", sumOfCost);
+}
+
+/**********************************************************************/
+/* Dijkstra Algorithm Functions */
+/**
+ * Find current shortest node
+ *
+ * @return current shortest node#
+ */
+int findCurrentShortestNode() {
+  int i;
+  int currentShortestCost = MAX_INT;
+  int currentShortestNode = 0;
+
+  // loop for find the minimum cost for all nodes
+  for(i=1; i<=numberOfNodes; i++) {
+    node* n = &nodeArray[i];
+    int isMinimumCost = n->isMinimumCost;
+    if(!isMinimumCost) {
+      int currentCost = n->currentCost;
+      if(currentShortestCost > currentCost) {
+        currentShortestCost = currentCost;
+        currentShortestNode = i;
+      }
+    }
+  }
+
+  return currentShortestNode;
+}
+
+
+/**
+ * Update next shortest nodes
+ *
+ */
+void updateNextShortestNodes()
+{
+  int i;
+  // update all edges
+  for(i=0; i<numberOfEdges; i++) {
+    edge* e = &edgeArray[i];
+    int from = e->from;
+    int to   = e->to;
+    int cost = e->cost;
+    node* fromNode = &nodeArray[from];
+    node* toNode = &nodeArray[to];
+    int fromNodeIsMinimumCost = fromNode->isMinimumCost;
+    int toNodeIsMinimumCost   = toNode->isMinimumCost;
+
+    // update "toNode" which is next of "fromNode"
+    if(fromNodeIsMinimumCost) {
+      if(!toNodeIsMinimumCost) {
+        int currentCostOfTheNextNode = toNode->currentCost;
+        int updatedCostOfTheNextNode = fromNode->currentCost + cost;
+        // compares the current and the updated value
+        if(updatedCostOfTheNextNode < currentCostOfTheNextNode) {
+          nodeArray[to].currentCost = updatedCostOfTheNextNode;
+          nodeArray[to].fromNodeForMinimumCost = from;
+        }
+      }
+    }
+    // update "fromNode" which is the next of "toNode"
+    if(toNodeIsMinimumCost) {
+      if(!fromNodeIsMinimumCost) {
+        int currentCostOfTheNextNode = fromNode->currentCost;
+        int updatedCostOfTheNextNode = toNode->currentCost + cost;
+        // compares the current and the updated value
+        if(updatedCostOfTheNextNode < currentCostOfTheNextNode) {
+          nodeArray[from].currentCost = updatedCostOfTheNextNode;
+          nodeArray[from].fromNodeForMinimumCost = to;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Find next shortest node
+ *
+ * @return newly found shortest node#
+ */
+int findNextShortestNode() {
+  int nextShortestNode;
+
+  updateNextShortestNodes();
+  nextShortestNode = findCurrentShortestNode();
+  node* n = &nodeArray[nextShortestNode];
+  n->isMinimumCost = TRUE;
+
+  return nextShortestNode;
+}
+
+
+/**
+ * Find shortest path
+ * result is output to serial
+ *
+ * @param start start node#
+ * @param goal  goal node#
+ * @return Sum of the cost along the shortest path
+ */
+int findShortestPath(int start, int goal)
+{
+  int newShortestNode = -1;
+  int currentShortestNode = -1;
+  if(start < 0 || goal < 0) {
+    return MAX_INT;
+  }
+
+  nodeArray[goal].currentCost = 0;
+  nodeArray[goal].isMinimumCost = TRUE;
+  if(debug) printNodeArray(); // initial state
+
+  while(newShortestNode != start) {
+    newShortestNode = findNextShortestNode();
+    if(debug) printNodeArray(); // updated state
+
+
+    if(currentShortestNode == newShortestNode) break;
+    currentShortestNode = newShortestNode;
+  }
+
+  return nodeArray[start].currentCost;
+}
+
+
+/**********************************************************************/
+/* main and initialize functions */
+
+/**
+ * Initialize node array information
+ * @param n number of nodes
+ */
+void initNodeArray(int n) {
+  int i;
+  for(i=1; i<=n; i++) {
+    nodeArray[i].currentCost   = MAX_INT;
+    nodeArray[i].isMinimumCost = FALSE;
+  }
+}
+
+
+/**
+ * Shortest PATH main function
+ *
+ * @return status code
+ */
+int main(int argc, char** argv)
+{
+  int sumOfCost = 0;
+
+  int n = atoi(argv[1]);
+  int m = atoi(argv[2]);
+  int start = atoi(argv[3]);
+  int goal  = atoi(argv[4]);
+  printInitialMessage(n, m, start, goal);
+
+  FILE* fp = fopen(argv[5], "rb");
+  if(fp == NULL){
+    return -1;
+  }
+
+  if(fread(&edge_data, sizeof(edge_data), 1, fp) != 0){
+    return -1;
+  }
+
+  /* ----- Initialize ----- */
+  edgeArray = edge_data;
+  numberOfNodes = n;
+  numberOfEdges = m;
+
+  if(debug) printEdgeArray();
+  initNodeArray(n);
+  if(debug) printNodeArray();
+
+  /* -----  main kernel ----- */
+  sumOfCost = findShortestPath(start, goal);
+
+  /* -----  show result ----- */
+  printResultMessage(sumOfCost, start, goal);
+
+  printf("\n");
+  return 0;
+}
+/**********************************************************************/

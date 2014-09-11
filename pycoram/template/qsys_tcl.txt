@@ -1,0 +1,327 @@
+package require -exact qsys 14.0
+
+
+# 
+# module pycoram_{{ userlogic_name.lower() }}
+# 
+set_module_property DESCRIPTION ""
+set_module_property NAME pycoram_{{ userlogic_name.lower() }}
+set_module_property VERSION 1.0
+set_module_property INTERNAL false
+set_module_property OPAQUE_ADDRESS_MAP true
+set_module_property GROUP pycoram_ipcores
+set_module_property AUTHOR ""
+set_module_property DISPLAY_NAME pycoram_{{ userlogic_name.lower() }}
+set_module_property INSTANTIATE_IN_SYSTEM_MODULE true
+set_module_property EDITABLE true
+set_module_property REPORT_TO_TALKBACK false
+set_module_property ALLOW_GREYBOX_GENERATION false
+set_module_property REPORT_HIERARCHY false
+
+
+# 
+# file sets
+# 
+add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
+set_fileset_property QUARTUS_SYNTH TOP_LEVEL pycoram_{{ userlogic_name.lower() }}
+set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
+set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE false
+add_fileset_file "./implementation/{{ hdlname }}" VERILOG PATH {{ hdlname }} TOP_LEVEL_FILE
+#add_fileset_file "./implementation/{{ common_hdlname }}" VERILOG PATH {{ common_hdlname }}
+
+
+# 
+# parameters
+# 
+{%- for param in tcl_parameters | sort(attribute=0) %}
+add_parameter {{ param[0] }} {{ param[2] }} {{ param[1] }} 
+set_parameter_property {{ param[0] }} DEFAULT_VALUE {{ param[1] }} 
+set_parameter_property {{ param[0] }} DISPLAY_NAME {{ param[0] }} 
+set_parameter_property {{ param[0] }} TYPE {{ param[2] }} 
+set_parameter_property {{ param[0] }} UNITS None
+{%- if param[2] == 'STD_LOGIC_VECTOR' %}
+set_parameter_property {{ param[0] }} ALLOWED_RANGES 0:17179869183
+{%- endif %}
+set_parameter_property {{ param[0] }} HDL_PARAMETER false
+{%- endfor %}
+
+
+# 
+# display items
+# 
+{% for thread in threads | sort(attribute='name') %}
+{%- for memory in thread.memories | sort(attribute='name') %}
+# 
+# connection point {{ thread.name }}_{{ memory.name }}
+# 
+add_interface {{ thread.name }}_{{ memory.name }} avalon start
+set_interface_property {{ thread.name }}_{{ memory.name }} addressUnits SYMBOLS
+{%- if not single_clock %}
+set_interface_property {{ thread.name }}_{{ memory.name }} associatedClock sys_{{ thread.name }}_{{ memory.name }}
+set_interface_property {{ thread.name }}_{{ memory.name }} associatedReset sys_{{ thread.name }}_{{ memory.name }}_reset
+{%- else %}
+set_interface_property {{ thread.name }}_{{ memory.name }} associatedClock sys_user
+set_interface_property {{ thread.name }}_{{ memory.name }} associatedReset sys_user_reset
+{%- endif %}
+set_interface_property {{ thread.name }}_{{ memory.name }} bitsPerSymbol 8
+set_interface_property {{ thread.name }}_{{ memory.name }} burstOnBurstBoundariesOnly false
+set_interface_property {{ thread.name }}_{{ memory.name }} burstcountUnits WORDS
+set_interface_property {{ thread.name }}_{{ memory.name }} doStreamReads false
+set_interface_property {{ thread.name }}_{{ memory.name }} doStreamWrites false
+set_interface_property {{ thread.name }}_{{ memory.name }} holdTime 0
+set_interface_property {{ thread.name }}_{{ memory.name }} linewrapBursts false
+set_interface_property {{ thread.name }}_{{ memory.name }} maximumPendingReadTransactions 256
+set_interface_property {{ thread.name }}_{{ memory.name }} maximumPendingWriteTransactions 0
+set_interface_property {{ thread.name }}_{{ memory.name }} readLatency 0
+set_interface_property {{ thread.name }}_{{ memory.name }} readWaitTime 1
+set_interface_property {{ thread.name }}_{{ memory.name }} setupTime 0
+set_interface_property {{ thread.name }}_{{ memory.name }} timingUnits Cycles
+set_interface_property {{ thread.name }}_{{ memory.name }} writeWaitTime 0
+set_interface_property {{ thread.name }}_{{ memory.name }} ENABLED true
+set_interface_property {{ thread.name }}_{{ memory.name }} EXPORT_OF ""
+set_interface_property {{ thread.name }}_{{ memory.name }} PORT_NAME_MAP ""
+set_interface_property {{ thread.name }}_{{ memory.name }} CMSIS_SVD_VARIABLES ""
+set_interface_property {{ thread.name }}_{{ memory.name }} SVD_ADDRESS_GROUP ""
+
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_address address Output {{ ext_addrwidth }}
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_waitrequest waitrequest Input 1
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_byteenable byteenable Output {{ int(memory.ext_datawidth / 8) }}
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_burstcount burstcount Output 8
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_read read Output 1
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_readdata readdata Input {{ memory.ext_datawidth }}
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_readdatavalid readdatavalid Input 1
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_write write Output 1
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_writedata writedata Output {{ memory.ext_datawidth }}
+{% endfor %}
+
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+# 
+# connection point {{ thread.name }}_{{ instream.name }}
+# 
+add_interface {{ thread.name }}_{{ instream.name }} avalon start
+set_interface_property {{ thread.name }}_{{ instream.name }} addressUnits SYMBOLS
+{%- if not single_clock %}
+set_interface_property {{ thread.name }}_{{ instream.name }} associatedClock sys_{{ thread.name }}_{{ instream.name }}
+set_interface_property {{ thread.name }}_{{ instream.name }} associatedReset sys_{{ thread.name }}_{{ instream.name }}_reset
+{%- else %}
+set_interface_property {{ thread.name }}_{{ instream.name }} associatedClock sys_user
+set_interface_property {{ thread.name }}_{{ instream.name }} associatedReset sys_user_reset
+{%- endif %}
+set_interface_property {{ thread.name }}_{{ instream.name }} bitsPerSymbol 8
+set_interface_property {{ thread.name }}_{{ instream.name }} burstOnBurstBoundariesOnly false
+set_interface_property {{ thread.name }}_{{ instream.name }} burstcountUnits WORDS
+set_interface_property {{ thread.name }}_{{ instream.name }} doStreamReads false
+set_interface_property {{ thread.name }}_{{ instream.name }} doStreamWrites false
+set_interface_property {{ thread.name }}_{{ instream.name }} holdTime 0
+set_interface_property {{ thread.name }}_{{ instream.name }} linewrapBursts false
+set_interface_property {{ thread.name }}_{{ instream.name }} maximumPendingReadTransactions 256
+set_interface_property {{ thread.name }}_{{ instream.name }} maximumPendingWriteTransactions 0
+set_interface_property {{ thread.name }}_{{ instream.name }} readLatency 0
+set_interface_property {{ thread.name }}_{{ instream.name }} readWaitTime 1
+set_interface_property {{ thread.name }}_{{ instream.name }} setupTime 0
+set_interface_property {{ thread.name }}_{{ instream.name }} timingUnits Cycles
+set_interface_property {{ thread.name }}_{{ instream.name }} writeWaitTime 0
+set_interface_property {{ thread.name }}_{{ instream.name }} ENABLED true
+set_interface_property {{ thread.name }}_{{ instream.name }} EXPORT_OF ""
+set_interface_property {{ thread.name }}_{{ instream.name }} PORT_NAME_MAP ""
+set_interface_property {{ thread.name }}_{{ instream.name }} CMSIS_SVD_VARIABLES ""
+set_interface_property {{ thread.name }}_{{ instream.name }} SVD_ADDRESS_GROUP ""
+
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_address address Output {{ ext_addrwidth }}
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_waitrequest waitrequest Input 1
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_byteenable byteenable Output {{ int(instream.ext_datawidth / 8) }}
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_burstcount burstcount Output 8
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_read read Output 1
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_readdata readdata Input {{ instream.ext_datawidth }}
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_readdatavalid readdatavalid Input 1
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_write write Output 1
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_writedata writedata Output {{ instream.ext_datawidth }}
+{% endfor %}
+
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+# 
+# connection point {{ thread.name }}_{{ outstream.name }}
+# 
+add_interface {{ thread.name }}_{{ outstream.name }} avalon start
+set_interface_property {{ thread.name }}_{{ outstream.name }} addressUnits SYMBOLS
+{%- if not single_clock %}
+set_interface_property {{ thread.name }}_{{ outstream.name }} associatedClock sys_{{ thread.name }}_{{ outstream.name }}
+set_interface_property {{ thread.name }}_{{ outstream.name }} associatedReset sys_{{ thread.name }}_{{ outstream.name }}_reset
+{%- else %}
+set_interface_property {{ thread.name }}_{{ outstream.name }} associatedClock sys_user
+set_interface_property {{ thread.name }}_{{ outstream.name }} associatedReset sys_user_reset
+{%- endif %}
+set_interface_property {{ thread.name }}_{{ outstream.name }} bitsPerSymbol 8
+set_interface_property {{ thread.name }}_{{ outstream.name }} burstOnBurstBoundariesOnly false
+set_interface_property {{ thread.name }}_{{ outstream.name }} burstcountUnits WORDS
+set_interface_property {{ thread.name }}_{{ outstream.name }} doStreamReads false
+set_interface_property {{ thread.name }}_{{ outstream.name }} doStreamWrites false
+set_interface_property {{ thread.name }}_{{ outstream.name }} holdTime 0
+set_interface_property {{ thread.name }}_{{ outstream.name }} linewrapBursts false
+set_interface_property {{ thread.name }}_{{ outstream.name }} maximumPendingReadTransactions 256
+set_interface_property {{ thread.name }}_{{ outstream.name }} maximumPendingWriteTransactions 0
+set_interface_property {{ thread.name }}_{{ outstream.name }} readLatency 0
+set_interface_property {{ thread.name }}_{{ outstream.name }} readWaitTime 1
+set_interface_property {{ thread.name }}_{{ outstream.name }} setupTime 0
+set_interface_property {{ thread.name }}_{{ outstream.name }} timingUnits Cycles
+set_interface_property {{ thread.name }}_{{ outstream.name }} writeWaitTime 0
+set_interface_property {{ thread.name }}_{{ outstream.name }} ENABLED true
+set_interface_property {{ thread.name }}_{{ outstream.name }} EXPORT_OF ""
+set_interface_property {{ thread.name }}_{{ outstream.name }} PORT_NAME_MAP ""
+set_interface_property {{ thread.name }}_{{ outstream.name }} CMSIS_SVD_VARIABLES ""
+set_interface_property {{ thread.name }}_{{ outstream.name }} SVD_ADDRESS_GROUP ""
+
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_address address Output {{ ext_addrwidth }}
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_waitrequest waitrequest Input 1
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_byteenable byteenable Output {{ int(outstream.ext_datawidth / 8) }}
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_burstcount burstcount Output 8
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_read read Output 1
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_readdata readdata Input {{ outstream.ext_datawidth }}
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid readdatavalid Input 1
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_write write Output 1
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_writedata writedata Output {{ outstream.ext_datawidth }}
+{% endfor %}
+
+
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+# 
+# connection point {{ thread.name }}_{{ iochannel.name }}
+# 
+add_interface {{ thread.name }}_{{ iochannel.name }} avalon end
+set_interface_property {{ thread.name }}_{{ iochannel.name }} addressUnits WORDS
+{%- if not single_clock %}
+set_interface_property {{ thread.name }}_{{ iochannel.name }} associatedClock sys_{{ thread.name }}_{{ iochannel.name }}
+set_interface_property {{ thread.name }}_{{ iochannel.name }} associatedReset sys_{{ thread.name }}_{{ iochannel.name }}_reset
+{%- else %}
+set_interface_property {{ thread.name }}_{{ iochannel.name }} associatedClock sys_user
+set_interface_property {{ thread.name }}_{{ iochannel.name }} associatedReset sys_user_reset
+{%- endif %}
+set_interface_property {{ thread.name }}_{{ iochannel.name }} bitsPerSymbol 8
+set_interface_property {{ thread.name }}_{{ iochannel.name }} burstOnBurstBoundariesOnly true
+set_interface_property {{ thread.name }}_{{ iochannel.name }} burstcountUnits WORDS
+set_interface_property {{ thread.name }}_{{ iochannel.name }} explicitAddressSpan 0
+set_interface_property {{ thread.name }}_{{ iochannel.name }} holdTime 0
+set_interface_property {{ thread.name }}_{{ iochannel.name }} linewrapBursts false
+set_interface_property {{ thread.name }}_{{ iochannel.name }} maximumPendingReadTransactions 1
+set_interface_property {{ thread.name }}_{{ iochannel.name }} maximumPendingWriteTransactions 0
+set_interface_property {{ thread.name }}_{{ iochannel.name }} readLatency 0
+set_interface_property {{ thread.name }}_{{ iochannel.name }} readWaitTime 1
+set_interface_property {{ thread.name }}_{{ iochannel.name }} setupTime 0
+set_interface_property {{ thread.name }}_{{ iochannel.name }} timingUnits Cycles
+set_interface_property {{ thread.name }}_{{ iochannel.name }} writeWaitTime 0
+set_interface_property {{ thread.name }}_{{ iochannel.name }} ENABLED true
+set_interface_property {{ thread.name }}_{{ iochannel.name }} EXPORT_OF ""
+set_interface_property {{ thread.name }}_{{ iochannel.name }} PORT_NAME_MAP ""
+set_interface_property {{ thread.name }}_{{ iochannel.name }} CMSIS_SVD_VARIABLES ""
+set_interface_property {{ thread.name }}_{{ iochannel.name }} SVD_ADDRESS_GROUP ""
+
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_address address Input 1
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest waitrequest Output 1
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_byteenable byteenable Input {{ int(iochannel.ext_datawidth / 8) }}
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_read read Input 1
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_readdata readdata Output {{ iochannel.ext_datawidth }}
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_readdatavalid readdatavalid Output 1
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_write write Input 1
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_writedata writedata Input {{ iochannel.ext_datawidth }}
+set_interface_assignment {{ thread.name }}_{{ iochannel.name }} embeddedsw.configuration.isFlash 0
+set_interface_assignment {{ thread.name }}_{{ iochannel.name }} embeddedsw.configuration.isMemoryDevice 0
+set_interface_assignment {{ thread.name }}_{{ iochannel.name }} embeddedsw.configuration.isNonVolatileStorage 0
+set_interface_assignment {{ thread.name }}_{{ iochannel.name }} embeddedsw.configuration.isPrintableDevice 0
+{% endfor %}
+
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+# 
+# connection point {{ thread.name }}_{{ ioregister.name }}
+# 
+add_interface {{ thread.name }}_{{ ioregister.name }} avalon end
+set_interface_property {{ thread.name }}_{{ ioregister.name }} addressUnits WORDS
+{%- if not single_clock %}
+set_interface_property {{ thread.name }}_{{ ioregister.name }} associatedClock sys_{{ thread.name }}_{{ ioregister.name }}
+set_interface_property {{ thread.name }}_{{ ioregister.name }} associatedReset sys_{{ thread.name }}_{{ ioregister.name }}_reset
+{%- else %}
+set_interface_property {{ thread.name }}_{{ ioregister.name }} associatedClock sys_user
+set_interface_property {{ thread.name }}_{{ ioregister.name }} associatedReset sys_user_reset
+{%- endif %}
+set_interface_property {{ thread.name }}_{{ ioregister.name }} bitsPerSymbol 8
+set_interface_property {{ thread.name }}_{{ ioregister.name }} burstOnBurstBoundariesOnly true
+set_interface_property {{ thread.name }}_{{ ioregister.name }} burstcountUnits WORDS
+set_interface_property {{ thread.name }}_{{ ioregister.name }} explicitAddressSpan 0
+set_interface_property {{ thread.name }}_{{ ioregister.name }} holdTime 0
+set_interface_property {{ thread.name }}_{{ ioregister.name }} linewrapBursts false
+set_interface_property {{ thread.name }}_{{ ioregister.name }} maximumPendingReadTransactions 1
+set_interface_property {{ thread.name }}_{{ ioregister.name }} maximumPendingWriteTransactions 0
+set_interface_property {{ thread.name }}_{{ ioregister.name }} readLatency 0
+set_interface_property {{ thread.name }}_{{ ioregister.name }} readWaitTime 1
+set_interface_property {{ thread.name }}_{{ ioregister.name }} setupTime 0
+set_interface_property {{ thread.name }}_{{ ioregister.name }} timingUnits Cycles
+set_interface_property {{ thread.name }}_{{ ioregister.name }} writeWaitTime 0
+set_interface_property {{ thread.name }}_{{ ioregister.name }} ENABLED true
+set_interface_property {{ thread.name }}_{{ ioregister.name }} EXPORT_OF ""
+set_interface_property {{ thread.name }}_{{ ioregister.name }} PORT_NAME_MAP ""
+set_interface_property {{ thread.name }}_{{ ioregister.name }} CMSIS_SVD_VARIABLES ""
+set_interface_property {{ thread.name }}_{{ ioregister.name }} SVD_ADDRESS_GROUP ""
+
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_address address Input 1
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest waitrequest Output 1
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_byteenable byteenable Input {{ int(ioregister.ext_datawidth / 8) }}
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_read read Input 1
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_readdata readdata Output {{ ioregister.ext_datawidth }}
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_readdatavalid readdatavalid Output 1
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_write write Input 1
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_writedata writedata Input {{ ioregister.ext_datawidth }}
+set_interface_assignment {{ thread.name }}_{{ ioregister.name }} embeddedsw.configuration.isFlash 0
+set_interface_assignment {{ thread.name }}_{{ ioregister.name }} embeddedsw.configuration.isMemoryDevice 0
+set_interface_assignment {{ thread.name }}_{{ ioregister.name }} embeddedsw.configuration.isNonVolatileStorage 0
+set_interface_assignment {{ thread.name }}_{{ ioregister.name }} embeddedsw.configuration.isPrintableDevice 0
+{% endfor %}
+{% endfor %}
+
+{% if len(tcl_ports) > 0 %}
+# 
+# connection point conduit_end_0
+# 
+add_interface conduit_end_0 conduit end
+set_interface_property conduit_end_0 associatedClock ""
+set_interface_property conduit_end_0 associatedReset ""
+set_interface_property conduit_end_0 ENABLED true
+set_interface_property conduit_end_0 EXPORT_OF ""
+set_interface_property conduit_end_0 PORT_NAME_MAP ""
+set_interface_property conduit_end_0 CMSIS_SVD_VARIABLES ""
+set_interface_property conduit_end_0 SVD_ADDRESS_GROUP ""
+{%- endif %}
+{%- for port in tcl_ports | sort(attribute=0) %}
+add_interface_port conduit_end_0 {{ port[0] }} pycoram_{{ userlogic_name.lower() }}_{{ port[0] }} {{ port[1] }} {{ port[2] }}
+{% endfor %}
+
+
+# 
+# connection point sys_user
+# 
+add_interface sys_user clock end
+set_interface_property sys_user clockRate 0
+set_interface_property sys_user ENABLED true
+set_interface_property sys_user EXPORT_OF ""
+set_interface_property sys_user PORT_NAME_MAP ""
+set_interface_property sys_user CMSIS_SVD_VARIABLES ""
+set_interface_property sys_user SVD_ADDRESS_GROUP ""
+
+add_interface_port sys_user csi_sys_user_clk clk Input 1
+
+
+# 
+# connection point sys_user_reset
+# 
+add_interface sys_user_reset reset end
+set_interface_property sys_user_reset associatedClock sys_user
+set_interface_property sys_user_reset synchronousEdges DEASSERT
+set_interface_property sys_user_reset ENABLED true
+set_interface_property sys_user_reset EXPORT_OF ""
+set_interface_property sys_user_reset PORT_NAME_MAP ""
+set_interface_property sys_user_reset CMSIS_SVD_VARIABLES ""
+set_interface_property sys_user_reset SVD_ADDRESS_GROUP ""
+
+add_interface_port sys_user_reset csi_sys_user_reset_n reset_n Input 1
+

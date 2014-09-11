@@ -1,4 +1,4 @@
-TARGET=./input/tests/single_memory/
+TARGET=./sample/test/single_memory/
 
 .PHONY: all
 all: sim
@@ -21,9 +21,6 @@ view:
 
 .PHONY: clean
 clean:
-	rm -rf *.pyc __pycache__ parsetab.py *.out *.html
-	make clean -C controlthread
-	make clean -C rtlconverter
-	make clean -C utils
-	make clean -C input
-	make clean -C pyverilog
+	make clean -C ./pycoram
+	make clean -C ./sample
+	rm -rf *.pyc __pycache__ pycoram.egg-info build dist

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE doc SYSTEM "../../ipdialog.dtd" [
+	<!-- -->
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_THREADS '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_THREADS">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_THREADS</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_THREADS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_PROTOCOL '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_PROTOCOL">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_PROTOCOL</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_PROTOCOL</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_USE_ADVANCED_PORTS '
+	<widget id="C_USE_ADVANCED_PORTS">
+		<key>C_USE_ADVANCED_PORTS</key>
+		<label>C_USE_ADVANCED_PORTS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_USER_SIGNALS '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_USER_SIGNALS">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_USER_SIGNALS</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_USER_SIGNALS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH '
+	<widget id=" C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH ">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_NARROW_BURST '
+	<widget id="C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_NARROW_BURST">
+		<key>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_NARROW_BURST</key>
+		<label>C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_NARROW_BURST</label>
+		<tip></tip>
+	</widget>
+	'>
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_THREADS '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_THREADS">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_THREADS</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_THREADS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_PROTOCOL '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_PROTOCOL">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_PROTOCOL</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_PROTOCOL</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_USE_ADVANCED_PORTS '
+	<widget id="C_USE_ADVANCED_PORTS">
+		<key>C_USE_ADVANCED_PORTS</key>
+		<label>C_USE_ADVANCED_PORTS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_USER_SIGNALS '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_USER_SIGNALS">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_USER_SIGNALS</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_USER_SIGNALS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH '
+	<widget id=" C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH ">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_NARROW_BURST '
+	<widget id="C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_NARROW_BURST">
+		<key>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_NARROW_BURST</key>
+		<label>C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_NARROW_BURST</label>
+		<tip></tip>
+	</widget>
+	'>
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_THREADS '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_THREADS">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_THREADS</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_THREADS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_PROTOCOL '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_PROTOCOL">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_PROTOCOL</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_PROTOCOL</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_USE_ADVANCED_PORTS '
+	<widget id="C_USE_ADVANCED_PORTS">
+		<key>C_USE_ADVANCED_PORTS</key>
+		<label>C_USE_ADVANCED_PORTS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_USER_SIGNALS '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_USER_SIGNALS">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_USER_SIGNALS</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_USER_SIGNALS</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH '
+	<widget id=" C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH ">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH</label>
+		<tip></tip>
+	</widget>
+	'>
+	<!ENTITY C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_NARROW_BURST '
+	<widget id="C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_NARROW_BURST">
+		<key>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_NARROW_BURST</key>
+		<label>C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_NARROW_BURST</label>
+		<tip></tip>
+	</widget>
+	'>
+{% endfor %}
+{%- endfor %}
+]>
+
+<doc>
+	<view id="User">
+		<display>User</display>
+		<group id="Common">
+			<display>Common</display>
+
+{%- for param in mpd_parameters %}
+	<!--
+			<item>&{{ param[0] }};</item>
+  -->
+{%- endfor %}
+
+	<!--
+{%- for thread in threads | sort(attribute='name') %}
+{%- for memory in thread.memories | sort(attribute='name') %}
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_PROTOCOL;</item>
+{%- endfor %}
+{%- for instream in thread.instreams | sort(attribute='name') %}
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_PROTOCOL;</item>
+{%- endfor %}
+{%- for outstream in thread.outstreams | sort(attribute='name') %}
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_PROTOCOL;</item>
+{%- endfor %}
+{%- endfor %}
+  -->
+
+		</group>
+	</view>
+	<view id="System">
+		<display>System</display>
+		<group id="AXI">
+			<display>AXI</display>
+
+	<!--
+{%- for thread in threads | sort(attribute='name') %}
+{%- for memory in thread.memories | sort(attribute='name') %}
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_THREADS;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_NARROW_BURST;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_USER_SIGNALS;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH;</item>
+{%- endfor %}
+{%- for instream in thread.instreams | sort(attribute='name') %}
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_THREADS;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_NARROW_BURST;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_USER_SIGNALS;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH;</item>
+{%- endfor %}
+{%- for outstream in thread.outstreams | sort(attribute='name') %}
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_THREADS;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_NARROW_BURST;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_USER_SIGNALS;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH;</item>
+			<item>&C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH;</item>
+{%- endfor %}
+{%- endfor %}
+  -->
+
+		</group>
+	</view>
+	
+</doc>

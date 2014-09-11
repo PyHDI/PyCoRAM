@@ -1,0 +1,1844 @@
+module pycoram_{{ userlogic_name.lower() }} #
+  (
+   //---------------------------------------------------------------------------
+   // User-defined parameter in Top-level User logic
+   // DO NOT modify. They are NOT passed through to the instance
+   //---------------------------------------------------------------------------
+{%- for param in def_top_parameters %}
+   {{ param }}
+{%- endfor %}
+
+   //---------------------------------------------------------------------------
+   // parameters
+   //---------------------------------------------------------------------------
+   parameter W_EXT_A = {{ ext_addrwidth }},
+   parameter W_BLEN = {{ ext_burstlen_width }},
+   parameter MAX_BURST_LEN = {{ ext_burstlength }},
+   parameter CMD_FIFO_ADDR_WIDTH = 4,
+
+   //----------------------------------------------------------------------------
+   // AXI Parameter
+   //----------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+
+{% for memory in thread.memories | sort(attribute='name') %}
+   // Memory {{ memory.name }}
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH = {{ memory.ext_datawidth }},
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH = {{ ext_addrwidth }},
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE = 1,
+   parameter integer C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ = 1,
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+   // Input stream {{ instream.name }}
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH = {{ instream.ext_datawidth }},
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH = {{ ext_addrwidth }},
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE = 0,
+   parameter integer C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ = 1,
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+   // Output stream {{ outstream.name }}
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH = {{ outstream.ext_datawidth }},
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH = {{ ext_addrwidth }},
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE = 1,
+   parameter integer C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ = 0,
+{% endfor %}
+
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+   // Control Thread I/O channel {{ iochannel.name }}
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH = {{ iochannel.ext_datawidth }},
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH = {{ ext_addrwidth }}, 
+{%- if not lite %}
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_WUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_RUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_BUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_SUPPORTS_WRITE = 1,
+   parameter integer C_{{ thread.name }}_{{ iochannel.name }}_AXI_SUPPORTS_READ = 1,
+{%- endif %}
+{% endfor %}
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+   // Control Thread I/O register {{ ioregister.name }}
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH = {{ ioregister.ext_datawidth }},
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH = {{ ext_addrwidth }}, 
+{%- if not lite %}
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_WUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_RUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_BUSER_WIDTH = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_SUPPORTS_WRITE = 1,
+   parameter integer C_{{ thread.name }}_{{ ioregister.name }}_AXI_SUPPORTS_READ = 1,
+{%- endif %}
+{% endfor %}
+
+{%- endfor %}
+   // Base address of targeted slave DRAM
+   parameter C_M_AXI_TARGET = 'h00000000
+   )
+  (
+   //----------------------------------------------------------------------------
+   // AXI Interface
+   //----------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+
+{% for memory in thread.memories | sort(attribute='name') %}
+   // Clock and Reset
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_ACLK,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_ARESETN,
+
+   // Master Interface Write Address
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWID,
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWADDR,
+   output wire [8-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWLEN,
+   output wire [3-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWSIZE,
+   output wire [2-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWBURST,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_AWLOCK,
+   output wire [4-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWCACHE,
+   output wire [3-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWPROT,
+   output wire [4-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWQOS,
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_AWUSER,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_AWVALID,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_AWREADY,
+   
+   // Master Interface Write Data
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_WDATA,
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH/8-1:0] {{ thread.name }}_{{ memory.name }}_AXI_WSTRB,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_WLAST,
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_WUSER,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_WVALID,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_WREADY,
+   
+   // Master Interface Write Response
+   input  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_BID,
+   input  wire [2-1:0] {{ thread.name }}_{{ memory.name }}_AXI_BRESP,
+   input  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_BUSER,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_BVALID,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_BREADY,
+   
+   // Master Interface Read Address
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARID,
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARADDR,
+   output wire [8-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARLEN,
+   output wire [3-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARSIZE,
+   output wire [2-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARBURST,
+   output wire [2-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARLOCK,
+   output wire [4-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARCACHE,
+   output wire [3-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARPROT,
+   output wire [4-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARQOS,
+   output wire [C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_ARUSER,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_ARVALID,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_ARREADY,
+   
+   // Master Interface Read Data 
+   input  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_RID,
+   input  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_AXI_RDATA,
+   input  wire [2-1:0] {{ thread.name }}_{{ memory.name }}_AXI_RRESP,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_RLAST,
+   input  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH-1:0]     {{ thread.name }}_{{ memory.name }}_AXI_RUSER,
+   input  wire {{ thread.name }}_{{ memory.name }}_AXI_RVALID,
+   output wire {{ thread.name }}_{{ memory.name }}_AXI_RREADY,
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+   // Clock and Reset
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_ACLK,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_ARESETN,
+
+   // Master Interface Write Address
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWID,
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWADDR,
+   output wire [8-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWLEN,
+   output wire [3-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWSIZE,
+   output wire [2-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWBURST,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_AWLOCK,
+   output wire [4-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWCACHE,
+   output wire [3-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWPROT,
+   output wire [4-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWQOS,
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_AWUSER,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_AWVALID,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_AWREADY,
+   
+   // Master Interface Write Data
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_WDATA,
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH/8-1:0] {{ thread.name }}_{{ instream.name }}_AXI_WSTRB,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_WLAST,
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH-1:0]     {{ thread.name }}_{{ instream.name }}_AXI_WUSER,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_WVALID,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_WREADY,
+   
+   // Master Interface Write Response
+   input  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_BID,
+   input  wire [2-1:0] {{ thread.name }}_{{ instream.name }}_AXI_BRESP,
+   input  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH-1:0]     {{ thread.name }}_{{ instream.name }}_AXI_BUSER,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_BVALID,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_BREADY,
+   
+   // Master Interface Read Address
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARID,
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARADDR,
+   output wire [8-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARLEN,
+   output wire [3-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARSIZE,
+   output wire [2-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARBURST,
+   output wire [2-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARLOCK,
+   output wire [4-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARCACHE,
+   output wire [3-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARPROT,
+   output wire [4-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARQOS,
+   output wire [C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_ARUSER,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_ARVALID,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_ARREADY,
+   
+   // Master Interface Read Data 
+   input  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_RID,
+   input  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_RDATA,
+   input  wire [2-1:0] {{ thread.name }}_{{ instream.name }}_AXI_RRESP,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_RLAST,
+   input  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_AXI_RUSER,
+   input  wire {{ thread.name }}_{{ instream.name }}_AXI_RVALID,
+   output wire {{ thread.name }}_{{ instream.name }}_AXI_RREADY,
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+   // Clock and Reset
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_ACLK,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_ARESETN,
+
+   // Master Interface Write Address
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWID,
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWADDR,
+   output wire [8-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWLEN,
+   output wire [3-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWSIZE,
+   output wire [2-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWBURST,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_AWLOCK,
+   output wire [4-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWCACHE,
+   output wire [3-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWPROT,
+   output wire [4-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_AWQOS,
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH-1:0]    {{ thread.name }}_{{ outstream.name }}_AXI_AWUSER,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_AWVALID,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_AWREADY,
+   
+   // Master Interface Write Data
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_WDATA,
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH/8-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_WSTRB,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_WLAST,
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH-1:0]     {{ thread.name }}_{{ outstream.name }}_AXI_WUSER,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_WVALID,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_WREADY,
+   
+   // Master Interface Write Response
+   input  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_BID,
+   input  wire [2-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_BRESP,
+   input  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH-1:0]     {{ thread.name }}_{{ outstream.name }}_AXI_BUSER,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_BVALID,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_BREADY,
+   
+   // Master Interface Read Address
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARID,
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARADDR,
+   output wire [8-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARLEN,
+   output wire [3-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARSIZE,
+   output wire [2-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARBURST,
+   output wire [2-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARLOCK,
+   output wire [4-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARCACHE,
+   output wire [3-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARPROT,
+   output wire [4-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARQOS,
+   output wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_ARUSER,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_ARVALID,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_ARREADY,
+   
+   // Master Interface Read Data 
+   input  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_RID,
+   input  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_RDATA,
+   input  wire [2-1:0] {{ thread.name }}_{{ outstream.name }}_AXI_RRESP,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_RLAST,
+   input  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH-1:0]     {{ thread.name }}_{{ outstream.name }}_AXI_RUSER,
+   input  wire {{ thread.name }}_{{ outstream.name }}_AXI_RVALID,
+   output wire {{ thread.name }}_{{ outstream.name }}_AXI_RREADY,
+{% endfor %}
+
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+   // Clock and Reset
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_ACLK,
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_ARESETN,
+
+   // Slave Interface Write Address
+{%- if not lite %}
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWID,
+{%- endif %}
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWADDR,
+{%- if not lite %}
+   input  wire [7:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWLEN,
+   input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE,
+   input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST,
+   input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK,
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE,
+{%- endif %}
+   input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT,
+{%- if not lite %}
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWREGION,
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS,
+   input  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER,
+{%- endif %}
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_AWVALID,
+   output wire {{ thread.name }}_{{ iochannel.name }}_AXI_AWREADY,
+
+   // Slave Interface Write Data
+{%- if not lite %}
+   input  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_WID,
+{%- endif %}
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_WDATA,
+   input  wire [((C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_WSTRB,
+{%- if not lite %}
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_WLAST,
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_WUSER_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_WUSER,
+{%- endif %}
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_WVALID,
+   output wire {{ thread.name }}_{{ iochannel.name }}_AXI_WREADY,
+
+   // Slave Interface Write Response
+{%- if not lite %}
+   output wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_BID,
+{%- endif %}
+   output wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_BRESP,
+{%- if not lite %}
+   output wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_BUSER_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_BUSER,
+{%- endif %}
+   output wire {{ thread.name }}_{{ iochannel.name }}_AXI_BVALID,
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_BREADY,
+
+   // Slave Interface Read Address
+{%- if not lite %}
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARID,
+{%- endif %}
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARADDR,
+{%- if not lite %}
+   input  wire [7:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARLEN,
+   input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE,
+   input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST,
+   input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK,
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE,
+{%- endif %}
+   input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT,
+{%- if not lite %}
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARREGION,
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS,
+   input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER,
+{%- endif %}
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_ARVALID,
+   output wire {{ thread.name }}_{{ iochannel.name }}_AXI_ARREADY,
+
+   // Slave Interface Read Data
+{%- if not lite %}
+   output wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_RID,
+{%- endif %}
+   output wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_RDATA,
+   output wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_RRESP,
+{%- if not lite %}
+   output wire {{ thread.name }}_{{ iochannel.name }}_AXI_RLAST,
+   output wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_RUSER_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_RUSER,
+{%- endif %}
+   output wire {{ thread.name }}_{{ iochannel.name }}_AXI_RVALID,
+   input  wire {{ thread.name }}_{{ iochannel.name }}_AXI_RREADY,
+{% endfor %}
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+   // Clock and Reset
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_ACLK,
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_ARESETN,
+
+   // Slave Interface Write Address
+{%- if not lite %}
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWID,
+{%- endif %}
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWADDR,
+{%- if not lite %}
+   input  wire [7:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWLEN,
+   input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE,
+   input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST,
+   input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK,
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE,
+{%- endif %}
+   input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT,
+{%- if not lite %}
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWREGION,
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS,
+   input  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER,
+{%- endif %}
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_AWVALID,
+   output wire {{ thread.name }}_{{ ioregister.name }}_AXI_AWREADY,
+
+   // Slave Interface Write Data
+{%- if not lite %}
+   input  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_WID,
+{%- endif %}
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_WDATA,
+   input  wire [((C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_WSTRB,
+{%- if not lite %}
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_WLAST,
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_WUSER_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_WUSER,
+{%- endif %}
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_WVALID,
+   output wire {{ thread.name }}_{{ ioregister.name }}_AXI_WREADY,
+
+   // Slave Interface Write Response
+{%- if not lite %}
+   output wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_BID,
+{%- endif %}
+   output wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_BRESP,
+{%- if not lite %}
+   output wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_BUSER_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_BUSER,
+{%- endif %}
+   output wire {{ thread.name }}_{{ ioregister.name }}_AXI_BVALID,
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_BREADY,
+
+   // Slave Interface Read Address
+{%- if not lite %}
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARID,
+{%- endif %}
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARADDR,
+{%- if not lite %}
+   input  wire [7:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARLEN,
+   input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE,
+   input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST,
+   input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK,
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE,
+{%- endif %}
+   input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT,
+{%- if not lite %}
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARREGION,
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS,
+   input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER,
+{%- endif %}
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_ARVALID,
+   output wire {{ thread.name }}_{{ ioregister.name }}_AXI_ARREADY,
+
+   // Slave Interface Read Data
+{%- if not lite %}
+   output wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_RID,
+{%- endif %}
+   output wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_RDATA,
+   output wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_RRESP,
+{%- if not lite %}
+   output wire {{ thread.name }}_{{ ioregister.name }}_AXI_RLAST,
+   output wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_RUSER_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_RUSER,
+{%- endif %}
+   output wire {{ thread.name }}_{{ ioregister.name }}_AXI_RVALID,
+   input  wire {{ thread.name }}_{{ ioregister.name }}_AXI_RREADY,
+{% endfor %}
+
+{%- endfor %}
+
+   //---------------------------------------------------------------------------
+   // User-defined I/O ports in Top-level User logic
+   //---------------------------------------------------------------------------
+{%- for ioport in def_top_ioports | sort() %}
+   {{ ioport }},
+{%- endfor %}
+
+   //---------------------------------------------------------------------------
+   // Finish 
+   //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+   output wire {{ thread.name }}_finish,
+{%- endfor %}
+
+   //----------------------------------------------------------------------------
+   // Control Thread Clock and Reset
+   //----------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+   input wire {{ thread.name }}_CCLK,
+   input wire {{ thread.name }}_CRESETN,
+{%- endfor %}
+
+   //----------------------------------------------------------------------------
+   // User-logic Clock and Reset
+   //----------------------------------------------------------------------------
+   input wire UCLK,
+   input wire URESETN
+   );
+
+
+  //---------------------------------------------------------------------------
+  // User-defined localparam in Top-level User logic
+  //---------------------------------------------------------------------------
+{%- for param in def_top_localparams %}
+  {{ param }}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // User-logic Reset
+  //---------------------------------------------------------------------------
+  reg URST_r;
+  reg URST_rr;
+  reg URST;
+
+  always @(posedge UCLK) begin
+    URST_r <= !URESETN;  
+    URST_rr <= URST_r;
+    URST <= URST_rr;
+  end
+
+  //---------------------------------------------------------------------------
+  // Control Thread Clock and Reset
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+  reg {{ thread.name }}_CRST_r;
+  reg {{ thread.name }}_CRST_rr;
+  reg {{ thread.name }}_CRST;
+
+  always @(posedge {{ thread.name }}_CCLK) begin
+    {{ thread.name }}_CRST_r <= !{{ thread.name }}_CRESETN;  
+    {{ thread.name }}_CRST_rr <= {{ thread.name }}_CRST_r;
+    {{ thread.name }}_CRST <= {{ thread.name }}_CRST_rr;
+  end
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // AXI Reset
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{%- for memory in thread.memories | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ memory.name }}_AXI_ARST_r;
+  reg {{ thread.name }}_{{ memory.name }}_AXI_ARST_rr;
+  reg {{ thread.name }}_{{ memory.name }}_AXI_ARST;
+
+  always @(posedge {{ thread.name }}_{{ memory.name }}_AXI_ACLK) begin
+    {{ thread.name }}_{{ memory.name }}_AXI_ARST_r <= !{{ thread.name }}_{{ memory.name }}_AXI_ARESETN;  
+    {{ thread.name }}_{{ memory.name }}_AXI_ARST_rr <= {{ thread.name }}_{{ memory.name }}_AXI_ARST_r;
+    {{ thread.name }}_{{ memory.name }}_AXI_ARST <= {{ thread.name }}_{{ memory.name }}_AXI_ARST_rr;
+  end
+{% endfor %}
+{%- for instream in thread.instreams | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ instream.name }}_AXI_ARST_r;
+  reg {{ thread.name }}_{{ instream.name }}_AXI_ARST_rr;
+  reg {{ thread.name }}_{{ instream.name }}_AXI_ARST;
+
+  always @(posedge {{ thread.name }}_{{ instream.name }}_AXI_ACLK) begin
+    {{ thread.name }}_{{ instream.name }}_AXI_ARST_r <= !{{ thread.name }}_{{ instream.name }}_AXI_ARESETN;  
+    {{ thread.name }}_{{ instream.name }}_AXI_ARST_rr <= {{ thread.name }}_{{ instream.name }}_AXI_ARST_r;
+    {{ thread.name }}_{{ instream.name }}_AXI_ARST <= {{ thread.name }}_{{ instream.name }}_AXI_ARST_rr;
+  end
+{% endfor %}
+{%- for outstream in thread.outstreams | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ outstream.name }}_AXI_ARST_r;
+  reg {{ thread.name }}_{{ outstream.name }}_AXI_ARST_rr;
+  reg {{ thread.name }}_{{ outstream.name }}_AXI_ARST;
+
+  always @(posedge {{ thread.name }}_{{ outstream.name }}_AXI_ACLK) begin
+    {{ thread.name }}_{{ outstream.name }}_AXI_ARST_r <= !{{ thread.name }}_{{ outstream.name }}_AXI_ARESETN;  
+    {{ thread.name }}_{{ outstream.name }}_AXI_ARST_rr <= {{ thread.name }}_{{ outstream.name }}_AXI_ARST_r;
+    {{ thread.name }}_{{ outstream.name }}_AXI_ARST <= {{ thread.name }}_{{ outstream.name }}_AXI_ARST_rr;
+  end
+{% endfor %}
+{%- for iochannel in thread.iochannels | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ iochannel.name }}_AXI_ARST_r;
+  reg {{ thread.name }}_{{ iochannel.name }}_AXI_ARST_rr;
+  reg {{ thread.name }}_{{ iochannel.name }}_AXI_ARST;
+
+  always @(posedge {{ thread.name }}_{{ iochannel.name }}_AXI_ACLK) begin
+    {{ thread.name }}_{{ iochannel.name }}_AXI_ARST_r <= !{{ thread.name }}_{{ iochannel.name }}_AXI_ARESETN;  
+    {{ thread.name }}_{{ iochannel.name }}_AXI_ARST_rr <= {{ thread.name }}_{{ iochannel.name }}_AXI_ARST_r;
+    {{ thread.name }}_{{ iochannel.name }}_AXI_ARST <= {{ thread.name }}_{{ iochannel.name }}_AXI_ARST_rr;
+  end
+{% endfor %}
+{%- for ioregister in thread.ioregisters | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ ioregister.name }}_AXI_ARST_r;
+  reg {{ thread.name }}_{{ ioregister.name }}_AXI_ARST_rr;
+  reg {{ thread.name }}_{{ ioregister.name }}_AXI_ARST;
+
+  always @(posedge {{ thread.name }}_{{ ioregister.name }}_AXI_ACLK) begin
+    {{ thread.name }}_{{ ioregister.name }}_AXI_ARST_r <= !{{ thread.name }}_{{ ioregister.name }}_AXI_ARESETN;  
+    {{ thread.name }}_{{ ioregister.name }}_AXI_ARST_rr <= {{ thread.name }}_{{ ioregister.name }}_AXI_ARST_r;
+    {{ thread.name }}_{{ ioregister.name }}_AXI_ARST <= {{ thread.name }}_{{ ioregister.name }}_AXI_ARST_rr;
+  end
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Memory port to User logic
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+{% for bank in range(memory.length) %}
+  wire {{ thread.name }}_{{ memory.name }}_{{ bank }}_clk; // AXI clock
+  wire [{{ memory.addrwidth -1 }}:0] {{ thread.name }}_{{ memory.name }}_{{ bank }}_addr; 
+  wire [{{ memory.datawidth -1 }}:0] {{ thread.name }}_{{ memory.name }}_{{ bank }}_d; 
+  wire {{ thread.name }}_{{ memory.name }}_{{ bank }}_we; 
+  wire [{{ memory.datawidth -1 }}:0] {{ thread.name }}_{{ memory.name }}_{{ bank }}_q; 
+  assign {{ thread.name }}_{{ memory.name }}_{{ bank }}_clk = {{ thread.name }}_{{ memory.name }}_AXI_ACLK;
+{% endfor %}
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Memory request port from Control Thread
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ memory.name }}_req_clk; // control thread clock
+  wire {{ thread.name }}_{{ memory.name }}_req_rst; // control thread clock
+  wire [W_EXT_A-1:0] {{ thread.name }}_{{ memory.name }}_req_ext_addr; 
+  wire [W_EXT_A-1:0] {{ thread.name }}_{{ memory.name }}_req_core_addr; 
+  wire {{ thread.name }}_{{ memory.name }}_req_read_enable; 
+  wire {{ thread.name }}_{{ memory.name }}_req_write_enable; 
+  wire [W_EXT_A:0] {{ thread.name }}_{{ memory.name }}_req_word_size; 
+  wire {{ thread.name }}_{{ memory.name }}_req_ready;
+  wire {{ thread.name }}_{{ memory.name }}_req_busy; 
+  assign {{ thread.name }}_{{ memory.name }}_req_clk = {{ thread.name }}_CCLK;
+  assign {{ thread.name }}_{{ memory.name }}_req_rst = {{ thread.name }}_CRST;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Input stream port to User logic
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ instream.name }}_clk; // AXI clock
+  wire {{ thread.name }}_{{ instream.name }}_rst; // AXI reset
+  wire [{{ instream.datawidth -1 }}:0] {{ thread.name }}_{{ instream.name }}_d; 
+  wire {{ thread.name }}_{{ instream.name }}_enq; 
+  wire {{ thread.name }}_{{ instream.name }}_almost_full; 
+  assign {{ thread.name }}_{{ instream.name }}_clk = {{ thread.name }}_{{ instream.name }}_AXI_ACLK;
+  assign {{ thread.name }}_{{ instream.name }}_rst = {{ thread.name }}_{{ instream.name }}_AXI_ARST;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Input stream request port from Control Thread
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ instream.name }}_req_clk; // control thread clock
+  wire {{ thread.name }}_{{ instream.name }}_req_rst; // control thread reset
+  wire [W_EXT_A-1:0] {{ thread.name }}_{{ instream.name }}_req_ext_addr; 
+  wire {{ thread.name }}_{{ instream.name }}_req_write_enable; 
+  wire [W_EXT_A:0] {{ thread.name }}_{{ instream.name }}_req_word_size; 
+  wire {{ thread.name }}_{{ instream.name }}_req_ready;
+  wire {{ thread.name }}_{{ instream.name }}_req_busy; 
+  assign {{ thread.name }}_{{ instream.name }}_req_clk = {{ thread.name }}_CCLK;
+  assign {{ thread.name }}_{{ instream.name }}_req_rst = {{ thread.name }}_CRST;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Output stream port to User logic
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ outstream.name }}_clk; // AXI clock 
+  wire {{ thread.name }}_{{ outstream.name }}_rst; // AXI reset
+  wire [{{ outstream.datawidth -1 }}:0] {{ thread.name }}_{{ outstream.name }}_q; 
+  wire {{ thread.name }}_{{ outstream.name }}_deq; 
+  wire {{ thread.name }}_{{ outstream.name }}_empty; 
+  assign {{ thread.name }}_{{ outstream.name }}_clk = {{ thread.name }}_{{ outstream.name }}_AXI_ACLK;
+  assign {{ thread.name }}_{{ outstream.name }}_rst = {{ thread.name }}_{{ outstream.name }}_AXI_ARST;
+{% endfor %}
+{%- endfor %}
+  
+  //---------------------------------------------------------------------------
+  // Output stream request port from Control Thread
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ outstream.name }}_req_clk; // control thread clock    
+  wire {{ thread.name }}_{{ outstream.name }}_req_rst; // control thread reset
+  wire [W_EXT_A-1:0] {{ thread.name }}_{{ outstream.name }}_req_ext_addr; 
+  wire {{ thread.name }}_{{ outstream.name }}_req_read_enable; 
+  wire [W_EXT_A:0] {{ thread.name }}_{{ outstream.name }}_req_word_size; 
+  wire {{ thread.name }}_{{ outstream.name }}_req_ready;
+  wire {{ thread.name }}_{{ outstream.name }}_req_busy; 
+  assign {{ thread.name }}_{{ outstream.name }}_req_clk = {{ thread.name }}_CCLK;
+  assign {{ thread.name }}_{{ outstream.name }}_req_rst = {{ thread.name }}_CRST;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Channel port to User logic
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for channel in thread.channels | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ channel.name }}_clk; // control thread clock
+  wire {{ thread.name }}_{{ channel.name }}_rst; // control thread reset
+  wire [{{ channel.datawidth -1 }}:0] {{ thread.name }}_{{ channel.name }}_d; 
+  wire {{ thread.name }}_{{ channel.name }}_enq; 
+  wire {{ thread.name }}_{{ channel.name }}_almost_full; 
+  wire [{{ channel.datawidth -1 }}:0] {{ thread.name }}_{{ channel.name }}_q; 
+  wire {{ thread.name }}_{{ channel.name }}_deq; 
+  wire {{ thread.name }}_{{ channel.name }}_empty;
+  assign {{ thread.name }}_{{ channel.name }}_clk = {{ thread.name }}_CCLK;
+  assign {{ thread.name }}_{{ channel.name }}_rst = {{ thread.name }}_CRST;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Register port to User logic
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for register in thread.registers | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ register.name }}_clk; // control thread clock
+  wire [{{ register.datawidth -1 }}:0] {{ thread.name }}_{{ register.name }}_d; 
+  wire {{ thread.name }}_{{ register.name }}_we; 
+  wire [{{ register.datawidth -1 }}:0] {{ thread.name }}_{{ register.name }}_q; 
+  assign {{ thread.name }}_{{ register.name }}_clk = {{ thread.name }}_CCLK;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // I/O Channel port to Control Thread
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ iochannel.name }}_clk; // control thread clock
+  wire {{ thread.name }}_{{ iochannel.name }}_rst; // control thread reset
+  wire [{{ iochannel.datawidth -1 }}:0] {{ thread.name }}_{{ iochannel.name }}_d; 
+  wire {{ thread.name }}_{{ iochannel.name }}_enq; 
+  wire {{ thread.name }}_{{ iochannel.name }}_almost_full; 
+  wire [{{ iochannel.datawidth -1 }}:0] {{ thread.name }}_{{ iochannel.name }}_q; 
+  wire {{ thread.name }}_{{ iochannel.name }}_deq; 
+  wire {{ thread.name }}_{{ iochannel.name }}_empty;
+  assign {{ thread.name }}_{{ iochannel.name }}_clk = {{ thread.name }}_CCLK;
+  assign {{ thread.name }}_{{ iochannel.name }}_rst = {{ thread.name }}_CRST;
+{% endfor %}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // I/O Register port to Control Thread
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  wire {{ thread.name }}_{{ ioregister.name }}_clk; // control thread clock
+  wire [{{ ioregister.datawidth -1 }}:0] {{ thread.name }}_{{ ioregister.name }}_d; 
+  wire {{ thread.name }}_{{ ioregister.name }}_we; 
+  wire [{{ ioregister.datawidth -1 }}:0] {{ thread.name }}_{{ ioregister.name }}_q; 
+  assign {{ thread.name }}_{{ ioregister.name }}_clk = {{ thread.name }}_CCLK;
+{% endfor %}
+{%- endfor %}
+
+
+  //---------------------------------------------------------------------------
+  // DMAC <-> AXI Interface
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+
+{% for memory in thread.memories | sort(attribute='name') %}
+  // Master Interface Write Address
+  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_awaddr;
+  wire [8-1:0] {{ thread.name }}_{{ memory.name }}_awlen;
+  wire {{ thread.name }}_{{ memory.name }}_awvalid;
+  wire {{ thread.name }}_{{ memory.name }}_awready;
+   
+  // Master Interface Write Data
+  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_wdata;
+  wire {{ thread.name }}_{{ memory.name }}_wlast;
+  wire {{ thread.name }}_{{ memory.name }}_wvalid;
+  wire {{ thread.name }}_{{ memory.name }}_wready;
+   
+  // Master Interface Write Response
+  wire {{ thread.name }}_{{ memory.name }}_bvalid;
+  wire {{ thread.name }}_{{ memory.name }}_bready;
+   
+  // Master Interface Read Address
+  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_araddr;
+  wire [8-1:0] {{ thread.name }}_{{ memory.name }}_arlen;
+  wire {{ thread.name }}_{{ memory.name }}_arvalid;
+  wire {{ thread.name }}_{{ memory.name }}_arready;
+   
+  // Master Interface Read Data 
+  wire [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_rdata;
+  wire {{ thread.name }}_{{ memory.name }}_rlast;
+  wire {{ thread.name }}_{{ memory.name }}_rvalid;
+  wire {{ thread.name }}_{{ memory.name }}_rready;
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+  // Master Interface Write Address
+  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_awaddr;
+  wire [8-1:0] {{ thread.name }}_{{ instream.name }}_awlen;
+  wire {{ thread.name }}_{{ instream.name }}_awvalid;
+  wire {{ thread.name }}_{{ instream.name }}_awready;
+   
+  // Master Interface Write Data
+  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_wdata;
+  wire {{ thread.name }}_{{ instream.name }}_wlast;
+  wire {{ thread.name }}_{{ instream.name }}_wvalid;
+  wire {{ thread.name }}_{{ instream.name }}_wready;
+   
+  // Master Interface Write Response
+  wire {{ thread.name }}_{{ instream.name }}_bvalid;
+  wire {{ thread.name }}_{{ instream.name }}_bready;
+   
+  // Master Interface Read Address
+  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_araddr;
+  wire [8-1:0] {{ thread.name }}_{{ instream.name }}_arlen;
+  wire {{ thread.name }}_{{ instream.name }}_arvalid;
+  wire {{ thread.name }}_{{ instream.name }}_arready;
+   
+  // Master Interface Read Data 
+  wire [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_rdata;
+  wire {{ thread.name }}_{{ instream.name }}_rlast;
+  wire {{ thread.name }}_{{ instream.name }}_rvalid;
+  wire {{ thread.name }}_{{ instream.name }}_rready;
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+  // Master Interface Write Address
+  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_awaddr;
+  wire [8-1:0] {{ thread.name }}_{{ outstream.name }}_awlen;
+  wire {{ thread.name }}_{{ outstream.name }}_awvalid;
+  wire {{ thread.name }}_{{ outstream.name }}_awready;
+   
+  // Master Interface Write Data
+  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_wdata;
+  wire {{ thread.name }}_{{ outstream.name }}_wlast;
+  wire {{ thread.name }}_{{ outstream.name }}_wvalid;
+  wire {{ thread.name }}_{{ outstream.name }}_wready;
+   
+  // Master Interface Write Response
+  wire {{ thread.name }}_{{ outstream.name }}_bvalid;
+  wire {{ thread.name }}_{{ outstream.name }}_bready;
+   
+  // Master Interface Read Address
+  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_araddr;
+  wire [8-1:0] {{ thread.name }}_{{ outstream.name }}_arlen;
+  wire {{ thread.name }}_{{ outstream.name }}_arvalid;
+  wire {{ thread.name }}_{{ outstream.name }}_arready;
+   
+  // Master Interface Read Data 
+  wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_rdata;
+  wire {{ thread.name }}_{{ outstream.name }}_rlast;
+  wire {{ thread.name }}_{{ outstream.name }}_rvalid;
+  wire {{ thread.name }}_{{ outstream.name }}_rready;
+{% endfor %}
+
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  // Master Interface Write Address
+  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_awaddr;
+  wire [8-1:0] {{ thread.name }}_{{ iochannel.name }}_awlen;
+  wire {{ thread.name }}_{{ iochannel.name }}_awvalid;
+  wire {{ thread.name }}_{{ iochannel.name }}_awready;
+   
+  // Master Interface Write Data
+  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_wdata;
+  wire {{ thread.name }}_{{ iochannel.name }}_wlast;
+  wire {{ thread.name }}_{{ iochannel.name }}_wvalid;
+  wire {{ thread.name }}_{{ iochannel.name }}_wready;
+   
+  // Master Interface Write Response
+  wire {{ thread.name }}_{{ iochannel.name }}_bvalid;
+  wire {{ thread.name }}_{{ iochannel.name }}_bready;
+   
+  // Master Interface Read Address
+  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_araddr;
+  wire [8-1:0] {{ thread.name }}_{{ iochannel.name }}_arlen;
+  wire {{ thread.name }}_{{ iochannel.name }}_arvalid;
+  wire {{ thread.name }}_{{ iochannel.name }}_arready;
+   
+  // Master Interface Read Data 
+  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_rdata;
+  wire {{ thread.name }}_{{ iochannel.name }}_rlast;
+  wire {{ thread.name }}_{{ iochannel.name }}_rvalid;
+  wire {{ thread.name }}_{{ iochannel.name }}_rready;
+{% endfor %}
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  // Master Interface Write Address
+  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_awaddr;
+  wire [8-1:0] {{ thread.name }}_{{ ioregister.name }}_awlen;
+  wire {{ thread.name }}_{{ ioregister.name }}_awvalid;
+  wire {{ thread.name }}_{{ ioregister.name }}_awready;
+   
+  // Master Interface Write Data
+  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_wdata;
+  wire {{ thread.name }}_{{ ioregister.name }}_wlast;
+  wire {{ thread.name }}_{{ ioregister.name }}_wvalid;
+  wire {{ thread.name }}_{{ ioregister.name }}_wready;
+   
+  // Master Interface Write Response
+  wire {{ thread.name }}_{{ ioregister.name }}_bvalid;
+  wire {{ thread.name }}_{{ ioregister.name }}_bready;
+   
+  // Master Interface Read Address
+  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_araddr;
+  wire [8-1:0] {{ thread.name }}_{{ ioregister.name }}_arlen;
+  wire {{ thread.name }}_{{ ioregister.name }}_arvalid;
+  wire {{ thread.name }}_{{ ioregister.name }}_arready;
+   
+  // Master Interface Read Data 
+  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_rdata;
+  wire {{ thread.name }}_{{ ioregister.name }}_rlast;
+  wire {{ thread.name }}_{{ ioregister.name }}_rvalid;
+  wire {{ thread.name }}_{{ ioregister.name }}_rready;
+{% endfor %}
+{%- endfor %}
+
+
+  //----------------------------------------------------------------------------
+  // User Logic
+  //----------------------------------------------------------------------------
+  {{ userlogic_name }}
+  inst_{{ userlogic_name }}
+    (
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+{% for bank in range(memory.length) %}
+     .{{ thread.name }}_{{ memory.name }}_{{ bank }}_clk({{ thread.name }}_{{ memory.name }}_{{ bank }}_clk), 
+     .{{ thread.name }}_{{ memory.name }}_{{ bank }}_addr({{ thread.name }}_{{ memory.name }}_{{ bank }}_addr), 
+     .{{ thread.name }}_{{ memory.name }}_{{ bank }}_d({{ thread.name }}_{{ memory.name }}_{{ bank }}_d), 
+     .{{ thread.name }}_{{ memory.name }}_{{ bank }}_we({{ thread.name }}_{{ memory.name }}_{{ bank }}_we), 
+     .{{ thread.name }}_{{ memory.name }}_{{ bank }}_q({{ thread.name }}_{{ memory.name }}_{{ bank }}_q), 
+{% endfor %}
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+     .{{ thread.name }}_{{ instream.name }}_clk({{ thread.name }}_{{ instream.name }}_clk), 
+     .{{ thread.name }}_{{ instream.name }}_rst({{ thread.name }}_{{ instream.name }}_rst), 
+     .{{ thread.name }}_{{ instream.name }}_d({{ thread.name }}_{{ instream.name }}_d), 
+     .{{ thread.name }}_{{ instream.name }}_enq({{ thread.name }}_{{ instream.name }}_enq), 
+     .{{ thread.name }}_{{ instream.name }}_almost_full({{ thread.name }}_{{ instream.name }}_almost_full), 
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+     .{{ thread.name }}_{{ outstream.name }}_clk({{ thread.name }}_{{ outstream.name }}_clk), 
+     .{{ thread.name }}_{{ outstream.name }}_rst({{ thread.name }}_{{ outstream.name }}_rst), 
+     .{{ thread.name }}_{{ outstream.name }}_q({{ thread.name }}_{{ outstream.name }}_q), 
+     .{{ thread.name }}_{{ outstream.name }}_deq({{ thread.name }}_{{ outstream.name }}_deq), 
+     .{{ thread.name }}_{{ outstream.name }}_empty({{ thread.name }}_{{ outstream.name }}_empty), 
+{% endfor %}
+{% for channel in thread.channels %}
+     .{{ thread.name }}_{{ channel.name }}_clk({{ thread.name }}_{{ channel.name }}_clk), 
+     .{{ thread.name }}_{{ channel.name }}_rst({{ thread.name }}_{{ channel.name }}_rst), 
+     .{{ thread.name }}_{{ channel.name }}_d({{ thread.name }}_{{ channel.name }}_d), 
+     .{{ thread.name }}_{{ channel.name }}_enq({{ thread.name }}_{{ channel.name }}_enq), 
+     .{{ thread.name }}_{{ channel.name }}_almost_full({{ thread.name }}_{{ channel.name }}_almost_full), 
+     .{{ thread.name }}_{{ channel.name }}_q({{ thread.name }}_{{ channel.name }}_q), 
+     .{{ thread.name }}_{{ channel.name }}_deq({{ thread.name }}_{{ channel.name }}_deq), 
+     .{{ thread.name }}_{{ channel.name }}_empty({{ thread.name }}_{{ channel.name }}_empty),
+{% endfor %}
+{% for register in thread.registers %}
+     .{{ thread.name }}_{{ register.name }}_clk({{ thread.name }}_{{ register.name }}_clk), 
+     .{{ thread.name }}_{{ register.name }}_d({{ thread.name }}_{{ register.name }}_d), 
+     .{{ thread.name }}_{{ register.name }}_we({{ thread.name }}_{{ register.name }}_we), 
+     .{{ thread.name }}_{{ register.name }}_q({{ thread.name }}_{{ register.name }}_q), 
+{% endfor %}
+{%- endfor %}
+{%- for ioport in name_top_ioports | sort() %}
+     .{{ ioport }}({{ ioport }}),
+{%- endfor %}
+     .CLK(UCLK), // User-logic clock
+     .RST(URST) // User-logic reset
+     );
+
+
+  //----------------------------------------------------------------------------
+  // Control Thread
+  //----------------------------------------------------------------------------
+{% for thread in threads | sort(attribute='name') %}
+  {{ thread.name }}
+  inst_{{ thread.name }}
+    (
+     .CLK({{ thread.name }}_CCLK), // control therad clock
+     .RST({{ thread.name }}_CRST), // control thread reset
+{% for memory in thread.memories | sort(attribute='name') %}
+     .{{ memory.name }}_ext_addr({{ thread.name }}_{{ memory.name }}_req_ext_addr), 
+     .{{ memory.name }}_core_addr({{ thread.name }}_{{ memory.name }}_req_core_addr), 
+     .{{ memory.name }}_read_enable({{ thread.name }}_{{ memory.name }}_req_read_enable), 
+     .{{ memory.name }}_write_enable({{ thread.name }}_{{ memory.name }}_req_write_enable), 
+     .{{ memory.name }}_word_size({{ thread.name }}_{{ memory.name }}_req_word_size), 
+     .{{ memory.name }}_ready({{ thread.name }}_{{ memory.name }}_req_ready),
+     .{{ memory.name }}_busy({{ thread.name }}_{{ memory.name }}_req_busy), 
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+     .{{ instream.name }}_ext_addr({{ thread.name }}_{{ instream.name }}_req_ext_addr), 
+     .{{ instream.name }}_write_enable({{ thread.name }}_{{ instream.name }}_req_write_enable), 
+     .{{ instream.name }}_word_size({{ thread.name }}_{{ instream.name }}_req_word_size), 
+     .{{ instream.name }}_ready({{ thread.name }}_{{ instream.name }}_req_ready),
+     .{{ instream.name }}_busy({{ thread.name }}_{{ instream.name }}_req_busy), 
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+     .{{ outstream.name }}_ext_addr({{ thread.name }}_{{ outstream.name }}_req_ext_addr), 
+     .{{ outstream.name }}_read_enable({{ thread.name }}_{{ outstream.name }}_req_read_enable), 
+     .{{ outstream.name }}_word_size({{ thread.name }}_{{ outstream.name }}_req_word_size), 
+     .{{ outstream.name }}_ready({{ thread.name }}_{{ outstream.name }}_req_ready),
+     .{{ outstream.name }}_busy({{ thread.name }}_{{ outstream.name }}_req_busy), 
+{% endfor %}
+{% for channel in thread.channels | sort(attribute='name') %}
+     .{{ channel.name }}_q({{ thread.name }}_{{ channel.name }}_q), 
+     .{{ channel.name }}_deq({{ thread.name }}_{{ channel.name }}_deq), 
+     .{{ channel.name }}_empty({{ thread.name }}_{{ channel.name }}_empty), 
+     .{{ channel.name }}_d({{ thread.name }}_{{ channel.name }}_d), 
+     .{{ channel.name }}_enq({{ thread.name }}_{{ channel.name }}_enq), 
+     .{{ channel.name }}_almost_full({{ thread.name }}_{{ channel.name }}_almost_full),
+{% endfor %}
+{% for register in thread.registers | sort(attribute='name') %}
+     .{{ register.name }}_d({{ thread.name }}_{{ register.name }}_d), 
+     .{{ register.name }}_we({{ thread.name }}_{{ register.name }}_we), 
+     .{{ register.name }}_q({{ thread.name }}_{{ register.name }}_q), 
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+     .{{ iochannel.name }}_q({{ thread.name }}_{{ iochannel.name }}_q), 
+     .{{ iochannel.name }}_deq({{ thread.name }}_{{ iochannel.name }}_deq), 
+     .{{ iochannel.name }}_empty({{ thread.name }}_{{ iochannel.name }}_empty), 
+     .{{ iochannel.name }}_d({{ thread.name }}_{{ iochannel.name }}_d), 
+     .{{ iochannel.name }}_enq({{ thread.name }}_{{ iochannel.name }}_enq), 
+     .{{ iochannel.name }}_almost_full({{ thread.name }}_{{ iochannel.name }}_almost_full),
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+     .{{ ioregister.name }}_d({{ thread.name }}_{{ ioregister.name }}_d), 
+     .{{ ioregister.name }}_we({{ thread.name }}_{{ ioregister.name }}_we), 
+     .{{ ioregister.name }}_q({{ thread.name }}_{{ ioregister.name }}_q), 
+{% endfor %}
+     .finish({{ thread.name }}_finish)
+     );
+{% endfor %}
+
+
+  //----------------------------------------------------------------------------
+  // DMA Controller
+  //----------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+  DMAC_MEMORY_{{ thread.name }}_{{ memory.name }} #
+  (
+   .W_A({{ memory.addrwidth }}),
+   .W_D({{ memory.datawidth }}),
+   .W_EXT_A(W_EXT_A),
+   .W_EXT_D({{ memory.ext_datawidth }}),
+   .ADDRMASK_WIDTH({{ memory.addroffset }}),
+   .NUM_RANKS({{ memory.numranks }}),
+   .LOG_NUM_RANKS({{ memory.lognumranks }}),
+   .NUM_PAGES({{ memory.numpages }}),
+   .LOG_NUM_PAGES({{ memory.lognumpages }}),
+   .W_BLEN(W_BLEN),
+   .MAX_BURST_LEN(MAX_BURST_LEN),
+   .CMD_FIFO_ADDR_WIDTH(CMD_FIFO_ADDR_WIDTH),
+   .ASYNC({%- if single_clock -%} 0 {%- else -%} 1 {%- endif -%}),
+   .SUPPORTS_WRITE(1)
+   )
+  inst_dmac_{{ thread.name }}_{{ memory.name }}
+    (
+     .ACLK({{ thread.name }}_{{ memory.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ memory.name }}_AXI_ARESETN), // AXI reset
+
+{% for bank in range(memory.length) %}
+     .core_addr_{{ bank }}({{ thread.name }}_{{ memory.name }}_{{ bank }}_addr),
+     .core_read_enable_{{ bank }}(),
+     .core_read_data_{{ bank }}({{ thread.name }}_{{ memory.name }}_{{ bank }}_q), 
+     .core_write_enable_{{ bank }}({{ thread.name }}_{{ memory.name }}_{{ bank }}_we), 
+     .core_write_data_{{ bank }}({{ thread.name }}_{{ memory.name }}_{{ bank }}_d),
+{% endfor %}
+
+     .req_clk({{ thread.name }}_{{ memory.name }}_req_clk), // control thread clock
+     .req_rst({{ thread.name }}_{{ memory.name }}_req_rst), // control thread reset
+     .req_ext_addr({{ thread.name }}_{{ memory.name }}_req_ext_addr), 
+     .req_core_addr({{ thread.name }}_{{ memory.name }}_req_core_addr), 
+     .req_read_enable({{ thread.name }}_{{ memory.name }}_req_read_enable), 
+     .req_write_enable({{ thread.name }}_{{ memory.name }}_req_write_enable), 
+     .req_word_size({{ thread.name }}_{{ memory.name }}_req_word_size), 
+     .req_ready({{ thread.name }}_{{ memory.name }}_req_ready),
+     .req_busy({{ thread.name }}_{{ memory.name }}_req_busy),
+
+     .awvalid({{ thread.name }}_{{ memory.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ memory.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ memory.name }}_awlen),
+     .awready({{ thread.name }}_{{ memory.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ memory.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ memory.name }}_wdata),
+     .wlast({{ thread.name }}_{{ memory.name }}_wlast),
+     .wready({{ thread.name }}_{{ memory.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ memory.name }}_bvalid),
+     .bready({{ thread.name }}_{{ memory.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ memory.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ memory.name }}_araddr),
+     .arlen({{ thread.name }}_{{ memory.name }}_arlen),
+     .arready({{ thread.name }}_{{ memory.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ memory.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ memory.name }}_rdata),
+     .rlast({{ thread.name }}_{{ memory.name }}_rlast),
+     .rready({{ thread.name }}_{{ memory.name }}_rready)
+     );
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+  DMAC_STREAM #
+  (
+   .W_A({{ instream.addrwidth }}),
+   .W_D({{ instream.datawidth }}),
+   .ADDRMASK_WIDTH({{ instream.addroffset }}),
+   .W_EXT_A(W_EXT_A),
+   .W_EXT_D({{ instream.ext_datawidth }}),
+   .W_BLEN(W_BLEN),
+   .MAX_BURST_LEN(MAX_BURST_LEN),
+   .CMD_FIFO_ADDR_WIDTH(CMD_FIFO_ADDR_WIDTH),
+   .ASYNC({%- if single_clock -%} 0 {%- else -%} 1 {%- endif -%}),
+   .SUPPORTS_WRITE(0),
+   .BUS_TYPE("axi")
+   )
+  inst_dmac_stream_{{ thread.name }}_{{ instream.name }}
+    (
+     .ACLK({{ thread.name }}_{{ instream.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ instream.name }}_AXI_ARESETN), // AXI reset
+
+     .core_read_enable(),
+     .core_read_data( 'h0 ),
+     .core_read_empty( 1'b0 ),
+     .core_write_enable({{ thread.name }}_{{ instream.name }}_enq), 
+     .core_write_data({{ thread.name }}_{{ instream.name }}_d),
+     .core_write_almost_full({{ thread.name }}_{{ instream.name }}_almost_full),
+
+     .req_clk({{ thread.name }}_{{ instream.name }}_req_clk), // control thread clock
+     .req_rst({{ thread.name }}_{{ instream.name }}_req_rst), // control thread reset
+     .req_ext_addr({{ thread.name }}_{{ instream.name }}_req_ext_addr), 
+     .req_read_enable( 1'b0 ),
+     .req_write_enable({{ thread.name }}_{{ instream.name }}_req_write_enable), 
+     .req_word_size({{ thread.name }}_{{ instream.name }}_req_word_size), 
+     .req_ready({{ thread.name }}_{{ instream.name }}_req_ready),
+     .req_busy({{ thread.name }}_{{ instream.name }}_req_busy),
+
+     .awvalid({{ thread.name }}_{{ instream.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ instream.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ instream.name }}_awlen),
+     .awready({{ thread.name }}_{{ instream.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ instream.name }}_wdata),
+     .wlast({{ thread.name }}_{{ instream.name }}_wlast),
+     .wready({{ thread.name }}_{{ instream.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ instream.name }}_bvalid),
+     .bready({{ thread.name }}_{{ instream.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ instream.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ instream.name }}_araddr),
+     .arlen({{ thread.name }}_{{ instream.name }}_arlen),
+     .arready({{ thread.name }}_{{ instream.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ instream.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ instream.name }}_rdata),
+     .rlast({{ thread.name }}_{{ instream.name }}_rlast),
+     .rready({{ thread.name }}_{{ instream.name }}_rready)
+     );
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+  DMAC_STREAM #
+  (
+   .W_A({{ outstream.addrwidth }}),
+   .W_D({{ outstream.datawidth }}),
+   .ADDRMASK_WIDTH({{ outstream.addroffset }}),
+   .W_EXT_A(W_EXT_A),
+   .W_EXT_D({{ outstream.ext_datawidth }}),
+   .W_BLEN(W_BLEN),
+   .MAX_BURST_LEN(MAX_BURST_LEN),
+   .CMD_FIFO_ADDR_WIDTH(CMD_FIFO_ADDR_WIDTH),
+   .ASYNC({%- if single_clock -%} 0 {%- else -%} 1 {%- endif -%}),
+   .SUPPORTS_WRITE(1),
+   .BUS_TYPE("axi")
+   )
+  inst_dmac_stream_{{ thread.name }}_{{ outstream.name }}
+    (
+     .ACLK({{ thread.name }}_{{ outstream.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ outstream.name }}_AXI_ARESETN), // AXI reset
+
+     .core_read_enable({{ thread.name }}_{{ outstream.name }}_deq),
+     .core_read_data({{ thread.name }}_{{ outstream.name }}_q),
+     .core_read_empty({{ thread.name }}_{{ outstream.name }}_empty),
+     .core_write_enable(), 
+     .core_write_data(),
+     .core_write_almost_full( 1'b0 ),
+
+     .req_clk({{ thread.name }}_{{ outstream.name }}_req_clk), 
+     .req_rst({{ thread.name }}_{{ outstream.name }}_req_rst), 
+     .req_ext_addr({{ thread.name }}_{{ outstream.name }}_req_ext_addr), 
+     .req_read_enable({{ thread.name }}_{{ outstream.name }}_req_read_enable), 
+     .req_write_enable( 1'b0 ),
+     .req_word_size({{ thread.name }}_{{ outstream.name }}_req_word_size), 
+     .req_ready({{ thread.name }}_{{ outstream.name }}_req_ready),
+     .req_busy({{ thread.name }}_{{ outstream.name }}_req_busy),
+
+     .awvalid({{ thread.name }}_{{ outstream.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ outstream.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ outstream.name }}_awlen),
+     .awready({{ thread.name }}_{{ outstream.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ outstream.name }}_wdata),
+     .wlast({{ thread.name }}_{{ outstream.name }}_wlast),
+     .wready({{ thread.name }}_{{ outstream.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ outstream.name }}_bvalid),
+     .bready({{ thread.name }}_{{ outstream.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ outstream.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ outstream.name }}_araddr),
+     .arlen({{ thread.name }}_{{ outstream.name }}_arlen),
+     .arready({{ thread.name }}_{{ outstream.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ outstream.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ outstream.name }}_rdata),
+     .rlast({{ thread.name }}_{{ outstream.name }}_rlast),
+     .rready({{ thread.name }}_{{ outstream.name }}_rready)
+     );
+{% endfor %}
+
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  DMAC_IOCHANNEL #
+  (
+   .W_D({{ iochannel.datawidth }}),
+   .W_EXT_A(W_EXT_A),
+   .W_BLEN(W_BLEN),
+   .MAX_BURST_LEN(MAX_BURST_LEN),
+   .FIFO_ADDR_WIDTH(CMD_FIFO_ADDR_WIDTH),
+   .ASYNC({%- if single_clock -%} 0 {%- else -%} 1 {%- endif -%})
+   )
+  inst_dmac_iochannel_{{ thread.name }}_{{ iochannel.name }}
+    (
+     .ACLK({{ thread.name }}_{{ iochannel.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ iochannel.name }}_AXI_ARESETN), // AXI reset
+
+     .coram_clk({{ thread.name }}_{{ iochannel.name }}_clk),
+     .coram_rst({{ thread.name }}_{{ iochannel.name }}_rst),
+
+     .coram_deq({{ thread.name }}_{{ iochannel.name }}_deq),
+     .coram_q({{ thread.name }}_{{ iochannel.name }}_q),
+     .coram_empty({{ thread.name }}_{{ iochannel.name }}_empty),
+
+     .coram_enq({{ thread.name }}_{{ iochannel.name }}_enq),
+     .coram_d({{ thread.name }}_{{ iochannel.name }}_d),
+     .coram_almost_full({{ thread.name }}_{{ iochannel.name }}_almost_full),
+
+     .awvalid({{ thread.name }}_{{ iochannel.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ iochannel.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ iochannel.name }}_awlen),
+     .awready({{ thread.name }}_{{ iochannel.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ iochannel.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ iochannel.name }}_wdata),
+     .wlast({{ thread.name }}_{{ iochannel.name }}_wlast),
+     .wready({{ thread.name }}_{{ iochannel.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ iochannel.name }}_bvalid),
+     .bready({{ thread.name }}_{{ iochannel.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ iochannel.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ iochannel.name }}_araddr),
+     .arlen({{ thread.name }}_{{ iochannel.name }}_arlen),
+     .arready({{ thread.name }}_{{ iochannel.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ iochannel.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ iochannel.name }}_rdata),
+     .rlast({{ thread.name }}_{{ iochannel.name }}_rlast),
+     .rready({{ thread.name }}_{{ iochannel.name }}_rready)
+     );
+{% endfor %}
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  DMAC_IOREGISTER #
+  (
+   .W_D({{ ioregister.datawidth }}),
+   .W_EXT_A(W_EXT_A),
+   .W_BLEN(W_BLEN),
+   .MAX_BURST_LEN(MAX_BURST_LEN),
+   .FIFO_ADDR_WIDTH(CMD_FIFO_ADDR_WIDTH),
+   .ASYNC({%- if single_clock -%} 0 {%- else -%} 1 {%- endif -%})
+   )
+  inst_dmac_ioregister_{{ thread.name }}_{{ ioregister.name }}
+    (
+     .ACLK({{ thread.name }}_{{ ioregister.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ ioregister.name }}_AXI_ARESETN), // AXI reset
+
+     .coram_clk({{ thread.name }}_{{ ioregister.name }}_clk),
+     .coram_rst({{ thread.name }}_{{ ioregister.name }}_rst),
+
+     .coram_d({{ thread.name }}_{{ ioregister.name }}_d),
+     .coram_we({{ thread.name }}_{{ ioregister.name }}_we),
+     .coram_q({{ thread.name }}_{{ ioregister.name }}_q),
+
+     .awvalid({{ thread.name }}_{{ ioregister.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ ioregister.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ ioregister.name }}_awlen),
+     .awready({{ thread.name }}_{{ ioregister.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ ioregister.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ ioregister.name }}_wdata),
+     .wlast({{ thread.name }}_{{ ioregister.name }}_wlast),
+     .wready({{ thread.name }}_{{ ioregister.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ ioregister.name }}_bvalid),
+     .bready({{ thread.name }}_{{ ioregister.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ ioregister.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ ioregister.name }}_araddr),
+     .arlen({{ thread.name }}_{{ ioregister.name }}_arlen),
+     .arready({{ thread.name }}_{{ ioregister.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ ioregister.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ ioregister.name }}_rdata),
+     .rlast({{ thread.name }}_{{ ioregister.name }}_rlast),
+     .rready({{ thread.name }}_{{ ioregister.name }}_rready)
+     );
+{% endfor %}
+{%- endfor %}
+
+
+  //------------------------------------------------------------------------------
+  // AXI Interface
+  //------------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+  axi_master_interface #
+   (
+    .C_M_AXI_THREAD_ID_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_THREAD_ID_WIDTH),
+    .C_M_AXI_ADDR_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH),
+    .C_M_AXI_DATA_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH),
+    .C_M_AXI_AWUSER_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_AWUSER_WIDTH),
+    .C_M_AXI_ARUSER_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_ARUSER_WIDTH),
+    .C_M_AXI_WUSER_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_WUSER_WIDTH),
+    .C_M_AXI_RUSER_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_RUSER_WIDTH),
+    .C_M_AXI_BUSER_WIDTH(C_{{ thread.name }}_{{ memory.name }}_AXI_BUSER_WIDTH),
+    .C_M_AXI_SUPPORTS_WRITE(C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_WRITE),
+    .C_M_AXI_SUPPORTS_READ(C_{{ thread.name }}_{{ memory.name }}_AXI_SUPPORTS_READ),
+    .C_M_AXI_TARGET(C_M_AXI_TARGET)
+   )
+  inst_axi_master_interface_{{ thread.name }}_{{ memory.name }}
+    (
+     .ACLK({{ thread.name }}_{{ memory.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ memory.name }}_AXI_ARESETN), // AXI reset
+
+     .awvalid({{ thread.name }}_{{ memory.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ memory.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ memory.name }}_awlen),
+     .awready({{ thread.name }}_{{ memory.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ memory.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ memory.name }}_wdata),
+     .wlast({{ thread.name }}_{{ memory.name }}_wlast),
+     .wready({{ thread.name }}_{{ memory.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ memory.name }}_bvalid),
+     .bready({{ thread.name }}_{{ memory.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ memory.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ memory.name }}_araddr),
+     .arlen({{ thread.name }}_{{ memory.name }}_arlen),
+     .arready({{ thread.name }}_{{ memory.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ memory.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ memory.name }}_rdata),
+     .rlast({{ thread.name }}_{{ memory.name }}_rlast),
+     .rready({{ thread.name }}_{{ memory.name }}_rready),
+
+     .M_AXI_AWID({{ thread.name }}_{{ memory.name }}_AXI_AWID),
+     .M_AXI_AWADDR({{ thread.name }}_{{ memory.name }}_AXI_AWADDR),
+     .M_AXI_AWLEN({{ thread.name }}_{{ memory.name }}_AXI_AWLEN),
+     .M_AXI_AWSIZE({{ thread.name }}_{{ memory.name }}_AXI_AWSIZE),
+     .M_AXI_AWBURST({{ thread.name }}_{{ memory.name }}_AXI_AWBURST),
+     .M_AXI_AWLOCK({{ thread.name }}_{{ memory.name }}_AXI_AWLOCK),
+     .M_AXI_AWCACHE({{ thread.name }}_{{ memory.name }}_AXI_AWCACHE),
+     .M_AXI_AWPROT({{ thread.name }}_{{ memory.name }}_AXI_AWPROT),
+     .M_AXI_AWQOS({{ thread.name }}_{{ memory.name }}_AXI_AWQOS),
+     .M_AXI_AWUSER({{ thread.name }}_{{ memory.name }}_AXI_AWUSER),
+     .M_AXI_AWVALID({{ thread.name }}_{{ memory.name }}_AXI_AWVALID),
+     .M_AXI_AWREADY({{ thread.name }}_{{ memory.name }}_AXI_AWREADY),
+
+     .M_AXI_WDATA({{ thread.name }}_{{ memory.name }}_AXI_WDATA),
+     .M_AXI_WSTRB({{ thread.name }}_{{ memory.name }}_AXI_WSTRB),
+     .M_AXI_WLAST({{ thread.name }}_{{ memory.name }}_AXI_WLAST),
+     .M_AXI_WUSER({{ thread.name }}_{{ memory.name }}_AXI_WUSER),
+     .M_AXI_WVALID({{ thread.name }}_{{ memory.name }}_AXI_WVALID),
+     .M_AXI_WREADY({{ thread.name }}_{{ memory.name }}_AXI_WREADY),
+
+     .M_AXI_BID({{ thread.name }}_{{ memory.name }}_AXI_BID),
+     .M_AXI_BRESP({{ thread.name }}_{{ memory.name }}_AXI_BRESP),
+     .M_AXI_BUSER({{ thread.name }}_{{ memory.name }}_AXI_BUSER),
+     .M_AXI_BVALID({{ thread.name }}_{{ memory.name }}_AXI_BVALID),
+     .M_AXI_BREADY({{ thread.name }}_{{ memory.name }}_AXI_BREADY),
+
+     .M_AXI_ARID({{ thread.name }}_{{ memory.name }}_AXI_ARID),
+     .M_AXI_ARADDR({{ thread.name }}_{{ memory.name }}_AXI_ARADDR),
+     .M_AXI_ARLEN({{ thread.name }}_{{ memory.name }}_AXI_ARLEN),
+     .M_AXI_ARSIZE({{ thread.name }}_{{ memory.name }}_AXI_ARSIZE),
+     .M_AXI_ARBURST({{ thread.name }}_{{ memory.name }}_AXI_ARBURST),
+     .M_AXI_ARLOCK({{ thread.name }}_{{ memory.name }}_AXI_ARLOCK),
+     .M_AXI_ARCACHE({{ thread.name }}_{{ memory.name }}_AXI_ARCACHE),
+     .M_AXI_ARPROT({{ thread.name }}_{{ memory.name }}_AXI_ARPROT),
+     .M_AXI_ARQOS({{ thread.name }}_{{ memory.name }}_AXI_ARQOS),
+     .M_AXI_ARUSER({{ thread.name }}_{{ memory.name }}_AXI_ARUSER),
+     .M_AXI_ARVALID({{ thread.name }}_{{ memory.name }}_AXI_ARVALID),
+     .M_AXI_ARREADY({{ thread.name }}_{{ memory.name }}_AXI_ARREADY),
+
+     .M_AXI_RID({{ thread.name }}_{{ memory.name }}_AXI_RID),
+     .M_AXI_RDATA({{ thread.name }}_{{ memory.name }}_AXI_RDATA),
+     .M_AXI_RRESP({{ thread.name }}_{{ memory.name }}_AXI_RRESP),
+     .M_AXI_RLAST({{ thread.name }}_{{ memory.name }}_AXI_RLAST),
+     .M_AXI_RUSER({{ thread.name }}_{{ memory.name }}_AXI_RUSER),
+     .M_AXI_RVALID({{ thread.name }}_{{ memory.name }}_AXI_RVALID),
+     .M_AXI_RREADY({{ thread.name }}_{{ memory.name }}_AXI_RREADY)
+     );
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}
+  axi_master_interface #
+   (
+    .C_M_AXI_THREAD_ID_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_THREAD_ID_WIDTH),
+    .C_M_AXI_ADDR_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH),
+    .C_M_AXI_DATA_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH),
+    .C_M_AXI_AWUSER_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_AWUSER_WIDTH),
+    .C_M_AXI_ARUSER_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_ARUSER_WIDTH),
+    .C_M_AXI_WUSER_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_WUSER_WIDTH),
+    .C_M_AXI_RUSER_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_RUSER_WIDTH),
+    .C_M_AXI_BUSER_WIDTH(C_{{ thread.name }}_{{ instream.name }}_AXI_BUSER_WIDTH),
+    .C_M_AXI_SUPPORTS_WRITE(C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_WRITE),
+    .C_M_AXI_SUPPORTS_READ(C_{{ thread.name }}_{{ instream.name }}_AXI_SUPPORTS_READ),
+    .C_M_AXI_TARGET(C_M_AXI_TARGET)
+   )
+  inst_axi_master_interface_{{ thread.name }}_{{ instream.name }}
+     (
+     .ACLK({{ thread.name }}_{{ instream.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ instream.name }}_AXI_ARESETN), // AXI reset
+ 
+     .awvalid({{ thread.name }}_{{ instream.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ instream.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ instream.name }}_awlen),
+     .awready({{ thread.name }}_{{ instream.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ instream.name }}_wdata),
+     .wlast({{ thread.name }}_{{ instream.name }}_wlast),
+     .wready({{ thread.name }}_{{ instream.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ instream.name }}_bvalid),
+     .bready({{ thread.name }}_{{ instream.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ instream.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ instream.name }}_araddr),
+     .arlen({{ thread.name }}_{{ instream.name }}_arlen),
+     .arready({{ thread.name }}_{{ instream.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ instream.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ instream.name }}_rdata),
+     .rlast({{ thread.name }}_{{ instream.name }}_rlast),
+     .rready({{ thread.name }}_{{ instream.name }}_rready),
+
+     .M_AXI_AWID({{ thread.name }}_{{ instream.name }}_AXI_AWID),
+     .M_AXI_AWADDR({{ thread.name }}_{{ instream.name }}_AXI_AWADDR),
+     .M_AXI_AWLEN({{ thread.name }}_{{ instream.name }}_AXI_AWLEN),
+     .M_AXI_AWSIZE({{ thread.name }}_{{ instream.name }}_AXI_AWSIZE),
+     .M_AXI_AWBURST({{ thread.name }}_{{ instream.name }}_AXI_AWBURST),
+     .M_AXI_AWLOCK({{ thread.name }}_{{ instream.name }}_AXI_AWLOCK),
+     .M_AXI_AWCACHE({{ thread.name }}_{{ instream.name }}_AXI_AWCACHE),
+     .M_AXI_AWPROT({{ thread.name }}_{{ instream.name }}_AXI_AWPROT),
+     .M_AXI_AWQOS({{ thread.name }}_{{ instream.name }}_AXI_AWQOS),
+     .M_AXI_AWUSER({{ thread.name }}_{{ instream.name }}_AXI_AWUSER),
+     .M_AXI_AWVALID({{ thread.name }}_{{ instream.name }}_AXI_AWVALID),
+     .M_AXI_AWREADY({{ thread.name }}_{{ instream.name }}_AXI_AWREADY),
+
+     .M_AXI_WDATA({{ thread.name }}_{{ instream.name }}_AXI_WDATA),
+     .M_AXI_WSTRB({{ thread.name }}_{{ instream.name }}_AXI_WSTRB),
+     .M_AXI_WLAST({{ thread.name }}_{{ instream.name }}_AXI_WLAST),
+     .M_AXI_WUSER({{ thread.name }}_{{ instream.name }}_AXI_WUSER),
+     .M_AXI_WVALID({{ thread.name }}_{{ instream.name }}_AXI_WVALID),
+     .M_AXI_WREADY({{ thread.name }}_{{ instream.name }}_AXI_WREADY),
+
+     .M_AXI_BID({{ thread.name }}_{{ instream.name }}_AXI_BID),
+     .M_AXI_BRESP({{ thread.name }}_{{ instream.name }}_AXI_BRESP),
+     .M_AXI_BUSER({{ thread.name }}_{{ instream.name }}_AXI_BUSER),
+     .M_AXI_BVALID({{ thread.name }}_{{ instream.name }}_AXI_BVALID),
+     .M_AXI_BREADY({{ thread.name }}_{{ instream.name }}_AXI_BREADY),
+
+     .M_AXI_ARID({{ thread.name }}_{{ instream.name }}_AXI_ARID),
+     .M_AXI_ARADDR({{ thread.name }}_{{ instream.name }}_AXI_ARADDR),
+     .M_AXI_ARLEN({{ thread.name }}_{{ instream.name }}_AXI_ARLEN),
+     .M_AXI_ARSIZE({{ thread.name }}_{{ instream.name }}_AXI_ARSIZE),
+     .M_AXI_ARBURST({{ thread.name }}_{{ instream.name }}_AXI_ARBURST),
+     .M_AXI_ARLOCK({{ thread.name }}_{{ instream.name }}_AXI_ARLOCK),
+     .M_AXI_ARCACHE({{ thread.name }}_{{ instream.name }}_AXI_ARCACHE),
+     .M_AXI_ARPROT({{ thread.name }}_{{ instream.name }}_AXI_ARPROT),
+     .M_AXI_ARQOS({{ thread.name }}_{{ instream.name }}_AXI_ARQOS),
+     .M_AXI_ARUSER({{ thread.name }}_{{ instream.name }}_AXI_ARUSER),
+     .M_AXI_ARVALID({{ thread.name }}_{{ instream.name }}_AXI_ARVALID),
+     .M_AXI_ARREADY({{ thread.name }}_{{ instream.name }}_AXI_ARREADY),
+
+     .M_AXI_RID({{ thread.name }}_{{ instream.name }}_AXI_RID),
+     .M_AXI_RDATA({{ thread.name }}_{{ instream.name }}_AXI_RDATA),
+     .M_AXI_RRESP({{ thread.name }}_{{ instream.name }}_AXI_RRESP),
+     .M_AXI_RLAST({{ thread.name }}_{{ instream.name }}_AXI_RLAST),
+     .M_AXI_RUSER({{ thread.name }}_{{ instream.name }}_AXI_RUSER),
+     .M_AXI_RVALID({{ thread.name }}_{{ instream.name }}_AXI_RVALID),
+     .M_AXI_RREADY({{ thread.name }}_{{ instream.name }}_AXI_RREADY)
+     );
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+  axi_master_interface #
+   (
+    .C_M_AXI_THREAD_ID_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_THREAD_ID_WIDTH),
+    .C_M_AXI_ADDR_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH),
+    .C_M_AXI_DATA_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH),
+    .C_M_AXI_AWUSER_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_AWUSER_WIDTH),
+    .C_M_AXI_ARUSER_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_ARUSER_WIDTH),
+    .C_M_AXI_WUSER_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_WUSER_WIDTH),
+    .C_M_AXI_RUSER_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_RUSER_WIDTH),
+    .C_M_AXI_BUSER_WIDTH(C_{{ thread.name }}_{{ outstream.name }}_AXI_BUSER_WIDTH),
+    .C_M_AXI_SUPPORTS_WRITE(C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_WRITE),
+    .C_M_AXI_SUPPORTS_READ(C_{{ thread.name }}_{{ outstream.name }}_AXI_SUPPORTS_READ),
+    .C_M_AXI_TARGET(C_M_AXI_TARGET)
+   )
+  inst_axi_master_interface_{{ thread.name }}_{{ outstream.name }}
+    (
+     .ACLK({{ thread.name }}_{{ outstream.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ outstream.name }}_AXI_ARESETN), // AXI reset
+
+     .awvalid({{ thread.name }}_{{ outstream.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ outstream.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ outstream.name }}_awlen),
+     .awready({{ thread.name }}_{{ outstream.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ outstream.name }}_wdata),
+     .wlast({{ thread.name }}_{{ outstream.name }}_wlast),
+     .wready({{ thread.name }}_{{ outstream.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ outstream.name }}_bvalid),
+     .bready({{ thread.name }}_{{ outstream.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ outstream.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ outstream.name }}_araddr),
+     .arlen({{ thread.name }}_{{ outstream.name }}_arlen),
+     .arready({{ thread.name }}_{{ outstream.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ outstream.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ outstream.name }}_rdata),
+     .rlast({{ thread.name }}_{{ outstream.name }}_rlast),
+     .rready({{ thread.name }}_{{ outstream.name }}_rready),
+
+     .M_AXI_AWID({{ thread.name }}_{{ outstream.name }}_AXI_AWID),
+     .M_AXI_AWADDR({{ thread.name }}_{{ outstream.name }}_AXI_AWADDR),
+     .M_AXI_AWLEN({{ thread.name }}_{{ outstream.name }}_AXI_AWLEN),
+     .M_AXI_AWSIZE({{ thread.name }}_{{ outstream.name }}_AXI_AWSIZE),
+     .M_AXI_AWBURST({{ thread.name }}_{{ outstream.name }}_AXI_AWBURST),
+     .M_AXI_AWLOCK({{ thread.name }}_{{ outstream.name }}_AXI_AWLOCK),
+     .M_AXI_AWCACHE({{ thread.name }}_{{ outstream.name }}_AXI_AWCACHE),
+     .M_AXI_AWPROT({{ thread.name }}_{{ outstream.name }}_AXI_AWPROT),
+     .M_AXI_AWQOS({{ thread.name }}_{{ outstream.name }}_AXI_AWQOS),
+     .M_AXI_AWUSER({{ thread.name }}_{{ outstream.name }}_AXI_AWUSER),
+     .M_AXI_AWVALID({{ thread.name }}_{{ outstream.name }}_AXI_AWVALID),
+     .M_AXI_AWREADY({{ thread.name }}_{{ outstream.name }}_AXI_AWREADY),
+
+     .M_AXI_WDATA({{ thread.name }}_{{ outstream.name }}_AXI_WDATA),
+     .M_AXI_WSTRB({{ thread.name }}_{{ outstream.name }}_AXI_WSTRB),
+     .M_AXI_WLAST({{ thread.name }}_{{ outstream.name }}_AXI_WLAST),
+     .M_AXI_WUSER({{ thread.name }}_{{ outstream.name }}_AXI_WUSER),
+     .M_AXI_WVALID({{ thread.name }}_{{ outstream.name }}_AXI_WVALID),
+     .M_AXI_WREADY({{ thread.name }}_{{ outstream.name }}_AXI_WREADY),
+
+     .M_AXI_BID({{ thread.name }}_{{ outstream.name }}_AXI_BID),
+     .M_AXI_BRESP({{ thread.name }}_{{ outstream.name }}_AXI_BRESP),
+     .M_AXI_BUSER({{ thread.name }}_{{ outstream.name }}_AXI_BUSER),
+     .M_AXI_BVALID({{ thread.name }}_{{ outstream.name }}_AXI_BVALID),
+     .M_AXI_BREADY({{ thread.name }}_{{ outstream.name }}_AXI_BREADY),
+
+     .M_AXI_ARID({{ thread.name }}_{{ outstream.name }}_AXI_ARID),
+     .M_AXI_ARADDR({{ thread.name }}_{{ outstream.name }}_AXI_ARADDR),
+     .M_AXI_ARLEN({{ thread.name }}_{{ outstream.name }}_AXI_ARLEN),
+     .M_AXI_ARSIZE({{ thread.name }}_{{ outstream.name }}_AXI_ARSIZE),
+     .M_AXI_ARBURST({{ thread.name }}_{{ outstream.name }}_AXI_ARBURST),
+     .M_AXI_ARLOCK({{ thread.name }}_{{ outstream.name }}_AXI_ARLOCK),
+     .M_AXI_ARCACHE({{ thread.name }}_{{ outstream.name }}_AXI_ARCACHE),
+     .M_AXI_ARPROT({{ thread.name }}_{{ outstream.name }}_AXI_ARPROT),
+     .M_AXI_ARQOS({{ thread.name }}_{{ outstream.name }}_AXI_ARQOS),
+     .M_AXI_ARUSER({{ thread.name }}_{{ outstream.name }}_AXI_ARUSER),
+     .M_AXI_ARVALID({{ thread.name }}_{{ outstream.name }}_AXI_ARVALID),
+     .M_AXI_ARREADY({{ thread.name }}_{{ outstream.name }}_AXI_ARREADY),
+
+     .M_AXI_RID({{ thread.name }}_{{ outstream.name }}_AXI_RID),
+     .M_AXI_RDATA({{ thread.name }}_{{ outstream.name }}_AXI_RDATA),
+     .M_AXI_RRESP({{ thread.name }}_{{ outstream.name }}_AXI_RRESP),
+     .M_AXI_RLAST({{ thread.name }}_{{ outstream.name }}_AXI_RLAST),
+     .M_AXI_RUSER({{ thread.name }}_{{ outstream.name }}_AXI_RUSER),
+     .M_AXI_RVALID({{ thread.name }}_{{ outstream.name }}_AXI_RVALID),
+     .M_AXI_RREADY({{ thread.name }}_{{ outstream.name }}_AXI_RREADY)
+     );
+{% endfor %}
+
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+{%- if not lite %}
+  axi_slave_interface #
+{%- else %}
+  axi_lite_slave_interface #
+{%- endif %}
+   (
+{%- if not lite %}
+    .C_S_AXI_ID_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ID_WIDTH),
+    .C_S_AXI_AWUSER_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER_WIDTH),
+    .C_S_AXI_ARUSER_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER_WIDTH),
+    .C_S_AXI_WUSER_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_WUSER_WIDTH),
+    .C_S_AXI_RUSER_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_RUSER_WIDTH),
+    .C_S_AXI_BUSER_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_BUSER_WIDTH),
+{%- endif %}
+    .C_S_AXI_ADDR_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH),
+    .C_S_AXI_DATA_WIDTH(C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH)
+   )
+{%- if not lite %}
+  inst_axi_slave_interface_{{ thread.name }}_{{ iochannel.name }}
+{%- else %}
+  inst_axi_lite_slave_interface_{{ thread.name }}_{{ iochannel.name }}
+{%- endif %}
+    (
+     .ACLK({{ thread.name }}_{{ iochannel.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ iochannel.name }}_AXI_ARESETN), // AXI reset
+
+     .awvalid({{ thread.name }}_{{ iochannel.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ iochannel.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ iochannel.name }}_awlen),
+     .awready({{ thread.name }}_{{ iochannel.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ iochannel.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ iochannel.name }}_wdata),
+     .wlast({{ thread.name }}_{{ iochannel.name }}_wlast),
+     .wready({{ thread.name }}_{{ iochannel.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ iochannel.name }}_bvalid),
+     .bready({{ thread.name }}_{{ iochannel.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ iochannel.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ iochannel.name }}_araddr),
+     .arlen({{ thread.name }}_{{ iochannel.name }}_arlen),
+     .arready({{ thread.name }}_{{ iochannel.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ iochannel.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ iochannel.name }}_rdata),
+     .rlast({{ thread.name }}_{{ iochannel.name }}_rlast),
+     .rready({{ thread.name }}_{{ iochannel.name }}_rready),
+
+{% if not lite %}
+     .S_AXI_AWID({{ thread.name }}_{{ iochannel.name }}_AXI_AWID),
+{%- endif %}
+     .S_AXI_AWADDR({{ thread.name }}_{{ iochannel.name }}_AXI_AWADDR),
+{%- if not lite %}
+     .S_AXI_AWLEN({{ thread.name }}_{{ iochannel.name }}_AXI_AWLEN),
+     .S_AXI_AWSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE),
+     .S_AXI_AWBURST({{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST),
+     .S_AXI_AWLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK),
+     .S_AXI_AWCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE),
+{%- endif %}
+     .S_AXI_AWPROT({{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT),
+{%- if not lite %}
+     .S_AXI_AWREGION({{ thread.name }}_{{ iochannel.name }}_AXI_AWREGION),
+     .S_AXI_AWQOS({{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS),
+     .S_AXI_AWUSER({{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER),
+{%- endif %}
+     .S_AXI_AWVALID({{ thread.name }}_{{ iochannel.name }}_AXI_AWVALID),
+     .S_AXI_AWREADY({{ thread.name }}_{{ iochannel.name }}_AXI_AWREADY),
+
+{% if not lite %}
+     .S_AXI_WID({{ thread.name }}_{{ iochannel.name }}_AXI_WID),
+{%- endif %}
+     .S_AXI_WDATA({{ thread.name }}_{{ iochannel.name }}_AXI_WDATA),
+     .S_AXI_WSTRB({{ thread.name }}_{{ iochannel.name }}_AXI_WSTRB),
+{%- if not lite %}
+     .S_AXI_WLAST({{ thread.name }}_{{ iochannel.name }}_AXI_WLAST),
+     .S_AXI_WUSER({{ thread.name }}_{{ iochannel.name }}_AXI_WUSER),
+{%- endif %}
+     .S_AXI_WVALID({{ thread.name }}_{{ iochannel.name }}_AXI_WVALID),
+     .S_AXI_WREADY({{ thread.name }}_{{ iochannel.name }}_AXI_WREADY),
+
+{% if not lite %}
+     .S_AXI_BID({{ thread.name }}_{{ iochannel.name }}_AXI_BID),
+{%- endif %}
+     .S_AXI_BRESP({{ thread.name }}_{{ iochannel.name }}_AXI_BRESP),
+{%- if not lite %}
+     .S_AXI_BUSER({{ thread.name }}_{{ iochannel.name }}_AXI_BUSER),
+{%- endif %}
+     .S_AXI_BVALID({{ thread.name }}_{{ iochannel.name }}_AXI_BVALID),
+     .S_AXI_BREADY({{ thread.name }}_{{ iochannel.name }}_AXI_BREADY),
+
+{% if not lite %}
+     .S_AXI_ARID({{ thread.name }}_{{ iochannel.name }}_AXI_ARID),
+{%- endif %}
+     .S_AXI_ARADDR({{ thread.name }}_{{ iochannel.name }}_AXI_ARADDR),
+{%- if not lite %}
+     .S_AXI_ARLEN({{ thread.name }}_{{ iochannel.name }}_AXI_ARLEN),
+     .S_AXI_ARSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE),
+     .S_AXI_ARBURST({{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST),
+     .S_AXI_ARLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK),
+     .S_AXI_ARCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE),
+{%- endif %}
+     .S_AXI_ARPROT({{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT),
+{%- if not lite %}
+     .S_AXI_ARREGION({{ thread.name }}_{{ iochannel.name }}_AXI_ARREGION),
+     .S_AXI_ARQOS({{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS),
+     .S_AXI_ARUSER({{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER),
+{%- endif %}
+     .S_AXI_ARVALID({{ thread.name }}_{{ iochannel.name }}_AXI_ARVALID),
+     .S_AXI_ARREADY({{ thread.name }}_{{ iochannel.name }}_AXI_ARREADY),
+
+{% if not lite %}
+     .S_AXI_RID({{ thread.name }}_{{ iochannel.name }}_AXI_RID),
+{%- endif %}
+     .S_AXI_RDATA({{ thread.name }}_{{ iochannel.name }}_AXI_RDATA),
+     .S_AXI_RRESP({{ thread.name }}_{{ iochannel.name }}_AXI_RRESP),
+{%- if not lite %}
+     .S_AXI_RLAST({{ thread.name }}_{{ iochannel.name }}_AXI_RLAST),
+     .S_AXI_RUSER({{ thread.name }}_{{ iochannel.name }}_AXI_RUSER),
+{%- endif %}
+     .S_AXI_RVALID({{ thread.name }}_{{ iochannel.name }}_AXI_RVALID),
+     .S_AXI_RREADY({{ thread.name }}_{{ iochannel.name }}_AXI_RREADY)
+     );
+{% endfor %}
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+{%- if not lite %}
+  axi_slave_interface #
+{%- else %}
+  axi_lite_slave_interface #
+{%- endif %}
+   (
+{%- if not lite %}
+    .C_S_AXI_ID_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ID_WIDTH),
+    .C_S_AXI_AWUSER_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER_WIDTH),
+    .C_S_AXI_ARUSER_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER_WIDTH),
+    .C_S_AXI_WUSER_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_WUSER_WIDTH),
+    .C_S_AXI_RUSER_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_RUSER_WIDTH),
+    .C_S_AXI_BUSER_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_BUSER_WIDTH),
+{%- endif %}
+    .C_S_AXI_ADDR_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH),
+    .C_S_AXI_DATA_WIDTH(C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH)
+   )
+{%- if not lite %}
+  inst_axi_slave_interface_{{ thread.name }}_{{ ioregister.name }}
+{%- else %}
+  inst_axi_lite_slave_interface_{{ thread.name }}_{{ ioregister.name }}
+{%- endif %}
+    (
+     .ACLK({{ thread.name }}_{{ ioregister.name }}_AXI_ACLK), // AXI clock
+     .ARESETN({{ thread.name }}_{{ ioregister.name }}_AXI_ARESETN), // AXI reset
+
+     .awvalid({{ thread.name }}_{{ ioregister.name }}_awvalid),
+     .awaddr({{ thread.name }}_{{ ioregister.name }}_awaddr),
+     .awlen({{ thread.name }}_{{ ioregister.name }}_awlen),
+     .awready({{ thread.name }}_{{ ioregister.name }}_awready),
+
+     .wvalid({{ thread.name }}_{{ ioregister.name }}_wvalid),
+     .wdata({{ thread.name }}_{{ ioregister.name }}_wdata),
+     .wlast({{ thread.name }}_{{ ioregister.name }}_wlast),
+     .wready({{ thread.name }}_{{ ioregister.name }}_wready),
+
+     .bvalid({{ thread.name }}_{{ ioregister.name }}_bvalid),
+     .bready({{ thread.name }}_{{ ioregister.name }}_bready),
+
+     .arvalid({{ thread.name }}_{{ ioregister.name }}_arvalid),
+     .araddr({{ thread.name }}_{{ ioregister.name }}_araddr),
+     .arlen({{ thread.name }}_{{ ioregister.name }}_arlen),
+     .arready({{ thread.name }}_{{ ioregister.name }}_arready),
+
+     .rvalid({{ thread.name }}_{{ ioregister.name }}_rvalid),
+     .rdata({{ thread.name }}_{{ ioregister.name }}_rdata),
+     .rlast({{ thread.name }}_{{ ioregister.name }}_rlast),
+     .rready({{ thread.name }}_{{ ioregister.name }}_rready),
+
+{% if not lite %}
+     .S_AXI_AWID({{ thread.name }}_{{ ioregister.name }}_AXI_AWID),
+{%- endif %}
+     .S_AXI_AWADDR({{ thread.name }}_{{ ioregister.name }}_AXI_AWADDR),
+{%- if not lite %}
+     .S_AXI_AWLEN({{ thread.name }}_{{ ioregister.name }}_AXI_AWLEN),
+     .S_AXI_AWSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE),
+     .S_AXI_AWBURST({{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST),
+     .S_AXI_AWLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK),
+     .S_AXI_AWCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE),
+{%- endif %}
+     .S_AXI_AWPROT({{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT),
+{%- if not lite %}
+     .S_AXI_AWREGION({{ thread.name }}_{{ ioregister.name }}_AXI_AWREGION),
+     .S_AXI_AWQOS({{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS),
+     .S_AXI_AWUSER({{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER),
+{%- endif %}
+     .S_AXI_AWVALID({{ thread.name }}_{{ ioregister.name }}_AXI_AWVALID),
+     .S_AXI_AWREADY({{ thread.name }}_{{ ioregister.name }}_AXI_AWREADY),
+
+{% if not lite %}
+     .S_AXI_WID({{ thread.name }}_{{ ioregister.name }}_AXI_WID),
+{%- endif %}
+     .S_AXI_WDATA({{ thread.name }}_{{ ioregister.name }}_AXI_WDATA),
+     .S_AXI_WSTRB({{ thread.name }}_{{ ioregister.name }}_AXI_WSTRB),
+{%- if not lite %}
+     .S_AXI_WLAST({{ thread.name }}_{{ ioregister.name }}_AXI_WLAST),
+     .S_AXI_WUSER({{ thread.name }}_{{ ioregister.name }}_AXI_WUSER),
+{%- endif %}
+     .S_AXI_WVALID({{ thread.name }}_{{ ioregister.name }}_AXI_WVALID),
+     .S_AXI_WREADY({{ thread.name }}_{{ ioregister.name }}_AXI_WREADY),
+
+{% if not lite %}
+     .S_AXI_BID({{ thread.name }}_{{ ioregister.name }}_AXI_BID),
+{%- endif %}
+     .S_AXI_BRESP({{ thread.name }}_{{ ioregister.name }}_AXI_BRESP),
+{%- if not lite %}
+     .S_AXI_BUSER({{ thread.name }}_{{ ioregister.name }}_AXI_BUSER),
+{%- endif %}
+     .S_AXI_BVALID({{ thread.name }}_{{ ioregister.name }}_AXI_BVALID),
+     .S_AXI_BREADY({{ thread.name }}_{{ ioregister.name }}_AXI_BREADY),
+
+{% if not lite %}
+     .S_AXI_ARID({{ thread.name }}_{{ ioregister.name }}_AXI_ARID),
+{%- endif %}
+     .S_AXI_ARADDR({{ thread.name }}_{{ ioregister.name }}_AXI_ARADDR),
+{%- if not lite %}
+     .S_AXI_ARLEN({{ thread.name }}_{{ ioregister.name }}_AXI_ARLEN),
+     .S_AXI_ARSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE),
+     .S_AXI_ARBURST({{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST),
+     .S_AXI_ARLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK),
+     .S_AXI_ARCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE),
+{%- endif %}
+     .S_AXI_ARPROT({{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT),
+{%- if not lite %}
+     .S_AXI_ARREGION({{ thread.name }}_{{ ioregister.name }}_AXI_ARREGION),
+     .S_AXI_ARQOS({{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS),
+     .S_AXI_ARUSER({{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER),
+{%- endif %}
+     .S_AXI_ARVALID({{ thread.name }}_{{ ioregister.name }}_AXI_ARVALID),
+     .S_AXI_ARREADY({{ thread.name }}_{{ ioregister.name }}_AXI_ARREADY),
+
+{% if not lite %}
+     .S_AXI_RID({{ thread.name }}_{{ ioregister.name }}_AXI_RID),
+{%- endif %}
+     .S_AXI_RDATA({{ thread.name }}_{{ ioregister.name }}_AXI_RDATA),
+     .S_AXI_RRESP({{ thread.name }}_{{ ioregister.name }}_AXI_RRESP),
+{%- if not lite %}
+     .S_AXI_RLAST({{ thread.name }}_{{ ioregister.name }}_AXI_RLAST),
+     .S_AXI_RUSER({{ thread.name }}_{{ ioregister.name }}_AXI_RUSER),
+{%- endif %}
+     .S_AXI_RVALID({{ thread.name }}_{{ ioregister.name }}_AXI_RVALID),
+     .S_AXI_RREADY({{ thread.name }}_{{ ioregister.name }}_AXI_RREADY)
+     );
+{% endfor %}
+
+{%- endfor %}
+
+endmodule
+

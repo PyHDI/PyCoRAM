@@ -1,0 +1,45 @@
+MAIN={{ testname }}
+INCDIR=../hdl/verilog/
+OPT=-I $(INCDIR)
+OUTPUT=a.out
+VCS_OUTPUT=simv
+LOGFILE=log.txt
+
+.PHONY: all
+all: compile
+
+.PHONY: compile
+compile:
+	iverilog $(OPT) -o $(OUTPUT) $(MAIN) 
+
+.PHONY: run
+run:
+	./$(OUTPUT)
+
+.PHONY: vcs_compile
+vcs_compile:
+	vcs -full64 -v2005 +incdir+$(INCDIR) $(MAIN)
+
+.PHONY: vcs_run
+vcs_run:
+	./$(VCS_OUTPUT)
+
+.PHONY: log
+log:
+	./$(OUTPUT) > $(LOGFILE)
+
+.PHONY: vcs_log
+vcs_log:
+	./$(VCS_OUTPUT) > $(LOGFILE)
+
+.PHONY: view
+view:
+	gtkwave --giga uut.vcd &
+
+.PHONY: clean
+clean:
+	rm -rf *.out *.vcd csrc simv simv.daidir ucli.key $(OUTPUT) $(LOGFILE)
+
+.PHONY: check_syntax
+check_syntax:
+	iverilog -tnull -Wall $(MAIN) 

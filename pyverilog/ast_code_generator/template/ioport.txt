@@ -1,1 +1,0 @@
-{{ first }} {% if second != '' %}{{ second }} {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }}

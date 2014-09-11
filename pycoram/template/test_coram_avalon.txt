@@ -1,0 +1,1237 @@
+
+`timescale 1ns / 1ps
+`include "{{ hdlname }}"
+`include "{{ common_hdlname }}"
+
+`define DUMP_VCD
+`define MEM_READ_LATENCY 8
+`define MEM_WRITE_LATENCY 4
+
+module test_top;
+`ifdef DUMP_VCD
+  initial begin
+    $dumpfile("uut.vcd");
+    $dumpvars(0, uut);
+  end
+`endif
+  test uut ();
+endmodule
+
+module test;
+  parameter SIM_CYCLE = 1000 * 1000 * 1000;
+  parameter MEMIMG = "{{ memimg }}";
+  parameter SIM_ADDR_WIDTH = {{ simaddrwidth }};
+
+  // Clock Period (Half)
+  parameter HPERIOD_CLK_ULOGIC = {{ clock_hperiod_userlogic }};
+  parameter HPERIOD_CLK_CTHREAD = {{ clock_hperiod_controlthread }};
+  parameter HPERIOD_CLK_BUS = {{ clock_hperiod_bus }};
+  parameter SINGLE_CLOCK = {% if single_clock %}1{% else %}0{% endif %};
+
+  // Memory Access Latency (in User logic Clock)
+  parameter READ_LATENCY = `MEM_READ_LATENCY;
+  parameter WRITE_LATENCY = `MEM_WRITE_LATENCY;
+
+  // Bus Type
+  parameter BUS_TYPE = "axi";
+
+{% for param in def_top_parameters %}
+  {{ param }}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}  
+  parameter integer C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH = {{ memory.ext_datawidth }};
+  parameter integer C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH = {{ ext_addrwidth }};
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}  
+  parameter integer C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH = {{ instream.ext_datawidth }};
+  parameter integer C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH = {{ ext_addrwidth }};
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}  
+  parameter integer C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH = {{ outstream.ext_datawidth }};
+  parameter integer C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH = {{ ext_addrwidth }};
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  parameter integer C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH = {{ iochannel.ext_datawidth }};
+  parameter integer C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH = {{ ext_addrwidth }};
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  parameter integer C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH = {{ ioregister.ext_datawidth }};
+  parameter integer C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH = {{ ext_addrwidth }};
+{% endfor %}
+{%- endfor %}
+  parameter C_AVM_TARGET = 'h00000000;
+  
+{%- if not single_clock %}
+  //----------------------------------------------------------------------------
+  // Control Thread Clock and Reset
+  //----------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+  reg csi_sys_{{ thread.name }}_clk;
+  reg csi_sys_{{ thread.name }}_reset_n;
+{%- endfor %}
+{%- endif %}
+
+  //------------------------------------------------------------------------------
+  // User logic Clock and Reset
+  //------------------------------------------------------------------------------
+  reg csi_sys_user_clk;
+  reg csi_sys_user_reset_n;
+
+  //---------------------------------------------------------------------------
+  // User-defined I/O ports in Top-level User logic (wire)
+  //---------------------------------------------------------------------------
+{%- for ioport in def_top_ioports | sort() %}
+  {{ ioport }}
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Finish 
+  //---------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+  wire {{ thread.name }}_finish;
+{%- endfor %}
+
+  //---------------------------------------------------------------------------
+  // Simulation Clock and Reset
+  //---------------------------------------------------------------------------
+  wire sim_clk;
+  wire sim_resetn;
+  assign sim_clk = csi_sys_user_clk;
+  assign sim_resetn = csi_sys_user_reset_n;
+
+  //------------------------------------------------------------------------------
+  // Avalon interface
+  //------------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+{%- if not single_clock %}
+  // Clock and Reset
+  reg csi_sys_{{ thread.name }}_{{ memory.name }}_clk;
+  reg csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n;
+{%- endif %}
+  // Common
+  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_address;
+  wire avm_{{ thread.name }}_{{ memory.name }}_waitrequest;
+  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ memory.name }}_byteenable;
+  wire [8-1:0] avm_{{ thread.name }}_{{ memory.name }}_burstcount;
+  // Read
+  wire avm_{{ thread.name }}_{{ memory.name }}_read;
+  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_readdata;
+  wire avm_{{ thread.name }}_{{ memory.name }}_readdatavalid;
+  // Write
+  wire avm_{{ thread.name }}_{{ memory.name }}_write;
+  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_writedata;
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+{%- if not single_clock %}
+  // Clock and Reset
+  reg csi_sys_{{ thread.name }}_{{ instream.name }}_clk;
+  reg csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n;
+{%- endif %}
+  // Common
+  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_address;
+  wire avm_{{ thread.name }}_{{ instream.name }}_waitrequest;
+  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ instream.name }}_byteenable;
+  wire [8-1:0] avm_{{ thread.name }}_{{ instream.name }}_burstcount;
+  // Read
+  wire avm_{{ thread.name }}_{{ instream.name }}_read;
+  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_readdata;
+  wire avm_{{ thread.name }}_{{ instream.name }}_readdatavalid;
+  // Write
+  wire avm_{{ thread.name }}_{{ instream.name }}_write;
+  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_writedata;
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+{%- if not single_clock %}
+  // Clock and Reset
+  reg csi_sys_{{ thread.name }}_{{ outstream.name }}_clk;
+  reg csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n;
+{%- endif %}
+  // Common
+  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_address;
+  wire avm_{{ thread.name }}_{{ outstream.name }}_waitrequest;
+  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ outstream.name }}_byteenable;
+  wire [8-1:0] avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
+  // Read
+  wire avm_{{ thread.name }}_{{ outstream.name }}_read;
+  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_readdata;
+  wire avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid;
+  // Write
+  wire avm_{{ thread.name }}_{{ outstream.name }}_write;
+  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_writedata;
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+{%- if not single_clock %}
+  // Clock and Reset
+  reg csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk;
+  reg csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n;
+{%- endif %}
+  // Common
+  wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_address;
+  wire avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest;
+  wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH/8-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_byteenable;
+  wire [8-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_burstcount;
+  // Read
+  wire avs_{{ thread.name }}_{{ iochannel.name }}_read;
+  wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_readdata;
+  wire avs_{{ thread.name }}_{{ iochannel.name }}_readdatavalid;
+  // Write
+  wire avs_{{ thread.name }}_{{ iochannel.name }}_write;
+  wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_writedata;
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+{%- if not single_clock %}
+  // Clock and Reset
+  reg csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk;
+  reg csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n;
+{%- endif %}
+  // Common
+  wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_address;
+  wire avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest;
+  wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH/8-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_byteenable;
+  wire [8-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_burstcount;
+  // Read
+  wire avs_{{ thread.name }}_{{ ioregister.name }}_read;
+  wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_readdata;
+  wire avs_{{ thread.name }}_{{ ioregister.name }}_readdatavalid;
+  // Write
+  wire avs_{{ thread.name }}_{{ ioregister.name }}_write;
+  wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_writedata;
+{% endfor %}
+{%- endfor %}
+
+
+  pycoram_{{ userlogic_name.lower() }}
+  inst_uut
+  (
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ memory.name }}_clk(csi_sys_{{ thread.name }}_{{ memory.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n(csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n),
+{%- endif %}
+   .avm_{{ thread.name }}_{{ memory.name }}_address(avm_{{ thread.name }}_{{ memory.name }}_address),
+   .avm_{{ thread.name }}_{{ memory.name }}_waitrequest(avm_{{ thread.name }}_{{ memory.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ memory.name }}_burstcount(avm_{{ thread.name }}_{{ memory.name }}_burstcount),
+   .avm_{{ thread.name }}_{{ memory.name }}_read(avm_{{ thread.name }}_{{ memory.name }}_read),
+   .avm_{{ thread.name }}_{{ memory.name }}_readdata(avm_{{ thread.name }}_{{ memory.name }}_readdata),
+   .avm_{{ thread.name }}_{{ memory.name }}_readdatavalid(avm_{{ thread.name }}_{{ memory.name }}_readdatavalid),
+   .avm_{{ thread.name }}_{{ memory.name }}_write(avm_{{ thread.name }}_{{ memory.name }}_write),
+   .avm_{{ thread.name }}_{{ memory.name }}_writedata(avm_{{ thread.name }}_{{ memory.name }}_writedata),
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ instream.name }}_clk(csi_sys_{{ thread.name }}_{{ instream.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n(csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n),
+{%- endif %}
+   .avm_{{ thread.name }}_{{ instream.name }}_address(avm_{{ thread.name }}_{{ instream.name }}_address),
+   .avm_{{ thread.name }}_{{ instream.name }}_waitrequest(avm_{{ thread.name }}_{{ instream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ instream.name }}_burstcount(avm_{{ thread.name }}_{{ instream.name }}_burstcount),
+   .avm_{{ thread.name }}_{{ instream.name }}_read(avm_{{ thread.name }}_{{ instream.name }}_read),
+   .avm_{{ thread.name }}_{{ instream.name }}_readdata(avm_{{ thread.name }}_{{ instream.name }}_readdata),
+   .avm_{{ thread.name }}_{{ instream.name }}_readdatavalid(avm_{{ thread.name }}_{{ instream.name }}_readdatavalid),
+   .avm_{{ thread.name }}_{{ instream.name }}_write(avm_{{ thread.name }}_{{ instream.name }}_write),
+   .avm_{{ thread.name }}_{{ instream.name }}_writedata(avm_{{ thread.name }}_{{ instream.name }}_writedata),
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ outstream.name }}_clk(csi_sys_{{ thread.name }}_{{ outstream.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n(csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n),
+{%- endif %}
+   .avm_{{ thread.name }}_{{ outstream.name }}_address(avm_{{ thread.name }}_{{ outstream.name }}_address),
+   .avm_{{ thread.name }}_{{ outstream.name }}_waitrequest(avm_{{ thread.name }}_{{ outstream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ outstream.name }}_burstcount(avm_{{ thread.name }}_{{ outstream.name }}_burstcount),
+   .avm_{{ thread.name }}_{{ outstream.name }}_read(avm_{{ thread.name }}_{{ outstream.name }}_read),
+   .avm_{{ thread.name }}_{{ outstream.name }}_readdata(avm_{{ thread.name }}_{{ outstream.name }}_readdata),
+   .avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid(avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid),
+   .avm_{{ thread.name }}_{{ outstream.name }}_write(avm_{{ thread.name }}_{{ outstream.name }}_write),
+   .avm_{{ thread.name }}_{{ outstream.name }}_writedata(avm_{{ thread.name }}_{{ outstream.name }}_writedata),
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk(csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n(csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n),
+{%- endif %}
+   .avs_{{ thread.name }}_{{ iochannel.name }}_address(avs_{{ thread.name }}_{{ iochannel.name }}_address[0]),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest(avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest),
+{% if not lite %}
+   .avs_{{ thread.name }}_{{ iochannel.name }}_burstcount(avs_{{ thread.name }}_{{ iochannel.name }}_burstcount),
+{%- endif %}
+   .avs_{{ thread.name }}_{{ iochannel.name }}_read(avs_{{ thread.name }}_{{ iochannel.name }}_read),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_readdata(avs_{{ thread.name }}_{{ iochannel.name }}_readdata),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_readdatavalid(avs_{{ thread.name }}_{{ iochannel.name }}_readdatavalid),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_write(avs_{{ thread.name }}_{{ iochannel.name }}_write),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_writedata(avs_{{ thread.name }}_{{ iochannel.name }}_writedata),
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk(csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n(csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n),
+{%- endif %}
+   .avs_{{ thread.name }}_{{ ioregister.name }}_address(avs_{{ thread.name }}_{{ ioregister.name }}_address[0]),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest(avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest),
+{% if not lite %}
+   .avs_{{ thread.name }}_{{ ioregister.name }}_burstcount(avs_{{ thread.name }}_{{ ioregister.name }}_burstcount),
+{%- endif %}
+   .avs_{{ thread.name }}_{{ ioregister.name }}_read(avs_{{ thread.name }}_{{ ioregister.name }}_read),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_readdata(avs_{{ thread.name }}_{{ ioregister.name }}_readdata),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_readdatavalid(avs_{{ thread.name }}_{{ ioregister.name }}_readdatavalid),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_write(avs_{{ thread.name }}_{{ ioregister.name }}_write),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_writedata(avs_{{ thread.name }}_{{ ioregister.name }}_writedata),
+{% endfor %}
+{%- endfor %}
+
+{%- for ioport in name_top_ioports %}
+   .coe_{{ ioport }}({{ ioport }}),
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+   .coe_{{ thread.name }}_finish({{ thread.name }}_finish),
+{%- endfor %}
+
+{%- if not single_clock %}
+{%- for thread in threads | sort(attribute='name') %}
+   .csi_sys_{{ thread.name }}_clk(csi_sys_{{ thread.name }}_clk),
+   .csi_sys_{{ thread.name }}_reset_n(csi_sys_{{ thread.name }}_reset_n),
+{%- endfor %}
+{%- endif %}
+
+   .csi_sys_user_clk(csi_sys_user_clk),
+   .csi_sys_user_reset_n(csi_sys_user_reset_n)
+   ); 
+
+  dram_stub #
+  (
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+   .C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH(C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH),
+   .C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH(C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH),
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+   .C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH(C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH),
+   .C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH(C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH),
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+   .C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH(C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH),
+   .C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH(C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH),
+{% endfor %}
+{%- endfor %}
+   .MEMIMG(MEMIMG),
+   .SIM_ADDR_WIDTH(SIM_ADDR_WIDTH),
+   .READ_LATENCY(READ_LATENCY),
+   .WRITE_LATENCY(WRITE_LATENCY)
+   )
+  inst_dram_stub
+  (
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ memory.name }}_clk(csi_sys_{{ thread.name }}_{{ memory.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n(csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n),
+{%- else %}
+   .csi_sys_{{ thread.name }}_{{ memory.name }}_clk(csi_sys_user_clk),
+   .csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n(csi_sys_user_reset_n),
+{%- endif %}
+   .avm_{{ thread.name }}_{{ memory.name }}_address(avm_{{ thread.name }}_{{ memory.name }}_address),
+   .avm_{{ thread.name }}_{{ memory.name }}_waitrequest(avm_{{ thread.name }}_{{ memory.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ memory.name }}_burstcount(avm_{{ thread.name }}_{{ memory.name }}_burstcount),
+   .avm_{{ thread.name }}_{{ memory.name }}_read(avm_{{ thread.name }}_{{ memory.name }}_read),
+   .avm_{{ thread.name }}_{{ memory.name }}_readdata(avm_{{ thread.name }}_{{ memory.name }}_readdata),
+   .avm_{{ thread.name }}_{{ memory.name }}_readdatavalid(avm_{{ thread.name }}_{{ memory.name }}_readdatavalid),
+   .avm_{{ thread.name }}_{{ memory.name }}_write(avm_{{ thread.name }}_{{ memory.name }}_write),
+   .avm_{{ thread.name }}_{{ memory.name }}_writedata(avm_{{ thread.name }}_{{ memory.name }}_writedata),
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ instream.name }}_clk(csi_sys_{{ thread.name }}_{{ instream.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n(csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n),
+{%- else %}
+   .csi_sys_{{ thread.name }}_{{ instream.name }}_clk(csi_sys_user_clk),
+   .csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n(csi_sys_user_reset_n),
+{%- endif %}
+   .avm_{{ thread.name }}_{{ instream.name }}_address(avm_{{ thread.name }}_{{ instream.name }}_address),
+   .avm_{{ thread.name }}_{{ instream.name }}_waitrequest(avm_{{ thread.name }}_{{ instream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ instream.name }}_burstcount(avm_{{ thread.name }}_{{ instream.name }}_burstcount),
+   .avm_{{ thread.name }}_{{ instream.name }}_read(avm_{{ thread.name }}_{{ instream.name }}_read),
+   .avm_{{ thread.name }}_{{ instream.name }}_readdata(avm_{{ thread.name }}_{{ instream.name }}_readdata),
+   .avm_{{ thread.name }}_{{ instream.name }}_readdatavalid(avm_{{ thread.name }}_{{ instream.name }}_readdatavalid),
+   .avm_{{ thread.name }}_{{ instream.name }}_write(avm_{{ thread.name }}_{{ instream.name }}_write),
+   .avm_{{ thread.name }}_{{ instream.name }}_writedata(avm_{{ thread.name }}_{{ instream.name }}_writedata),
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+{%- if not single_clock %}
+   .csi_sys_{{ thread.name }}_{{ outstream.name }}_clk(csi_sys_{{ thread.name }}_{{ outstream.name }}_clk),
+   .csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n(csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n),
+{%- else %}
+   .csi_sys_{{ thread.name }}_{{ outstream.name }}_clk(csi_sys_user_clk),
+   .csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n(csi_sys_user_reset_n),
+{%- endif %}
+   .avm_{{ thread.name }}_{{ outstream.name }}_address(avm_{{ thread.name }}_{{ outstream.name }}_address),
+   .avm_{{ thread.name }}_{{ outstream.name }}_waitrequest(avm_{{ thread.name }}_{{ outstream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ outstream.name }}_burstcount(avm_{{ thread.name }}_{{ outstream.name }}_burstcount),
+   .avm_{{ thread.name }}_{{ outstream.name }}_read(avm_{{ thread.name }}_{{ outstream.name }}_read),
+   .avm_{{ thread.name }}_{{ outstream.name }}_readdata(avm_{{ thread.name }}_{{ outstream.name }}_readdata),
+   .avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid(avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid),
+   .avm_{{ thread.name }}_{{ outstream.name }}_write(avm_{{ thread.name }}_{{ outstream.name }}_write),
+   .avm_{{ thread.name }}_{{ outstream.name }}_writedata(avm_{{ thread.name }}_{{ outstream.name }}_writedata),
+{% endfor %}
+{%- endfor %}
+
+   .csi_sys_user_clk(csi_sys_user_clk),
+   .csi_sys_user_reset_n(csi_sys_user_reset_n)
+   );
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ iochannel.name }}_ext_write_enq;
+  reg [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_ext_write_data;
+  wire {{ thread.name }}_{{ iochannel.name }}_ext_write_almost_full;
+  reg {{ thread.name }}_{{ iochannel.name }}_ext_read_deq;
+  wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_ext_read_data;
+  wire {{ thread.name }}_{{ iochannel.name }}_ext_read_empty;
+
+  reg [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_ext_addr;
+  reg {{ thread.name }}_{{ iochannel.name }}_ext_read_enable;
+  reg {{ thread.name }}_{{ iochannel.name }}_ext_write_enable;
+  reg [8:0] {{ thread.name }}_{{ iochannel.name }}_ext_word_size;
+  wire {{ thread.name }}_{{ iochannel.name }}_ext_done;
+
+  initial begin
+    {{ thread.name }}_{{ iochannel.name }}_ext_write_enq = 0;
+    {{ thread.name }}_{{ iochannel.name }}_ext_write_data = 0;
+    {{ thread.name }}_{{ iochannel.name }}_ext_read_deq = 0;
+    {{ thread.name }}_{{ iochannel.name }}_ext_addr = 0;
+    {{ thread.name }}_{{ iochannel.name }}_ext_read_enable = 0;
+    {{ thread.name }}_{{ iochannel.name }}_ext_write_enable = 0;
+    {{ thread.name }}_{{ iochannel.name }}_ext_word_size = 0;
+  end
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  reg {{ thread.name }}_{{ ioregister.name }}_ext_write_enq;
+  reg [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_ext_write_data;
+  wire {{ thread.name }}_{{ ioregister.name }}_ext_write_almost_full;
+  reg {{ thread.name }}_{{ ioregister.name }}_ext_read_deq;
+  wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_ext_read_data;
+  wire {{ thread.name }}_{{ ioregister.name }}_ext_read_empty;
+
+  reg [C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_ext_addr;
+  reg {{ thread.name }}_{{ ioregister.name }}_ext_read_enable;
+  reg {{ thread.name }}_{{ ioregister.name }}_ext_write_enable;
+  reg [8:0] {{ thread.name }}_{{ ioregister.name }}_ext_word_size;
+  wire {{ thread.name }}_{{ ioregister.name }}_ext_done;
+
+  initial begin
+    {{ thread.name }}_{{ ioregister.name }}_ext_write_enq = 0;
+    {{ thread.name }}_{{ ioregister.name }}_ext_write_data = 0;
+    {{ thread.name }}_{{ ioregister.name }}_ext_read_deq = 0;
+    {{ thread.name }}_{{ ioregister.name }}_ext_addr = 0;
+    {{ thread.name }}_{{ ioregister.name }}_ext_read_enable = 0;
+    {{ thread.name }}_{{ ioregister.name }}_ext_write_enable = 0;
+    {{ thread.name }}_{{ ioregister.name }}_ext_word_size = 0;
+  end
+{% endfor %}
+{%- endfor %}
+
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  avalon_master_fifo #
+  (
+   .C_AVM_ADDR_WIDTH(C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH),
+   .C_AVM_DATA_WIDTH(C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH),
+   .C_AVM_TARGET(0)
+   )
+  inst_avalon_master_fifo_{{ thread.name }}_{{ iochannel.name }}
+  (
+{%- if not single_clock %}
+   .ACLK(csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk), // Avalon clock
+   .ARESETN(csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n), // Avalon reset
+{%- else %}
+   .ACLK(csi_sys_user_clk), // Avalon clock
+   .ARESETN(csi_sys_user_reset_n), // Avalon reset
+{%- endif %}
+
+   .user_write_enq({{ thread.name }}_{{ iochannel.name }}_ext_write_enq),
+   .user_write_data({{ thread.name }}_{{ iochannel.name }}_ext_write_data),
+   .user_write_almost_full({{ thread.name }}_{{ iochannel.name }}_ext_write_almost_full),
+   .user_read_deq({{ thread.name }}_{{ iochannel.name }}_ext_read_deq),
+   .user_read_data({{ thread.name }}_{{ iochannel.name }}_ext_read_data),
+   .user_read_empty({{ thread.name }}_{{ iochannel.name }}_ext_read_empty),
+
+   .user_addr({{ thread.name }}_{{ iochannel.name }}_ext_addr),
+   .user_read_enable({{ thread.name }}_{{ iochannel.name }}_ext_read_enable),
+   .user_write_enable({{ thread.name }}_{{ iochannel.name }}_ext_write_enable),
+   .user_word_size({{ thread.name }}_{{ iochannel.name }}_ext_word_size),
+   .user_done({{ thread.name }}_{{ iochannel.name }}_ext_done),
+
+   .avm_address(avs_{{ thread.name }}_{{ iochannel.name }}_address),
+   .avm_waitrequest(avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest),
+   .avm_byteenable(avs_{{ thread.name }}_{{ iochannel.name }}_byteenable),
+   .avm_burstcount(avs_{{ thread.name }}_{{ iochannel.name }}_burstcount),
+
+   .avm_read(avs_{{ thread.name }}_{{ iochannel.name }}_read),
+   .avm_readdata(avs_{{ thread.name }}_{{ iochannel.name }}_readdata),
+   .avm_readdatavalid(avs_{{ thread.name }}_{{ iochannel.name }}_readdatavalid),
+
+   .avm_write(avs_{{ thread.name }}_{{ iochannel.name }}_write),
+   .avm_writedata(avs_{{ thread.name }}_{{ iochannel.name }}_writedata)
+  );
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  avalon_master_fifo #
+  (
+   .C_AVM_ADDR_WIDTH(C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH),
+   .C_AVM_DATA_WIDTH(C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH),
+   .C_AVM_TARGET(0)
+   )
+  inst_avalon_master_fifo_{{ thread.name }}_{{ ioregister.name }}
+  (
+{%- if not single_clock %}
+   .ACLK(csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk), // Avalon clock
+   .ARESETN(csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n), // Avalon reset
+{%- else %}
+   .ACLK(csi_sys_user_clk), // Avalon clock
+   .ARESETN(csi_sys_user_reset_n), // Avalon reset
+{%- endif %}
+
+   .user_write_enq({{ thread.name }}_{{ ioregister.name }}_ext_write_enq),
+   .user_write_data({{ thread.name }}_{{ ioregister.name }}_ext_write_data),
+   .user_write_almost_full({{ thread.name }}_{{ ioregister.name }}_ext_write_almost_full),
+   .user_read_deq({{ thread.name }}_{{ ioregister.name }}_ext_read_deq),
+   .user_read_data({{ thread.name }}_{{ ioregister.name }}_ext_read_data),
+   .user_read_empty({{ thread.name }}_{{ ioregister.name }}_ext_read_empty),
+
+   .user_addr({{ thread.name }}_{{ ioregister.name }}_ext_addr),
+   .user_read_enable({{ thread.name }}_{{ ioregister.name }}_ext_read_enable),
+   .user_write_enable({{ thread.name }}_{{ ioregister.name }}_ext_write_enable),
+   .user_word_size({{ thread.name }}_{{ ioregister.name }}_ext_word_size),
+   .user_done({{ thread.name }}_{{ ioregister.name }}_ext_done),
+
+   .avm_address(avs_{{ thread.name }}_{{ ioregister.name }}_address),
+   .avm_waitrequest(avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest),
+   .avm_byteenable(avs_{{ thread.name }}_{{ ioregister.name }}_byteenable),
+   .avm_burstcount(avs_{{ thread.name }}_{{ ioregister.name }}_burstcount),
+
+   .avm_read(avs_{{ thread.name }}_{{ ioregister.name }}_read),
+   .avm_readdata(avs_{{ thread.name }}_{{ ioregister.name }}_readdata),
+   .avm_readdatavalid(avs_{{ thread.name }}_{{ ioregister.name }}_readdatavalid),
+
+   .avm_write(avs_{{ thread.name }}_{{ ioregister.name }}_write),
+   .avm_writedata(avs_{{ thread.name }}_{{ ioregister.name }}_writedata)
+  );
+{% endfor %}
+{%- endfor %}
+
+  initial begin
+    csi_sys_user_clk = 0;
+    #HPERIOD_CLK_ULOGIC;
+    forever #HPERIOD_CLK_ULOGIC csi_sys_user_clk = ~csi_sys_user_clk;
+  end
+
+{%- if not single_clock %}
+
+{%- for thread in threads | sort(attribute='name') %}
+  initial begin
+    csi_sys_{{ thread.name }}_clk = 0;
+    #HPERIOD_CLK_CTHREAD;
+    forever #HPERIOD_CLK_CTHREAD csi_sys_{{ thread.name }}_clk = ~csi_sys_{{ thread.name }}_clk;
+  end
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+  initial begin
+    csi_sys_{{ thread.name }}_{{ memory.name }}_clk = 0;
+    #HPERIOD_CLK_BUS;
+    forever #HPERIOD_CLK_BUS csi_sys_{{ thread.name }}_{{ memory.name }}_clk = ~csi_sys_{{ thread.name }}_{{ memory.name }}_clk;
+  end
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+  initial begin
+    csi_sys_{{ thread.name }}_{{ instream.name }}_clk = 0;
+    #HPERIOD_CLK_BUS;
+    forever #HPERIOD_CLK_BUS csi_sys_{{ thread.name }}_{{ instream.name }}_clk = ~csi_sys_{{ thread.name }}_{{ instream.name }}_clk;
+  end
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+  initial begin
+    csi_sys_{{ thread.name }}_{{ outstream.name }}_clk = 0;
+    #HPERIOD_CLK_BUS;
+    forever #HPERIOD_CLK_BUS csi_sys_{{ thread.name }}_{{ outstream.name }}_clk = ~csi_sys_{{ thread.name }}_{{ outstream.name }}_clk;
+  end
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  initial begin
+    csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk = 0;
+    #HPERIOD_CLK_BUS;
+    forever #HPERIOD_CLK_BUS csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk = ~csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk;
+  end
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  initial begin
+    csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk = 0;
+    #HPERIOD_CLK_BUS;
+    forever #HPERIOD_CLK_BUS csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk = ~csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk;
+  end
+{% endfor %}
+{%- endfor %}
+
+{%- endif %}
+
+  task nclk;
+    begin
+      wait(~csi_sys_user_clk);
+      wait(csi_sys_user_clk);
+      #1;
+    end
+  endtask
+
+  integer cycle_count;
+  
+  initial begin
+    if(SINGLE_CLOCK &&
+       ((HPERIOD_CLK_ULOGIC != HPERIOD_CLK_CTHREAD) ||
+        (HPERIOD_CLK_ULOGIC != HPERIOD_CLK_BUS) ||
+        (HPERIOD_CLK_CTHREAD != HPERIOD_CLK_BUS))) begin
+      $display("ERROR: All clock periods should be same in single clock mode");
+      $finish;
+    end
+
+    csi_sys_user_reset_n = 1;
+
+{%- if not single_clock %}
+{%- for thread in threads | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_reset_n = 1;
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n = 1;
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n = 1;
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n = 1;
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n = 1;
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n = 1;
+{% endfor %}
+{%- endfor %}
+{%- endif %}
+    
+    #100;
+
+    csi_sys_user_reset_n = 0;
+
+{%- if not single_clock %}
+{%- for thread in threads | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_reset_n = 0;
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n = 0;
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n = 0;
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n = 0;
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n = 0;
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n = 0;
+{% endfor %}
+{%- endfor %}
+{%- endif %}
+
+    #100;
+
+    csi_sys_user_reset_n = 1;
+
+{%- if not single_clock %}
+{%- for thread in threads | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_reset_n = 1;
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n = 1;
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n = 1;
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n = 1;
+{% endfor %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n = 1;
+{% endfor %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+    csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n = 1;
+{% endfor %}
+{%- endfor %}
+{%- endif %}
+
+    #100;
+
+    nclk();
+
+    for(cycle_count=0; cycle_count<SIM_CYCLE; cycle_count=cycle_count+1) begin
+      nclk();
+    end
+    
+    $display("[CoRAM] time:%d simulation time out. cycle:%d", $stime, cycle_count);
+    $finish;
+  end
+
+  initial begin
+    #301;
+    wait(
+{%- for thread in threads | sort(attribute='name') %}
+         {{ thread.name }}_finish &&
+{%- endfor %}    
+         1'b1);
+    $display("[CoRAM] time:%d all threads finished", $stime);
+    $finish;
+  end
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+  task iochannel_write_{{ thread.name }}_{{ iochannel.name }};
+    input [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] data;
+    input [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] addr;
+    begin
+      nclk();
+      wait(!{{ thread.name }}_{{ iochannel.name }}_ext_write_almost_full);
+      #1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_write_enable = 1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_addr = addr;
+      {{ thread.name }}_{{ iochannel.name }}_ext_word_size = 1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_write_enq = 1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_write_data = data;
+      nclk();
+      {{ thread.name }}_{{ iochannel.name }}_ext_write_enq = 0;
+      nclk();
+      wait({{ thread.name }}_{{ iochannel.name }}_ext_done);
+      #1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_write_enable = 0;
+      nclk();
+    end
+  endtask
+
+  task iochannel_read_{{ thread.name }}_{{ iochannel.name }};
+    output [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] data;
+    input [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] addr;
+    begin
+      nclk();
+      {{ thread.name }}_{{ iochannel.name }}_ext_read_enable = 1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_addr = addr;
+      {{ thread.name }}_{{ iochannel.name }}_ext_word_size = 1;
+      nclk();
+      nclk();
+      wait({{ thread.name }}_{{ iochannel.name }}_ext_done);
+      #1;
+      {{ thread.name }}_{{ iochannel.name }}_ext_read_enable = 0;
+      nclk();
+      wait(!{{ thread.name }}_{{ iochannel.name }}_ext_read_empty);
+      #1;
+      data = {{ thread.name }}_{{ iochannel.name }}_ext_read_data;
+      {{ thread.name }}_{{ iochannel.name }}_ext_read_deq = 1;
+      nclk();
+      {{ thread.name }}_{{ iochannel.name }}_ext_read_deq = 0;
+      nclk();
+    end
+  endtask
+{% endfor %}
+{%- endfor %}
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+  task ioregister_write_{{ thread.name }}_{{ ioregister.name }};
+    input [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] data;
+    input [C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH-1:0] addr;
+    begin
+      nclk();
+      wait(!{{ thread.name }}_{{ ioregister.name }}_ext_write_almost_full);
+      #1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_write_enable = 1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_addr = addr;
+      {{ thread.name }}_{{ ioregister.name }}_ext_word_size = 1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_write_enq = 1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_write_data = data;
+      nclk();
+      {{ thread.name }}_{{ ioregister.name }}_ext_write_enq = 0;
+      nclk();
+      wait({{ thread.name }}_{{ ioregister.name }}_ext_done);
+      #1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_write_enable = 0;
+      nclk();
+    end
+  endtask
+
+  task ioregister_read_{{ thread.name }}_{{ ioregister.name }};
+    output [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] data;
+    input [C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH-1:0] addr;
+    begin
+      nclk();
+      {{ thread.name }}_{{ ioregister.name }}_ext_read_enable = 1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_addr = addr;
+      {{ thread.name }}_{{ ioregister.name }}_ext_word_size = 1;
+      nclk();
+      nclk();
+      wait({{ thread.name }}_{{ ioregister.name }}_ext_done);
+      #1;
+      {{ thread.name }}_{{ ioregister.name }}_ext_read_enable = 0;
+      nclk();
+      wait(!{{ thread.name }}_{{ ioregister.name }}_ext_read_empty);
+      #1;
+      data = {{ thread.name }}_{{ ioregister.name }}_ext_read_data;
+      {{ thread.name }}_{{ ioregister.name }}_ext_read_deq = 1;
+      nclk();
+      {{ thread.name }}_{{ ioregister.name }}_ext_read_deq = 0;
+      nclk();
+    end
+  endtask
+{% endfor %}
+{%- endfor %}
+
+  //----------------------------------------------------------------------------
+  // Setting of User-defined I/O ports
+  //----------------------------------------------------------------------------
+  // Please add signal or module definitions here for simulation
+{% if usertestcode != '' %}
+{{ usertestcode }}
+{% endif %}
+  
+endmodule
+
+
+//------------------------------------------------------------------------------
+// DRAM Stub with Avalon Interface
+//------------------------------------------------------------------------------
+module dram_stub #
+  (
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}   
+   parameter integer C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH            = 32,
+   parameter integer C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH            = 32,
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}   
+   parameter integer C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH            = 32,
+   parameter integer C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH            = 32,
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}   
+   parameter integer C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH            = 32,
+   parameter integer C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH            = 32,
+{% endfor %}
+{%- endfor %}
+   parameter MEMIMG = "{{ memimg }}",
+   parameter SIM_ADDR_WIDTH = {{ simaddrwidth }},
+   parameter READ_LATENCY = 32,
+   parameter WRITE_LATENCY = 32
+   )
+  (
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}   
+   input  wire                               csi_sys_{{ thread.name }}_{{ memory.name }}_clk,
+   input  wire                               csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n,
+
+   input  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_address,
+   output reg                                avm_{{ thread.name }}_{{ memory.name }}_waitrequest,
+   input  wire [8-1:0]                       avm_{{ thread.name }}_{{ memory.name }}_burstcount,
+
+   input  wire                               avm_{{ thread.name }}_{{ memory.name }}_read,
+   output reg  [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_readdata,
+   output reg                                avm_{{ thread.name }}_{{ memory.name }}_readdatavalid,
+
+   input  wire                               avm_{{ thread.name }}_{{ memory.name }}_write,
+   input  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_writedata,
+{% endfor %}
+{% for instream in thread.instreams | sort(attribute='name') %}   
+   input  wire                               csi_sys_{{ thread.name }}_{{ instream.name }}_clk,
+   input  wire                               csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n,
+
+   input  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_address,
+   output reg                                avm_{{ thread.name }}_{{ instream.name }}_waitrequest,
+   input  wire [8-1:0]                       avm_{{ thread.name }}_{{ instream.name }}_burstcount,
+
+   input  wire                               avm_{{ thread.name }}_{{ instream.name }}_read,
+   output reg  [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_readdata,
+   output reg                                avm_{{ thread.name }}_{{ instream.name }}_readdatavalid,
+
+   input  wire                               avm_{{ thread.name }}_{{ instream.name }}_write,
+   input  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_writedata,
+{% endfor %}
+{% for outstream in thread.outstreams | sort(attribute='name') %}   
+   input  wire                               csi_sys_{{ thread.name }}_{{ outstream.name }}_clk,
+   input  wire                               csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n,
+
+   input  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_address,
+   output reg                                avm_{{ thread.name }}_{{ outstream.name }}_waitrequest,
+   input  wire [8-1:0]                       avm_{{ thread.name }}_{{ outstream.name }}_burstcount,
+
+   input  wire                               avm_{{ thread.name }}_{{ outstream.name }}_read,
+   output reg  [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_readdata,
+   output reg                                avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid,
+
+   input  wire                               avm_{{ thread.name }}_{{ outstream.name }}_write,
+   input  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_writedata,
+{% endfor %}
+{%- endfor %}
+
+   input csi_sys_user_clk, // User logic (Unused)
+   input csi_sys_user_reset_n // User logic (Unused)
+   );
+
+  //------------------------------------------------------------------------------
+  // Memory Field
+  //------------------------------------------------------------------------------
+  localparam MEMORY_LEN = (2 ** SIM_ADDR_WIDTH);
+  reg [7:0] memory [0:MEMORY_LEN-1];
+
+  integer i;
+  integer val;
+  integer __fp, __c;
+
+  initial begin
+    if(MEMIMG == "None") begin
+      val = 0;
+      for(i=0; i<MEMORY_LEN; i=i+1) begin
+        memory[i] = val >> (8 * (i % 4));
+        if((i % 4) == 3) val = val + 1;
+      end
+    end else begin
+{%- if binfile %}
+      __fp = $fopen(MEMIMG, "rb");
+      __c = $fread(memory, __fp);
+{%- else %}
+      $readmemh(MEMIMG, memory);
+{%- endif %}
+      $display("read memory image file %s", MEMIMG);
+    end
+  end
+
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}   
+  task mem_write_{{ thread.name }}_{{ memory.name }};
+    input [SIM_ADDR_WIDTH-1:0] addr;
+    input [SIM_ADDR_WIDTH-1:0] size;
+    input [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] data;
+    integer pos;
+    begin
+      for(pos=0; pos < size; pos=pos+1) begin
+        memory[addr+pos] = (data >> (8*pos)) & 'hFF;
+      end
+    end
+  endtask
+  
+  task mem_read_{{ thread.name }}_{{ memory.name }};
+    input [SIM_ADDR_WIDTH-1:0] addr;
+    input [SIM_ADDR_WIDTH-1:0] size;
+    output [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] data;
+    integer pos;
+    begin
+      data = 0;
+      for(pos=0; pos < size; pos=pos+1) begin
+        data = data | memory[addr+pos] << (8*pos);
+      end
+    end
+  endtask
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}   
+  task mem_write_{{ thread.name }}_{{ instream.name }};
+    input [SIM_ADDR_WIDTH-1:0] addr;
+    input [SIM_ADDR_WIDTH-1:0] size;
+    input [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] data;
+    integer pos;
+    begin
+      for(pos=0; pos < size; pos=pos+1) begin
+        memory[addr+pos] = (data >> (8*pos)) & 'hFF;
+      end
+    end
+  endtask
+  
+  task mem_read_{{ thread.name }}_{{ instream.name }};
+    input [SIM_ADDR_WIDTH-1:0] addr;
+    input [SIM_ADDR_WIDTH-1:0] size;
+    output [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] data;
+    integer pos;
+    begin
+      data = 0;
+      for(pos=0; pos < size; pos=pos+1) begin
+        data = data | memory[addr+pos] << (8*pos);
+      end
+    end
+  endtask
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}   
+  task mem_write_{{ thread.name }}_{{ outstream.name }};
+    input [SIM_ADDR_WIDTH-1:0] addr;
+    input [SIM_ADDR_WIDTH-1:0] size;
+    input [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] data;
+    integer pos;
+    begin
+      for(pos=0; pos < size; pos=pos+1) begin
+        memory[addr+pos] = (data >> (8*pos)) & 'hFF;
+      end
+    end
+  endtask
+  
+  task mem_read_{{ thread.name }}_{{ outstream.name }};
+    input [SIM_ADDR_WIDTH-1:0] addr;
+    input [SIM_ADDR_WIDTH-1:0] size;
+    output [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] data;
+    integer pos;
+    begin
+      data = 0;
+      for(pos=0; pos < size; pos=pos+1) begin
+        data = data | memory[addr+pos] << (8*pos);
+      end
+    end
+  endtask
+{% endfor %}
+{%- endfor %}
+
+  //------------------------------------------------------------------------------
+  // Timing Model
+  //------------------------------------------------------------------------------
+{%- for thread in threads | sort(attribute='name') %}
+{% for memory in thread.memories | sort(attribute='name') %}   
+  reg {{ thread.name }}_{{ memory.name }}_write_mode;
+  reg {{ thread.name }}_{{ memory.name }}_read_mode;
+  reg [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] d_avm_{{ thread.name }}_{{ memory.name }}_address;
+  reg [8-1:0] d_avm_{{ thread.name }}_{{ memory.name }}_burstcount;
+  reg [31:0] {{ thread.name }}_{{ memory.name }}_stall_count;
+  
+  always @(negedge csi_sys_{{ thread.name }}_{{ memory.name }}_clk) begin
+    if(!csi_sys_{{ thread.name }}_{{ memory.name }}_reset_n) begin
+      {{ thread.name }}_{{ memory.name }}_write_mode <= 0;
+      {{ thread.name }}_{{ memory.name }}_read_mode <= 0;
+      {{ thread.name }}_{{ memory.name }}_stall_count <= 0;
+    end else begin
+      avm_{{ thread.name }}_{{ memory.name }}_waitrequest = 1;
+      avm_{{ thread.name }}_{{ memory.name }}_readdatavalid = 0;
+      
+      if(!{{ thread.name }}_{{ memory.name }}_write_mode && avm_{{ thread.name }}_{{ memory.name }}_write) begin
+        {{ thread.name }}_{{ memory.name }}_stall_count <= {{ thread.name }}_{{ memory.name }}_stall_count + 1;
+        if({{ thread.name }}_{{ memory.name }}_stall_count == WRITE_LATENCY) begin
+          {{ thread.name }}_{{ memory.name }}_stall_count <= 0;
+          avm_{{ thread.name }}_{{ memory.name }}_waitrequest = 0;
+          mem_write_{{ thread.name }}_{{ memory.name }}(avm_{{ thread.name }}_{{ memory.name }}_address, C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ memory.name }}_writedata);
+          d_avm_{{ thread.name }}_{{ memory.name }}_address = avm_{{ thread.name }}_{{ memory.name }}_address + (C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH / 8);
+          d_avm_{{ thread.name }}_{{ memory.name }}_burstcount = avm_{{ thread.name }}_{{ memory.name }}_burstcount - 1;
+          if(d_avm_{{ thread.name }}_{{ memory.name }}_burstcount == 0) begin
+            {{ thread.name }}_{{ memory.name }}_write_mode <= 0;
+          end else begin
+            {{ thread.name }}_{{ memory.name }}_write_mode <= 1;
+          end
+        end
+      end
+
+      if(!{{ thread.name }}_{{ memory.name }}_read_mode && avm_{{ thread.name }}_{{ memory.name }}_read) begin
+        {{ thread.name }}_{{ memory.name }}_stall_count <= {{ thread.name }}_{{ memory.name }}_stall_count + 1;
+        if({{ thread.name }}_{{ memory.name }}_stall_count == READ_LATENCY) begin
+          {{ thread.name }}_{{ memory.name }}_read_mode <= 1;
+          {{ thread.name }}_{{ memory.name }}_stall_count <= 0;
+          avm_{{ thread.name }}_{{ memory.name }}_waitrequest = 0;
+          d_avm_{{ thread.name }}_{{ memory.name }}_address = avm_{{ thread.name }}_{{ memory.name }}_address;
+          d_avm_{{ thread.name }}_{{ memory.name }}_burstcount = avm_{{ thread.name }}_{{ memory.name }}_burstcount;
+        end
+      end
+      
+      if({{ thread.name }}_{{ memory.name }}_write_mode) begin
+        avm_{{ thread.name }}_{{ memory.name }}_waitrequest = 0;
+        if(avm_{{ thread.name }}_{{ memory.name }}_write) begin
+          mem_write_{{ thread.name }}_{{ memory.name }}(d_avm_{{ thread.name }}_{{ memory.name }}_address, C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ memory.name }}_writedata);
+          d_avm_{{ thread.name }}_{{ memory.name }}_address = d_avm_{{ thread.name }}_{{ memory.name }}_address + (C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH / 8);
+          d_avm_{{ thread.name }}_{{ memory.name }}_burstcount = d_avm_{{ thread.name }}_{{ memory.name }}_burstcount - 1;
+          if(d_avm_{{ thread.name }}_{{ memory.name }}_burstcount == 0) begin
+            {{ thread.name }}_{{ memory.name }}_write_mode <= 0;
+          end
+        end
+      end
+
+      if({{ thread.name }}_{{ memory.name }}_read_mode) begin
+        mem_read_{{ thread.name }}_{{ memory.name }}(d_avm_{{ thread.name }}_{{ memory.name }}_address, C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ memory.name }}_readdata);
+        avm_{{ thread.name }}_{{ memory.name }}_readdatavalid = 1;
+        d_avm_{{ thread.name }}_{{ memory.name }}_address = d_avm_{{ thread.name }}_{{ memory.name }}_address + (C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH / 8);
+        d_avm_{{ thread.name }}_{{ memory.name }}_burstcount = d_avm_{{ thread.name }}_{{ memory.name }}_burstcount - 1;
+        if(d_avm_{{ thread.name }}_{{ memory.name }}_burstcount == 0) begin
+          {{ thread.name }}_{{ memory.name }}_read_mode <= 0;
+        end
+      end
+
+    end
+  end
+{% endfor %}
+
+{% for instream in thread.instreams | sort(attribute='name') %}   
+  reg {{ thread.name }}_{{ instream.name }}_write_mode;
+  reg {{ thread.name }}_{{ instream.name }}_read_mode;
+  reg [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] d_avm_{{ thread.name }}_{{ instream.name }}_address;
+  reg [8-1:0] d_avm_{{ thread.name }}_{{ instream.name }}_burstcount;
+  reg [31:0] {{ thread.name }}_{{ instream.name }}_stall_count;
+  
+  always @(negedge csi_sys_{{ thread.name }}_{{ instream.name }}_clk) begin
+    if(!csi_sys_{{ thread.name }}_{{ instream.name }}_reset_n) begin
+      {{ thread.name }}_{{ instream.name }}_write_mode <= 0;
+      {{ thread.name }}_{{ instream.name }}_read_mode <= 0;
+      {{ thread.name }}_{{ instream.name }}_stall_count <= 0;
+    end else begin
+      avm_{{ thread.name }}_{{ instream.name }}_waitrequest = 1;
+      avm_{{ thread.name }}_{{ instream.name }}_readdatavalid = 0;
+      
+      if(!{{ thread.name }}_{{ instream.name }}_write_mode && avm_{{ thread.name }}_{{ instream.name }}_write) begin
+        {{ thread.name }}_{{ instream.name }}_stall_count <= {{ thread.name }}_{{ instream.name }}_stall_count + 1;
+        if({{ thread.name }}_{{ instream.name }}_stall_count == WRITE_LATENCY) begin
+          {{ thread.name }}_{{ instream.name }}_stall_count <= 0;
+          avm_{{ thread.name }}_{{ instream.name }}_waitrequest = 0;
+          mem_write_{{ thread.name }}_{{ instream.name }}(avm_{{ thread.name }}_{{ instream.name }}_address, C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ instream.name }}_writedata);
+          d_avm_{{ thread.name }}_{{ instream.name }}_address = avm_{{ thread.name }}_{{ instream.name }}_address + (C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH / 8);
+          d_avm_{{ thread.name }}_{{ instream.name }}_burstcount = avm_{{ thread.name }}_{{ instream.name }}_burstcount - 1;
+          if(d_avm_{{ thread.name }}_{{ instream.name }}_burstcount == 0) begin
+            {{ thread.name }}_{{ instream.name }}_write_mode <= 0;
+          end else begin
+            {{ thread.name }}_{{ instream.name }}_write_mode <= 1;
+          end
+        end
+      end
+
+      if(!{{ thread.name }}_{{ instream.name }}_read_mode && avm_{{ thread.name }}_{{ instream.name }}_read) begin
+        {{ thread.name }}_{{ instream.name }}_stall_count <= {{ thread.name }}_{{ instream.name }}_stall_count + 1;
+        if({{ thread.name }}_{{ instream.name }}_stall_count == READ_LATENCY) begin
+          {{ thread.name }}_{{ instream.name }}_read_mode <= 1;
+          {{ thread.name }}_{{ instream.name }}_stall_count <= 0;
+          avm_{{ thread.name }}_{{ instream.name }}_waitrequest = 0;
+          d_avm_{{ thread.name }}_{{ instream.name }}_address = avm_{{ thread.name }}_{{ instream.name }}_address;
+          d_avm_{{ thread.name }}_{{ instream.name }}_burstcount = avm_{{ thread.name }}_{{ instream.name }}_burstcount;
+        end
+      end
+      
+      if({{ thread.name }}_{{ instream.name }}_write_mode) begin
+        avm_{{ thread.name }}_{{ instream.name }}_waitrequest = 0;
+        if(avm_{{ thread.name }}_{{ instream.name }}_write) begin
+          mem_write_{{ thread.name }}_{{ instream.name }}(d_avm_{{ thread.name }}_{{ instream.name }}_address, C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ instream.name }}_writedata);
+          d_avm_{{ thread.name }}_{{ instream.name }}_address = d_avm_{{ thread.name }}_{{ instream.name }}_address + (C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH / 8);
+          d_avm_{{ thread.name }}_{{ instream.name }}_burstcount = d_avm_{{ thread.name }}_{{ instream.name }}_burstcount - 1;
+          if(d_avm_{{ thread.name }}_{{ instream.name }}_burstcount == 0) begin
+            {{ thread.name }}_{{ instream.name }}_write_mode <= 0;
+          end
+        end
+      end
+
+      if({{ thread.name }}_{{ instream.name }}_read_mode) begin
+        mem_read_{{ thread.name }}_{{ instream.name }}(d_avm_{{ thread.name }}_{{ instream.name }}_address, C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ instream.name }}_readdata);
+        avm_{{ thread.name }}_{{ instream.name }}_readdatavalid = 1;
+        d_avm_{{ thread.name }}_{{ instream.name }}_address = d_avm_{{ thread.name }}_{{ instream.name }}_address + (C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH / 8);
+        d_avm_{{ thread.name }}_{{ instream.name }}_burstcount = d_avm_{{ thread.name }}_{{ instream.name }}_burstcount - 1;
+        if(d_avm_{{ thread.name }}_{{ instream.name }}_burstcount == 0) begin
+          {{ thread.name }}_{{ instream.name }}_read_mode <= 0;
+        end
+      end
+
+    end
+  end
+{% endfor %}
+
+{% for outstream in thread.outstreams | sort(attribute='name') %}   
+  reg {{ thread.name }}_{{ outstream.name }}_write_mode;
+  reg {{ thread.name }}_{{ outstream.name }}_read_mode;
+  reg [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] d_avm_{{ thread.name }}_{{ outstream.name }}_address;
+  reg [8-1:0] d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
+  reg [31:0] {{ thread.name }}_{{ outstream.name }}_stall_count;
+  
+  always @(negedge csi_sys_{{ thread.name }}_{{ outstream.name }}_clk) begin
+    if(!csi_sys_{{ thread.name }}_{{ outstream.name }}_reset_n) begin
+      {{ thread.name }}_{{ outstream.name }}_write_mode <= 0;
+      {{ thread.name }}_{{ outstream.name }}_read_mode <= 0;
+      {{ thread.name }}_{{ outstream.name }}_stall_count <= 0;
+    end else begin
+      avm_{{ thread.name }}_{{ outstream.name }}_waitrequest = 1;
+      avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid = 0;
+      
+      if(!{{ thread.name }}_{{ outstream.name }}_write_mode && avm_{{ thread.name }}_{{ outstream.name }}_write) begin
+        {{ thread.name }}_{{ outstream.name }}_stall_count <= {{ thread.name }}_{{ outstream.name }}_stall_count + 1;
+        if({{ thread.name }}_{{ outstream.name }}_stall_count == WRITE_LATENCY) begin
+          {{ thread.name }}_{{ outstream.name }}_stall_count <= 0;
+          avm_{{ thread.name }}_{{ outstream.name }}_waitrequest = 0;
+          mem_write_{{ thread.name }}_{{ outstream.name }}(avm_{{ thread.name }}_{{ outstream.name }}_address, C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ outstream.name }}_writedata);
+          d_avm_{{ thread.name }}_{{ outstream.name }}_address = avm_{{ thread.name }}_{{ outstream.name }}_address + (C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH / 8);
+          d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount = avm_{{ thread.name }}_{{ outstream.name }}_burstcount - 1;
+          if(d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount == 0) begin
+            {{ thread.name }}_{{ outstream.name }}_write_mode <= 0;
+          end else begin
+            {{ thread.name }}_{{ outstream.name }}_write_mode <= 1;
+          end
+        end
+      end
+
+      if(!{{ thread.name }}_{{ outstream.name }}_read_mode && avm_{{ thread.name }}_{{ outstream.name }}_read) begin
+        {{ thread.name }}_{{ outstream.name }}_stall_count <= {{ thread.name }}_{{ outstream.name }}_stall_count + 1;
+        if({{ thread.name }}_{{ outstream.name }}_stall_count == READ_LATENCY) begin
+          {{ thread.name }}_{{ outstream.name }}_read_mode <= 1;
+          {{ thread.name }}_{{ outstream.name }}_stall_count <= 0;
+          avm_{{ thread.name }}_{{ outstream.name }}_waitrequest = 0;
+          d_avm_{{ thread.name }}_{{ outstream.name }}_address = avm_{{ thread.name }}_{{ outstream.name }}_address;
+          d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount = avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
+        end
+      end
+      
+      if({{ thread.name }}_{{ outstream.name }}_write_mode) begin
+        avm_{{ thread.name }}_{{ outstream.name }}_waitrequest = 0;
+        if(avm_{{ thread.name }}_{{ outstream.name }}_write) begin
+          mem_write_{{ thread.name }}_{{ outstream.name }}(d_avm_{{ thread.name }}_{{ outstream.name }}_address, C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ outstream.name }}_writedata);
+          d_avm_{{ thread.name }}_{{ outstream.name }}_address = d_avm_{{ thread.name }}_{{ outstream.name }}_address + (C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH / 8);
+          d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount = d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount - 1;
+          if(d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount == 0) begin
+            {{ thread.name }}_{{ outstream.name }}_write_mode <= 0;
+          end
+        end
+      end
+
+      if({{ thread.name }}_{{ outstream.name }}_read_mode) begin
+        mem_read_{{ thread.name }}_{{ outstream.name }}(d_avm_{{ thread.name }}_{{ outstream.name }}_address, C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH/8, avm_{{ thread.name }}_{{ outstream.name }}_readdata);
+        avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid = 1;
+        d_avm_{{ thread.name }}_{{ outstream.name }}_address = d_avm_{{ thread.name }}_{{ outstream.name }}_address + (C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH / 8);
+        d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount = d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount - 1;
+        if(d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount == 0) begin
+          {{ thread.name }}_{{ outstream.name }}_read_mode <= 0;
+        end
+      end
+
+    end
+  end
+{% endfor %}
+{%- endfor %}
+
+endmodule
+

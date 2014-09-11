@@ -1,2 +1,0 @@
-
-lib pycoram_{{ userlogic_name }}{{ ipcore_version }} {{ hdlname }} verilog

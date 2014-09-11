@@ -1,21 +1,25 @@
 What's PyCoRAM?
 ==============================
 
-PyCoRAM is a Python-based Implementation of CoRAM (Connected RAM) Memory Architecture.
-PyCoRAM generates AXI4 IP-core design from your computing kernel logic and memory access pattern descriptions in Python.
-The generated IP-core can be used as a standard IP-core with other common IP-cores together on vendor-provided EDK.
-PyCoRAM includes a Verilog-to-Verilog design translator and a Python-to-Verilog high-level synthesis compiler to generate a control logic of memory operations.
+PyCoRAM is a Python-based portable IP-core synthesis framework with CoRAM (Connected RAM) memory architecture.
 
-PyCoRAM differs in some points from the original soft-logic implementation of CoRAM on existing FPGAs.
+PyCoRAM framework generates a portable IP-core package from computing logic descriptions in Verilog HDL and memory access pattern descriptions in Python.
+Designers can easily build an FPGA-based custom accelerator using a generated IP-core with any common IP-cores on vendor-provided EDA tools.
+PyCoRAM framework includes (1) the Verilog-to-Verilog design translation compiler and (2) the Python-to-Verilog high-level synthesis (HLS) compiler for generating control circuits of memory operations.
+
+There are some major differences between PyCoRAM and the original soft-logic implementation of CoRAM.
 
 * Memory access pattern representation in Python
-    - The original CoRAM uses C to represent a memory access pattern (control thread). In PyCoRAM, you can describe in easier way using popular scripting language.
-    - The Python script of memory access pattern is translated into hardware design of Verilog HDL by a Python-to-Verilog high-level synthesis compiler.
-* AMBA AXI4 Interconnection Support
-    - The original CoRAM uses CONNECT to generate an on-chip interconnect. PyCoRAM compiler generates IP-core design for AXI4 interconnection from you computing kernel logic. AMBA AXI4 is standard interconnection architecture supported in various environments.
+    - The original CoRAM uses C language to represent a memory access pattern (called 'control thread').
+    - In PyCoRAM, you can easily describe them by using popular lightweight scripting language.
+    - A Python script of memory access patterns is translated into an RT-level hardware design in Verilog HDL by the Python-to-Verilog high-level synthesis compiler.
+* Commercial interconnect supports (AMBA AXI4 and Altera Avalon)
+    - The original CoRAM uses CONNECT to generate an on-chip interconnect.
+    - PyCoRAM compiler generates a IP-core design with AMBA AXI4 or Altera Avalon. Both are commonly used on vendor-provided EDA tools.
 * Parameterized RTL Design Support
-    - The original CoRAM has some limitations in description of computing kernel logic. PyCoRAM has a sophisticated RTL analyzer to translate your logic design into suitable design for PyCoRAM.
-
+    - The original CoRAM has some limitations in Verilog HDL description of computing logic, such as no supports of generate statement.
+    - PyCoRAM has a sophisticated RTL analyzer/translator to convert RTL descriptions into synthesizable IP-core package under memory abstractions of CoRAM.
+    
 
 Requirements
 ==============================
@@ -23,36 +27,63 @@ Requirements
 Software
 --------------------------------------------------------------------------------
 
-### For simulation
-
-* Python3 (3.3 or later)
-* Pyverilog (0.7.0 or later)
-    - My original hardware design processing toolkit for Verilog HDL
-    - Pyverilog-lite is included in this package.
+* Python (2.7 or later, 3.3 or later)
 * Icarus Verilog (0.9.6 or later)
-   - Preprocessor of Pyverilog uses 'iverilog -E' command instead of the preprocessor.
+   - 'iverilog -E' command is used for the preprocessor.
 * Jinja2 (2.7 or later)
-   - Code generator requires jinja2 module.
-   - 'pip3 install jinja2'
+   - The code generator uses Jinja2 template engine.
+   - 'pip install jinja2' (for Python 2.x) or 'pip3 install jinja2' (for Python 3.x)
 
-Icarus Verilog and Synopsys VCS are supported for Verilog simulation.
 
-### For synthesis of an FPGA circuit design (bit-file)
+* Pyverilog (Python-based Verilog HDL Design Processing Toolkit) is already included in this package.
+
+### for RTL simulation
+
+* Icarus Verilog or Synopsys VCS
+   - Icarus Verilog is an open-sourced Verilog simulator
+   - VCS is a very fast commercial Verilog simulator
+
+### for bitstream synthesis
 
 * Xilinx Platform Studio (14.6 or later)
+* Altera Qsys (14.0 or later)
 
 (Recommended) FPGA Board
 --------------------------------------------------------------------------------
 
-* Digilent Atlys (Spartan-6)
-* Xilinx ML605 (Virtex-6)
-* Xilinx VC707 (Virtex-7)
+* Digilent Atlys (Xilinx Spartan-6)
+* Xilinx ML605 (Xilinx Virtex-6)
+* Xilinx VC707 (Xilinx Virtex-7)
+* Altera DE2-115 (Altera Cyclone-4)
+* Altera Cyclone-5 GX Starter Kit
+
+
+Installation
+==============================
+
+If you want to use PyCoRAM as a general library, you can install on your environment by using setup.py.
+
+If Python 2.7 is used,
+
+    python setup.py install
+
+If Python 3.x is used,
+
+    python3 setup.py install
+
+Then you can use the pycoram command from your console.
+
+    pycoram-0.9.0-py3.4.1
 
 
 Getting Started
 ==============================
 
-You can find the sample input projects in 'input/tests/single\_memory'.
+First, please check 'base.mk' in 'sample'. If you use the installed pycoram command on your environment, please modify 'TARGET' in base.mk as below (the version number depends on your environment)
+
+    TARGET=pycoram-0.9.0-py2.7.0
+
+You can find the sample projects in 'sample/tests/single\_memory'.
 
 * ctrl\_thread.py : Control-thread definition in Python
 * userlogic.v  : User-defined Verilog code using CoRAM memory blocks
@@ -64,7 +95,7 @@ Then type 'make' and 'make run' to simulate sample system.
 
 Or type commands as below directly.
 
-    python3 pycoram.py -t userlogic -I ./include/ ./input/tests/single_memory/ctrl_thread.py ./input/tests/single_memory/userlogic.v
+    python3 pycoram/pycoram.py sample/default.config -t userlogic -I include/ sample/tests/single_memory/ctrl_thread.py sample/tests/single_memory/userlogic.v
     iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
     ./a.out
 
@@ -79,7 +110,7 @@ A bit-stream can be synthesized by using Xilinx Platform Studio.
 Please copy the generated IP-core into 'pcores' directory of XPS project.
 
 
-This software has some sample project in 'input'.
+This software has some sample project in 'sample'.
 To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST)
 
 
@@ -89,7 +120,7 @@ PyCoRAM Command Options
 Command
 ------------------------------
 
-    python3 pycoram.py [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [--simaddrwidth=int] [--noaxi] [-o outputfile] [file]+
+    python3 pycoram.py config.conf [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+
 
 Description
 ------------------------------
@@ -109,12 +140,6 @@ Description
 * --usertest
     - User-defined test code file (option, if you need).
       The code is copied into testbench script.
-* --simaddrwidth
-    - DRAM address width of DRAM stub in the testbench.
-* --noaxi
-    - The compiler does NOT generate the system with AXI4 bus interface. default is disabled.
-* -o
-    - Name of output file in no-AXI mode. default is "out.v".
 
 
 Publication
@@ -146,7 +171,7 @@ Apache License 2.0
 Copyright and Contact
 ==============================
 
-Copyright (C) 2014, Shinya Takamaeda-Yamazaki
+Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
 E-mail: shinya\_at\_is.naist.jp
 

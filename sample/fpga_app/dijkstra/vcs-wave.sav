@@ -1,0 +1,78 @@
+[timestart] 0
+[size] 1873 1176
+[pos] -874 -1
+*-21.000000 2570000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test_top.
+[treeopen] test_top.uut.
+[treeopen] test_top.uut.inst_uut.
+[treeopen] test_top.uut.inst_uut.inst_dijkstra.
+@22
+test_top.uut.inst_uut.inst_dijkstra.start_node_addr[31:0]
+test_top.uut.inst_uut.inst_dijkstra.goal_node_addr[31:0]
+test_top.uut.inst_uut.inst_dijkstra.state[7:0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.read_node_req_addr[31:0]
+@28
+test_top.uut.inst_uut.inst_dijkstra.read_node_req_ready[0]
+test_top.uut.inst_uut.inst_dijkstra.read_node_req_valid[0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.read_node_page_addr[31:0]
+test_top.uut.inst_uut.inst_dijkstra.read_node_current_cost[31:0]
+@24
+test_top.uut.inst_uut.inst_dijkstra.current_cost[31:0]
+@23
+test_top.uut.inst_uut.inst_dijkstra.current_node_addr[31:0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.read_edge_req_addr[31:0]
+@28
+test_top.uut.inst_uut.inst_dijkstra.read_edge_req_ready[0]
+test_top.uut.inst_uut.inst_dijkstra.read_edge_req_valid[0]
+@200
+-
+@28
+test_top.uut.inst_uut.inst_dijkstra.read_edge_data_end[0]
+test_top.uut.inst_uut.inst_dijkstra.read_edge_data_ready[0]
+test_top.uut.inst_uut.inst_dijkstra.read_edge_data_valid[0]
+@22
+test_top.uut.inst_uut.inst_dijkstra.read_edge_next_addr[31:0]
+test_top.uut.inst_uut.inst_dijkstra.read_edge_next_cost[31:0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.read_node_req_addr[31:0]
+@28
+test_top.uut.inst_uut.inst_dijkstra.read_node_req_ready[0]
+test_top.uut.inst_uut.inst_dijkstra.read_node_req_valid[0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.read_node_current_cost[31:0]
+@28
+test_top.uut.inst_uut.inst_dijkstra.read_node_data_valid[0]
+test_top.uut.inst_uut.inst_dijkstra.read_node_data_ready[0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.write_node_update_next_cost[31:0]
+test_top.uut.inst_uut.inst_dijkstra.write_node_update_parent_addr[31:0]
+test_top.uut.inst_uut.inst_dijkstra.write_node_update_write_addr[31:0]
+@28
+test_top.uut.inst_uut.inst_dijkstra.write_node_update_write_empty[0]
+test_top.uut.inst_uut.inst_dijkstra.write_node_update_write_ready[0]
+test_top.uut.inst_uut.inst_dijkstra.write_node_update_write_valid[0]
+@200
+-
+@22
+test_top.uut.inst_uut.inst_dijkstra.frontier_write_cost[31:0]
+test_top.uut.inst_uut.inst_dijkstra.frontier_write_node_addr[31:0]
+@28
+test_top.uut.inst_uut.inst_dijkstra.frontier_write_ready[0]
+test_top.uut.inst_uut.inst_dijkstra.frontier_write_valid[0]
+[pattern_trace] 1
+[pattern_trace] 0
