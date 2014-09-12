@@ -122,7 +122,7 @@ module CoramOutStream(CLK, RST, D, ENQ, FULL, ALM_FULL);
 endmodule
 
 //------------------------------------------------------------------------------
-// CoRAM Channel (Transparent FIFO with LUT-RAM)
+// CoRAM Channel (Non-Transparent FIFO with BlockRAM)
 //------------------------------------------------------------------------------
 module CoramChannel(CLK, RST,
                     D, ENQ, FULL, ALM_FULL,
