@@ -112,8 +112,8 @@ class RtlConverter(object):
                     not (signaltype.isClock(signame) or signaltype.isReset(signame)) and
                     isinstance(svv, vast.Input) or isinstance(svv, vast.Output) or isinstance(svv, vast.Inout)):
                     port = svv
-                    msb_val = instanceconvert_visitor.getTree(port.width.msb, top_scope)
-                    lsb_val = instanceconvert_visitor.getTree(port.width.lsb, top_scope)
+                    msb_val = instanceconvert_visitor.optimize(instanceconvert_visitor.getTree(port.width.msb, top_scope))
+                    lsb_val = instanceconvert_visitor.optimize(instanceconvert_visitor.getTree(port.width.lsb, top_scope))
                     width = int(msb_val.value) - int(lsb_val.value) + 1
                     self.top_ioports[signame] = (port, width)
                     break
