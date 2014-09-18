@@ -1444,9 +1444,8 @@ class CompileVisitor(ast.NodeVisitor):
 
     def visit_Return(self, node):
         if node.value is None:
-            self.setFsm()
+            self.addReturn(None)
             self.incFsmCount()
-            self.addReturn(node.value)
             return None
 
         retvar = self.getReturnVariable()
@@ -1454,9 +1453,8 @@ class CompileVisitor(ast.NodeVisitor):
             left = vast.Identifier(retvar)
             right = self.visit(node.value)
             self.setBind(left, right)
-            self.setFsm()
+            self.addReturn(right)
             self.incFsmCount()
-            self.addReturn(node.value)
             return left
 
         tmp = self.getTmpVariable()
@@ -1464,9 +1462,8 @@ class CompileVisitor(ast.NodeVisitor):
         left = vast.Identifier(tmp)
         right = self.visit(node.value)
         self.setBind(left, right)
-        self.setFsm()
+        self.addReturn(right)
         self.incFsmCount()
-        self.addReturn(node.value)
         return left
 
     def visit_Num(self, node):

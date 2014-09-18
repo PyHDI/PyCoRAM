@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 from pyverilog.vparser.ast import *
 from pyverilog.dataflow.dataflow import *
 from pyverilog.utils.scope import *
+import pyverilog.dataflow.reorder as reorder
 import pyverilog.utils.op2mark
 
 def getDFTree(node):
@@ -42,20 +43,20 @@ def makeDFTree(node):
         false_df = makeDFTree(node.false_value)
         cond_df = makeDFTree(node.cond)
         if isinstance(cond_df, DFBranch):
-            return tree_reorder.insertCond(cond_df, true_df, false_df)
+            return reorder.insertCond(cond_df, true_df, false_df)
         return DFBranch(cond_df, true_df, false_df)
 
     if isinstance(node, UnaryOperator):
         right_df = makeDFTree(node.right)
         if isinstance(right_df, DFBranch):
-            return tree_reorder.insertUnaryOp(right_df, node.__class__.__name__)
+            return reorder.insertUnaryOp(right_df, node.__class__.__name__)
         return DFOperator((right_df,), node.__class__.__name__)
 
     if isinstance(node, Operator):
         left_df = makeDFTree(node.left)
         right_df = makeDFTree(node.right)
         if isinstance(left_df, DFBranch) or isinstance(right_df, DFBranch):
-            return tree_reorder.insertOp(left_df, right_df, node.__class__.__name__)
+            return reorder.insertOp(left_df, right_df, node.__class__.__name__)
         return DFOperator((left_df, right_df,), node.__class__.__name__)
 
     if isinstance(node, SystemCall):

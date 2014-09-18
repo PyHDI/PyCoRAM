@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # pycoram.py
 #
-# PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture
+# PyCoRAM: Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 # 
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
@@ -570,9 +570,9 @@ class SystemBuilder(object):
 #---------------------------------------------------------------------------
 def main():
     from optparse import OptionParser
-    INFO = "PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based computing"
+    INFO = "PyCoRAM: Python-based Portable IP-core Synthesis Framework for FPGA-based Computing"
     VERSION = utils.version.VERSION
-    USAGE = "Usage: python pycoram.py [-t topmodule] [-I includepath]+ [file]+"
+    USAGE = "Usage: python pycoram.py [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+"
 
     def showVersion():
         print(INFO)
@@ -589,10 +589,10 @@ def main():
                          default=[],help="Include path")
     optparser.add_option("-D",dest="define",action="append",
                          default=[],help="Macro Definition")
-    optparser.add_option("--usertest",dest="usertest",
-                         default=None,help="User-defined test bench file, Default=None")
     optparser.add_option("--memimg",dest="memimg",
                          default=None,help="Memory image file, Default=None")
+    optparser.add_option("--usertest",dest="usertest",
+                         default=None,help="User-defined test bench file, Default=None")
 
     (options, args) = optparser.parse_args()
 
@@ -645,9 +645,7 @@ def main():
     if configfile is not None:
         confp.read(configfile)
 
-    #if 'synthesis' in confp:
     if confp.has_section('synthesis'):
-        #for k, v in confp['synthesis'].items():
         for k, v in confp.items('synthesis'):
             if k == 'single_clock' or k == 'io_lite':
                 configs[k] = False if 'n' in v or 'N' in v else True
@@ -658,9 +656,7 @@ def main():
             else:
                 configs[k] = v
 
-    #if 'simulation' in confp:
     if confp.has_section('simulation'):
-        #for k, v in confp['simulation'].items():
         for k, v in confp.items('simulation'):
             if k == 'sim_addrwidth' or k == 'hperiod_ulogic' or k == 'hperiod_cthread' or k == 'hperiod_bus':
                 configs[k] = int(v)
