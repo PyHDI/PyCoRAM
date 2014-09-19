@@ -380,9 +380,6 @@ class CompileVisitor(ast.NodeVisitor):
             self.setFsm(body_end_count, check_count)
             self.setFsm(check_count, body_begin_count, cond_node, loop_exit_count)
 
-            self.setFsm()
-            self.incFsmCount()
-
             unresolved_break = self.getUnresolvedBreak()
             for b in unresolved_break:
                 self.setFsm(b, loop_exit_count)
