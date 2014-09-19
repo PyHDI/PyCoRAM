@@ -389,7 +389,7 @@ class CompileVisitor(ast.NodeVisitor):
 
             unresolved_continue = self.getUnresolvedContinue()
             for c in unresolved_continue:
-                self.setFsm(c, check_count)
+                self.setFsm(c, body_end_count)
             
             self.clearBreak()
             self.clearContinue()
