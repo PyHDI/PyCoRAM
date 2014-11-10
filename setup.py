@@ -2,9 +2,13 @@ from setuptools import setup, find_packages
 
 import pycoram.utils.version
 import re
+import os
 
 m = re.search(r'(\d+\.\d+\.\d+)', pycoram.utils.version.VERSION)
 version = m.group(1) if m is not None else '0.0.0'
+
+def read(filename):
+    return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
 import sys
 script_name = 'pycoram-' + version + '-py' + '.'.join([str(s) for s in sys.version_info[:3]])
