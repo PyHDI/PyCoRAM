@@ -12,12 +12,15 @@ script_name = 'pycoram-' + version + '-py' + '.'.join([str(s) for s in sys.versi
 setup(name='pycoram',
       version=version,
       description='Python-based Portable IP-core Synthesis Framework for FPGA-based Computing',
+      long_description=read('README.md'),
+      keywords = 'FPGA, Verilog HDL, High-Level Synthesis, Memory System Abstraction, IP-core, AMBA AXI4, Altera Avalon',
       author='Shinya Takamaeda-Yamazaki',
+      license="Apache License 2.0",
       url='http://shtaxxx.github.io/Pycoram/',
       packages=find_packages(),
       package_data={ 'pycoram.template' : ['*.*'],
-                     'pycoram.pyverilog.ast_code_generator' : ['template/*'], 
-                     'pycoram.pyverilog' : ['testcode/*'],
+#                     'pycoram.pyverilog.ast_code_generator' : ['template/*'], 
+#                     'pycoram.pyverilog' : ['testcode/*'],
                  },
       entry_points="""
       [console_scripts]
