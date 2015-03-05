@@ -5,6 +5,7 @@ clean:
 	make clean -C ioregister
 	make clean -C multipage
 	make clean -C multithread
+	make clean -C nologic
 	make clean -C nonblocking
 	make clean -C scattergather
 	make clean -C single_memory
@@ -17,6 +18,7 @@ build:
 	make build -C ioregister
 	make build -C multipage
 	make build -C multithread
+	make build -C nologic
 	make build -C nonblocking
 	make build -C scattergather
 	make build -C single_memory
@@ -29,6 +31,7 @@ sim:
 	make sim -C ioregister
 	make sim -C multipage
 	make sim -C multithread
+	make sim -C nologic
 	make sim -C nonblocking
 	make sim -C scattergather
 	make sim -C single_memory
@@ -41,6 +44,7 @@ vcs_sim:
 	make vcs_sim -C ioregister
 	make vcs_sim -C multipage
 	make vcs_sim -C multithread
+	make vcs_sim -C nologic
 	make vcs_sim -C nonblocking
 	make vcs_sim -C scattergather
 	make vcs_sim -C single_memory
@@ -53,6 +57,7 @@ test:
 	make test -C ioregister
 	make test -C multipage
 	make test -C multithread
+	make test -C nologic
 	make test -C nonblocking
 	make test -C scattergather
 	make test -C single_memory
@@ -65,6 +70,7 @@ vcs_test:
 	make vcs_test -C ioregister
 	make vcs_test -C multipage
 	make vcs_test -C multithread
+	make vcs_test -C nologic
 	make vcs_test -C nonblocking
 	make vcs_test -C scattergather
 	make vcs_test -C single_memory
