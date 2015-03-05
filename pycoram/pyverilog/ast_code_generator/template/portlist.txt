@@ -1,2 +1,0 @@
-{% for port in ports %}{{ port }}{% if loop.index < len_ports %}, {% endif %}
-{% endfor %}

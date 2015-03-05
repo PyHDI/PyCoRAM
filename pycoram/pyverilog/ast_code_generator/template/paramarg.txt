@@ -1,1 +1,0 @@
-{%- if paramname != '' -%}.{{ paramname }}({{ argname }}){%- else -%}{{ argname }}{%- endif -%}

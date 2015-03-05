@@ -1,5 +1,0 @@
-begin{% if scope != '' %} : {{ scope }}{% endif %}
-  {%- for statement in statements %}        
-  {{ statement }}
-  {%- endfor %}
-end 

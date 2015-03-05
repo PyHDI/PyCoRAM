@@ -64,27 +64,36 @@ Software
 
 -  Python (2.7 or later, 3.3 or later)
 -  Icarus Verilog (0.9.6 or later)
--  'iverilog -E' command is used for the preprocessor.
--  Jinja2 (2.7 or later)
--  The code generator uses Jinja2 template engine.
--  'pip install jinja2' (for Python 2.x) or 'pip3 install jinja2' (for
-   Python 3.x)
 
--  Pyverilog (Python-based Verilog HDL Design Processing Toolkit) is
-   already included in this package.
+   -  'iverilog -E' command is used for preprocessing Verilog source
+      code.
+
+-  Jinja2 (2.7 or later)
+
+   -  The code generator uses Jinja2 template engine.
+   -  'pip install jinja2' (for Python 2.x) or 'pip3 install jinja2'
+      (for Python 3.x)
+
+-  Pyverilog (Python-based Verilog HDL Design Processing Toolkit)
+
+   -  Install from pip: 'pip install pyverilog' for Python2.7 or 'pip3
+      install pyverilog' for Python3
+   -  Install from github into this package: 'cd Pycoram; git clone
+      https://github.com/shtaxxx/Pyverilog.git'
 
 for RTL simulation
 ~~~~~~~~~~~~~~~~~~
 
 -  Icarus Verilog or Synopsys VCS
--  Icarus Verilog is an open-sourced Verilog simulator
--  VCS is a very fast commercial Verilog simulator
+
+   -  Icarus Verilog is an open-sourced Verilog simulator
+   -  VCS is a very fast commercial Verilog simulator
 
 for bitstream synthesis
 ~~~~~~~~~~~~~~~~~~~~~~~
 
--  Xilinx Platform Studio (14.6 or later)
--  Altera Qsys (14.0 or later)
+-  for Xilinx: Xilinx Platform Studio (14.6 or later)
+-  for Altera: Qsys (14.0 or later)
 
 (Recommended) FPGA Board
 ------------------------
@@ -92,6 +101,8 @@ for bitstream synthesis
 -  Digilent Atlys (Xilinx Spartan-6)
 -  Xilinx ML605 (Xilinx Virtex-6)
 -  Xilinx VC707 (Xilinx Virtex-7)
+-  Xilinx ZedBoard (Xilinx Zynq 7020)
+-  Xilinx ZC706 (Xilinx Zynq 7045)
 -  Altera DE2-115 (Altera Cyclone-4)
 -  Altera Cyclone-5 GX Starter Kit
 

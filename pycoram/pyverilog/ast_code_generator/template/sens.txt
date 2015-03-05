@@ -1,1 +1,0 @@
-{% if type != '' %}{{ type }} {% endif %}{{ sig }}

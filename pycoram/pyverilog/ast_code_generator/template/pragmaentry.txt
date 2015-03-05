@@ -1,1 +1,0 @@
-{{ name }}{% if value != '' %} = {{ value }}{% endif %}
