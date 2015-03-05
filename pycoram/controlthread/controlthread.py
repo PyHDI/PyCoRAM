@@ -1843,7 +1843,7 @@ class ControlThreadGenerator(object):
                 source_src.append( inspect.getsource(global_func) )
 
         if filename is not None:
-            source.append( open(filename, 'r').read() )
+            source_src.append( open(filename, 'r').read() )
 
         if ((func is not None and function_lib is None) or 
             (func is not None and
