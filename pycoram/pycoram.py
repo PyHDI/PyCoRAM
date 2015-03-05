@@ -14,6 +14,7 @@ import re
 import copy
 import shutil
 import glob
+import collections
 from jinja2 import Environment, FileSystemLoader
 if sys.version_info[0] < 3:
     import ConfigParser as configparser
@@ -25,11 +26,103 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) )
 import utils.version
 from controlthread.controlthread import ControlThreadGenerator
 from rtlconverter.rtlconverter import RtlConverter
-import controlthread.coram_module as coram_module
+from controlthread.coram_module import *
 from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 import pyverilog.vparser.ast as vast
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
+
+#-------------------------------------------------------------------------------
+class PycoramIp(object):
+    def __init__(self, signal_width=32, ext_addrwidth=32, ext_datawidth=512,
+                 if_type='axi', io_lite=True, single_clock=True,
+                 sim_addrwidth=27, hperiod_ulogic=5, hperiod_cthread=5, hperiod_bus=5,
+                 topmodule='TOP', memimg=None, usertest=None, output='out.v'):
+        self.signal_width = signal_width
+        self.ext_addrwidth = ext_addrwidth
+        self.ext_datawidth = ext_datawidth
+        self.if_type = if_type
+        self.io_lite = True
+        self.single_clock = True
+        self.sim_addrwidth = sim_addrwidth
+        self.hperiod_ulogic = hperiod_ulogic
+        self.hperiod_cthread = hperiod_cthread
+        self.hperiod_bus = hperiod_bus
+        self.topmodule = topmodule
+        self.memimg = memimg
+        self.usertest = usertest
+        self.output = output
+
+        self.include_paths = []
+        self.macros = []
+
+        self.function_lib = {}
+        
+        self.rtl_files = []
+        self.controlthreads = {}
+
+    def add_include_path(self, path):
+        self.include_paths.append(path)
+        
+    def add_macros(self, macro):
+        self.macros.append(macro)
+        
+    def add_rtl(self, filename):
+        self.rtl_files.append(filename)
+
+    def add_function(self, func):
+        name = func.__name__
+        if name in self.function_lib:
+            raise ValueError("function '%s' is already defined." % name)
+        self.function_lib[name] = func
+        
+    def add_controlthread(self, cthread, threadname=None):
+        if threadname is None:
+            threadname = cthread.__name__
+        if threadname in self.controlthreads:
+            raise ValueError("cthread '%s' is already defined." % threadname)
+        self.controlthreads[threadname] = cthread
+
+    def generate(self):
+        for f in self.rtl_files:
+            if not os.path.exists(f): raise IOError("file not found: " + f)
+
+        if len(self.rtl_files) == 0:
+            raise IOError("RTL file not found")
+
+        print("Input files")
+        print("  User-logic: %s" % ', '.join(self.rtl_files) )
+        print("  Control-thread: %s" % ', '.join(self.controlthreads.keys()) )
+
+        # default values
+        configs = {
+            'signal_width' : self.signal_width,
+            'ext_addrwidth' : self.ext_addrwidth,
+            'ext_datawidth' : self.ext_datawidth,
+            'single_clock' : self.single_clock,
+            'io_lite' : self.io_lite,
+            'if_type' : self.if_type,
+            'output' : self.output,
+            'sim_addrwidth' : self.sim_addrwidth,
+            'hperiod_ulogic' : self.hperiod_ulogic,
+            'hperiod_cthread' : self.hperiod_cthread,
+            'hperiod_bus' : self.hperiod_bus,
+        }
+
+        systembuilder = SystemBuilder()
+        systembuilder.build(configs,
+                            self.topmodule,
+                            self.rtl_files,
+                            controlthread_funcs=self.controlthreads,
+                            function_lib=self.function_lib,
+                            userlogic_include=self.include_paths,
+                            userlogic_define=self.macros,
+                            usertest=self.usertest,
+                            memimg=self.memimg)
+            
+#-------------------------------------------------------------------------------
+def log2(v):
+    return int(math.ceil(math.log(v, 2)))
 
 #-------------------------------------------------------------------------------
 class SystemBuilder(object):
@@ -41,7 +134,7 @@ class SystemBuilder(object):
 
     #---------------------------------------------------------------------------
     def render(self, template_file,
-               userlogic_name, threads, 
+               userlogic_name, threads,
                def_top_parameters, def_top_localparams, def_top_ioports, name_top_ioports,
                ext_addrwidth=32, ext_burstlength=256,
                single_clock=False, lite=False,
@@ -53,7 +146,7 @@ class SystemBuilder(object):
                clock_hperiod_controlthread=None,
                clock_hperiod_bus=None):
 
-        ext_burstlen_width = int(math.ceil(math.log(ext_burstlength,2)))
+        ext_burstlen_width = log2(ext_burstlength)
         template_dict = {
             'userlogic_name' : userlogic_name,
             'ext_addrwidth' : ext_addrwidth,
@@ -95,7 +188,8 @@ class SystemBuilder(object):
         return rslt
 
     #---------------------------------------------------------------------------
-    def build(self, configs, controlthread_filelist, userlogic_filelist, userlogic_topmodule,
+    def build(self, configs, userlogic_topmodule,  userlogic_filelist,
+              controlthread_filelist=None, controlthread_funcs=None, function_lib=None,
               userlogic_include=None, userlogic_define=None, memimg=None, usertest=None):
 
         # default values
@@ -116,8 +210,9 @@ class SystemBuilder(object):
         top_parameters = converter.getTopParameters()
         top_ioports = converter.getTopIOPorts()
 
+        # dump
         converter.dumpCoramObject()
-
+        
         # Code Generator
         asttocode = ASTCodeGenerator()
         userlogic_code= asttocode.visit(userlogic_ast)
@@ -126,21 +221,36 @@ class SystemBuilder(object):
         controlthread_codes = []
         generator = ControlThreadGenerator()
         thread_status = {}
-        for f in controlthread_filelist:
-            (thread_name, ext) = os.path.splitext(os.path.basename(f))
-            controlthread_codes.append(
-                generator.compile(f, thread_name,
-                                  signalwidth=configs['signal_width'], 
-                                  ext_addrwidth=configs['ext_addrwidth'],
-                                  ext_max_datawidth=configs['ext_datawidth'],
-                                  dump=True))
-            thread_status.update(generator.getStatus())
+
+        # from files
+        if controlthread_filelist is not None: 
+            for f in controlthread_filelist:
+                (thread_name, ext) = os.path.splitext(os.path.basename(f))
+                controlthread_codes.append(
+                    generator.compile(thread_name, filename=f, 
+                                      signalwidth=configs['signal_width'], 
+                                      ext_addrwidth=configs['ext_addrwidth'],
+                                      ext_max_datawidth=configs['ext_datawidth'],
+                                      dump=True))
+                thread_status.update(generator.getStatus())
+            
+        # from func objects
+        if controlthread_funcs is not None: 
+            for func_name, func in controlthread_funcs.items():
+                controlthread_codes.append(
+                    generator.compile(func_name, func=func,
+                                      function_lib=function_lib,
+                                      signalwidth=configs['signal_width'], 
+                                      ext_addrwidth=configs['ext_addrwidth'],
+                                      ext_max_datawidth=configs['ext_datawidth'],
+                                      dump=True))
+                thread_status.update(generator.getStatus())
             
         # Template Render
         threads = []
         for tname, (tmemories, tinstreams, toutstreams, tchannels, tregisters, 
                     tiochannels, tioregisters) in sorted(thread_status.items(), key=lambda x:x[0]):
-            threads.append(coram_module.ControlThread(tname, tmemories, tinstreams, toutstreams, 
+            threads.append(ControlThread(tname, tmemories, tinstreams, toutstreams, 
                                                       tchannels, tregisters, tiochannels, tioregisters))
 
         asttocode = ASTCodeGenerator()
@@ -235,13 +345,15 @@ class SystemBuilder(object):
 
         if configs['if_type'] == 'axi':
             self.build_package_axi(configs, synthesized_code, common_code, 
-                                   threads, top_parameters, top_ioports, userlogic_topmodule,
+                                   threads, 
+                                   top_parameters, top_ioports, userlogic_topmodule,
                                    userlogic_include, userlogic_define, memimg, usertest)
             return
             
         if configs['if_type'] == 'avalon':
             self.build_package_avalon(configs, synthesized_code, common_code,
-                                      threads, top_parameters, top_ioports, userlogic_topmodule,
+                                      threads, 
+                                      top_parameters, top_ioports, userlogic_topmodule,
                                       userlogic_include, userlogic_define, memimg, usertest)
             return
 
@@ -256,7 +368,8 @@ class SystemBuilder(object):
 
     #---------------------------------------------------------------------------
     def build_package_axi(self, configs, synthesized_code, common_code, 
-                          threads, top_parameters, top_ioports, userlogic_topmodule, 
+                          threads,
+                          top_parameters, top_ioports, userlogic_topmodule, 
                           userlogic_include, userlogic_define, memimg, usertest):
         code = synthesized_code + common_code
 
@@ -340,7 +453,7 @@ class SystemBuilder(object):
         # mpd file
         mpd_template_file = 'mpd.txt'
         mpd_code = self.render(mpd_template_file,
-                               userlogic_topmodule, threads, 
+                               userlogic_topmodule, threads,
                                def_top_parameters, def_top_localparams, def_top_ioports, name_top_ioports,
                                ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength,
                                single_clock=configs['single_clock'], lite=configs['io_lite'],
@@ -354,7 +467,7 @@ class SystemBuilder(object):
         # mui file
         #mui_template_file = 'mui.txt'
         #mui_code = self.render(mui_template_file,
-        #                       userlogic_topmodule, threads, 
+        #                       userlogic_topmodule, threads,
         #                       def_top_parameters, def_top_localparams, def_top_ioports, name_top_ioports,
         #                       ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength,
         #                       single_clock=configs['single_clock'], lite=configs['io_lite'],
@@ -368,7 +481,7 @@ class SystemBuilder(object):
         # pao file
         pao_template_file = 'pao.txt'
         pao_code = self.render(pao_template_file,
-                               userlogic_topmodule, threads, 
+                               userlogic_topmodule, threads,
                                def_top_parameters, def_top_localparams, def_top_ioports, name_top_ioports,
                                ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength,
                                single_clock=configs['single_clock'], lite=configs['io_lite'],
@@ -429,7 +542,8 @@ class SystemBuilder(object):
 
     #---------------------------------------------------------------------------
     def build_package_avalon(self, configs, synthesized_code, common_code, 
-                             threads, top_parameters, top_ioports, userlogic_topmodule, 
+                             threads,
+                             top_parameters, top_ioports, userlogic_topmodule, 
                              userlogic_include, userlogic_define, memimg, usertest):
         # default values
         ext_burstlength = 256
@@ -667,9 +781,9 @@ def main():
 
     systembuilder = SystemBuilder()
     systembuilder.build(configs,
-                        controlthread_filelist,
-                        userlogic_filelist,
                         options.topmodule,
+                        userlogic_filelist,
+                        controlthread_filelist,
                         userlogic_include=options.include,
                         userlogic_define=options.define,
                         usertest=options.usertest,

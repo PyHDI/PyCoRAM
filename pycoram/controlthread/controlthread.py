@@ -1827,12 +1827,35 @@ class ControlThreadGenerator(object):
     def __init__(self):
         self.status = {}
 
-    def compile(self, filename, thread_name,
+    def compile(self, thread_name,
+                filename=None, func=None, function_lib=None,
                 signalwidth=64, 
                 ext_addrwidth=64,
                 ext_max_datawidth=512,
                 dump=False):
-        source = open(filename, 'r').read()
+        if filename is not None and func is not None:
+            raise IOError('Only filename or func should be defined.')
+
+        source_src = []
+
+        if func is not None and function_lib is not None:
+            for name, global_func in function_lib.items():
+                source_src.append( inspect.getsource(global_func) )
+
+        if filename is not None:
+            source.append( open(filename, 'r').read() )
+
+        if ((func is not None and function_lib is None) or 
+            (func is not None and
+             function_lib is not None and 
+             func.__name__ not in function_lib)):
+            source_src.append( inspect.getsource(func) )
+
+        if func is not None:
+            source_src.append( func.__name__ + '()' )
+
+        source = ''.join(source_src)
+
         tree = ast.parse(source)
         functionvisitor = FunctionVisitor()
         functionvisitor.visit(tree)
@@ -1908,7 +1931,7 @@ def main():
         threadgen = ControlThreadGenerator()
         (thread_name, ext) = os.path.splitext(os.path.basename(filename))
         output = thread_name + '.v'
-        code = threadgen.compile(filename, thread_name, dump=options.dump)
+        code = threadgen.compile(thread_name, filename=filename, dump=options.dump)
         f = open(output, 'w')
         f.write(code)
         f.close()

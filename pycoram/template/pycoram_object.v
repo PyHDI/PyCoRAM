@@ -569,6 +569,57 @@ module CoramRegister(CLK, D, WE, Q,
 endmodule
 
 //------------------------------------------------------------------------------
+// CoRAM Slave Stream (Non-Transparent FIFO with BlockRAM)
+//------------------------------------------------------------------------------
+module CoramSlaveStream(CLK, RST,
+                        D, ENQ, FULL, ALM_FULL,
+                        Q, DEQ, EMPTY, ALM_EMPTY,
+                        coram_clk, coram_rst,
+                        coram_q, coram_deq, coram_empty, coram_almost_empty, 
+                        coram_d, coram_enq, coram_full, coram_almost_full);
+  parameter CORAM_THREAD_NAME = "undefined";
+  parameter CORAM_THREAD_ID = 0;
+  parameter CORAM_ID = 0;
+  parameter CORAM_SUB_ID = 0;
+  parameter CORAM_ADDR_LEN = 4;
+  parameter CORAM_DATA_WIDTH = 32;
+  localparam CORAM_MEM_SIZE = 2 ** CORAM_ADDR_LEN;
+
+  input                         CLK;
+  input                         RST;
+  input  [CORAM_DATA_WIDTH-1:0] D;
+  input                         ENQ;
+  output                        FULL;
+  output                        ALM_FULL;
+  output [CORAM_DATA_WIDTH-1:0] Q;
+  input                         DEQ;
+  output                        EMPTY;
+  output                        ALM_EMPTY;
+
+  input                         coram_clk;
+  input                         coram_rst;
+  output [CORAM_DATA_WIDTH-1:0] coram_q;
+  input                         coram_deq;
+  output                        coram_empty;
+  output                        coram_almost_empty;
+  input  [CORAM_DATA_WIDTH-1:0] coram_d;
+  input                         coram_enq;
+  output                        coram_full;
+  output                        coram_almost_full;
+
+  CoramBramFifo # (.CORAM_ADDR_LEN(CORAM_ADDR_LEN), .CORAM_DATA_WIDTH(CORAM_DATA_WIDTH))
+  write_fifo
+    (.CLK0(coram_clk), .RST0(coram_rst), .Q(coram_q), .DEQ(coram_deq), .EMPTY(coram_empty), .ALM_EMPTY(coram_almost_empty),
+     .CLK1(CLK), .RST1(RST), .D(D), .ENQ(ENQ), .FULL(FULL), .ALM_FULL(ALM_FULL));
+
+  CoramBramFifo # (.CORAM_ADDR_LEN(CORAM_ADDR_LEN), .CORAM_DATA_WIDTH(CORAM_DATA_WIDTH))
+  read_fifo
+    (.CLK0(CLK), .RST0(RST), .Q(Q), .DEQ(DEQ), .EMPTY(EMPTY), .ALM_EMPTY(ALM_EMPTY),
+     .CLK1(coram_clk), .RST1(coram_rst), .D(coram_d), .ENQ(coram_enq), .FULL(coram_full), .ALM_FULL(coram_almost_full));
+  
+endmodule
+
+//------------------------------------------------------------------------------
 // Single-port BRAM
 //------------------------------------------------------------------------------
 module CoramBRAM1(CLK, ADDR, D, WE, Q);

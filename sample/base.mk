@@ -1,6 +1,7 @@
 PYTHON=python3
 #PYTHON=python
 #OPT=-m pdb
+#OPT=-m cProfile -s time
 #OPT=-m cProfile -o profile.rslt
 
 ## If you installed pycoram in your environment (site-packages)

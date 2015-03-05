@@ -11,6 +11,7 @@ import os
 
 import re
 import copy
+import collections
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 
@@ -27,7 +28,7 @@ class InstanceConvertVisitor(SignalVisitor):
     def __init__(self, moduleinfotable, top):
         SignalVisitor.__init__(self, moduleinfotable, top)
         self.new_moduleinfotable = ModuleInfoTable()
-        self.coram_object = {} # key:kind, value:list of object
+        self.coram_object = collections.defaultdict(list)
 
         self.rename_prefix = '_r'
         self.rename_prefix_count = 0
@@ -135,7 +136,7 @@ class InstanceConvertVisitor(SignalVisitor):
         new_portlist = list(instance.portlist)
         if ioport:
             for i, a in enumerate(self.additionalport):
-                new_portlist.append(PortArg(Identifier(copy.deepcopy(a.name)),
+                new_portlist.append(PortArg(copy.deepcopy(a.name),
                                             Identifier(copy.deepcopy(a.name))))
         else:
             for a in self.additionalport:
@@ -310,6 +311,15 @@ class InstanceConvertVisitor(SignalVisitor):
             self.additionalport.append( Input(name=nameprefix+'_d', width=evaldatawidth) )
             self.additionalport.append( Input(name=nameprefix+'_we') )
             self.additionalport.append( Output(name=nameprefix+'_q', width=evaldatawidth) )
+        elif mode == 'CoramSlaveStream':
+            self.additionalport.append( Input(name=nameprefix+'_clk') )
+            self.additionalport.append( Input(name=nameprefix+'_rst') )
+            self.additionalport.append( Input(name=nameprefix+'_d', width=evaldatawidth) )
+            self.additionalport.append( Input(name=nameprefix+'_enq') )
+            self.additionalport.append( Output(name=nameprefix+'_almost_full') )
+            self.additionalport.append( Output(name=nameprefix+'_q', width=evaldatawidth) )
+            self.additionalport.append( Input(name=nameprefix+'_deq') )
+            self.additionalport.append( Output(name=nameprefix+'_empty') )
 
         instance = copy.deepcopy(node)
         noportname = True if len(instance.portlist) == 0 or instance.portlist[0].portname is None else False
@@ -348,6 +358,15 @@ class InstanceConvertVisitor(SignalVisitor):
                 new_portlist.append( PortArg(None, Identifier(nameprefix+'_d')) )
                 new_portlist.append( PortArg(None, Identifier(nameprefix+'_we')) )
                 new_portlist.append( PortArg(None, Identifier(nameprefix+'_q')) )
+            elif mode == 'CoramSlaveStream':
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_clk')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_rst')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_d')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_enq')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_almost_full')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_q')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_deq')) )
+                new_portlist.append( PortArg(None, Identifier(nameprefix+'_empty')) )
         else:
             if mode == 'CoramMemory':
                 new_portlist.append( PortArg('coram_clk', Identifier(nameprefix+'_clk')) )
@@ -382,6 +401,15 @@ class InstanceConvertVisitor(SignalVisitor):
                 new_portlist.append( PortArg('coram_d', Identifier(nameprefix+'_d')) )
                 new_portlist.append( PortArg('coram_we', Identifier(nameprefix+'_we')) )
                 new_portlist.append( PortArg('coram_q', Identifier(nameprefix+'_q')) )
+            elif mode == 'CoramSlaveStream':
+                new_portlist.append( PortArg('coram_clk', Identifier(nameprefix+'_clk')) )
+                new_portlist.append( PortArg('coram_rst', Identifier(nameprefix+'_rst')) )
+                new_portlist.append( PortArg('coram_d', Identifier(nameprefix+'_d')) )
+                new_portlist.append( PortArg('coram_enq', Identifier(nameprefix+'_enq')) )
+                new_portlist.append( PortArg('coram_almost_full', Identifier(nameprefix+'_almost_full')) )
+                new_portlist.append( PortArg('coram_q', Identifier(nameprefix+'_q')) )
+                new_portlist.append( PortArg('coram_deq', Identifier(nameprefix+'_deq')) )
+                new_portlist.append( PortArg('coram_empty', Identifier(nameprefix+'_empty')) )
 
         instance.portlist = tuple(new_portlist)
 
@@ -418,8 +446,6 @@ class InstanceConvertVisitor(SignalVisitor):
 
     #----------------------------------------------------------------------------
     def addCoramObject(self, mode, threadname, idx, subid, addrwidth, datawidth):
-        if mode not in self.coram_object:
-            self.coram_object[mode] = []
         self.coram_object[mode].append( (threadname, idx, subid, addrwidth, datawidth) )
 
     #----------------------------------------------------------------------------
@@ -472,12 +498,17 @@ class InstanceConvertVisitor(SignalVisitor):
         outstream = re.match('(CoramOutStream).*', node.module)
         channel = re.match('(CoramChannel).*', node.module)
         register = re.match('(CoramRegister).*', node.module)
+        slavestream = re.match('(CoramSlaveStream).*', node.module)
         mode = (memory.group(1) if memory else 
                 instream.group(1) if instream else
                 outstream.group(1) if outstream else
                 channel.group(1) if channel else 
-                register.group(1) if register else 
+                register.group(1) if register else
+                slavestream.group(1) if slavestream else
                 'None')
+
+        if mode == 'None':
+            raise ValueError("Unknown CoRAM object type '%s'" % node.module)
 
         if self.frames.isGenerate():
             tmp = self.additionalport

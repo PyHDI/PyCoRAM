@@ -166,48 +166,28 @@ module CoramRegister(CLK, D, WE, Q);
 endmodule
 
 //------------------------------------------------------------------------------
-// Single-Port CoRAM (Double Buffer)
+// CoRAM Slave Stream (Non-Transparent FIFO with BlockRAM)
 //------------------------------------------------------------------------------
-/* -----\/----- EXCLUDED -----\/-----
-module CoramMemory1PDB(CLK, ADDR, D, WE, Q);
+module CoramSlaveStream(CLK, RST,
+                        D, ENQ, FULL, ALM_FULL,
+                        Q, DEQ, EMPTY, ALM_EMPTY);
   parameter CORAM_THREAD_NAME = "undefined";
   parameter CORAM_THREAD_ID = 0;
   parameter CORAM_ID = 0;
   parameter CORAM_SUB_ID = 0;
-  parameter CORAM_ADDR_LEN = 10;
+  parameter CORAM_ADDR_LEN = 4;
   parameter CORAM_DATA_WIDTH = 32;
   localparam CORAM_MEM_SIZE = 2 ** CORAM_ADDR_LEN;
 
   input                         CLK;
-  input  [CORAM_ADDR_LEN-1:0]   ADDR;
+  input                         RST;
   input  [CORAM_DATA_WIDTH-1:0] D;
-  input                         WE;
+  input                         ENQ;
+  output                        FULL;
+  output                        ALM_FULL;
   output [CORAM_DATA_WIDTH-1:0] Q;
+  input                         DEQ;
+  output                        EMPTY;
+  output                        ALM_EMPTY;
 endmodule
- -----/\----- EXCLUDED -----/\----- */
-
-//------------------------------------------------------------------------------
-// Dual-Port CoRAM (Double Buffer)
-//------------------------------------------------------------------------------
-/* -----\/----- EXCLUDED -----\/-----
-module CoramMemory2PDB(CLK, ADDR0, D0, WE0, Q0, ADDR1, D1, WE1, Q1);
-  parameter CORAM_THREAD_NAME = "undefined";
-  parameter CORAM_THREAD_ID = 0;
-  parameter CORAM_ID = 0;
-  parameter CORAM_SUB_ID = 0;
-  parameter CORAM_ADDR_LEN = 10;
-  parameter CORAM_DATA_WIDTH = 32;
-  localparam CORAM_MEM_SIZE = 2 ** CORAM_ADDR_LEN;
-
-  input                         CLK;
-  input  [CORAM_ADDR_LEN-1:0]   ADDR0;
-  input  [CORAM_DATA_WIDTH-1:0] D0;
-  input                         WE0;
-  output [CORAM_DATA_WIDTH-1:0] Q0;
-  input  [CORAM_ADDR_LEN-1:0]   ADDR1;
-  input  [CORAM_DATA_WIDTH-1:0] D1;
-  input                         WE1;
-  output [CORAM_DATA_WIDTH-1:0] Q1;
-endmodule
- -----/\----- EXCLUDED -----/\----- */
 

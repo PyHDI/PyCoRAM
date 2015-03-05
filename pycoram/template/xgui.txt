@@ -1,0 +1,64 @@
+#Definitional proc to organize widgets for parameters.
+proc create_gui { ipview } {
+	set Page0 [ ipgui::add_page $ipview  -name "Page 0" -layout vertical]
+	set Component_Name [ ipgui::add_param  $ipview  -parent  $Page0  -name Component_Name ]
+	set C_M_AXI_DATA_WIDTH [ipgui::add_param $ipview -parent $Page0 -name C_M_AXI_DATA_WIDTH]
+	set C_BURST_LEN [ipgui::add_param $ipview -parent $Page0 -name C_BURST_LEN]
+	set C_TRANSACTIONS_NUM [ipgui::add_param $ipview -parent $Page0 -name C_TRANSACTIONS_NUM]
+}
+
+proc C_M_AXI_DATA_WIDTH_updated {ipview} {
+	# Procedure called when C_M_AXI_DATA_WIDTH is updated
+	return true
+}
+
+proc validate_C_M_AXI_DATA_WIDTH {ipview} {
+	# Procedure called to validate C_M_AXI_DATA_WIDTH
+	return true
+}
+
+proc C_BURST_LEN_updated {ipview} {
+	# Procedure called when C_BURST_LEN is updated
+	return true
+}
+
+proc validate_C_BURST_LEN {ipview} {
+	# Procedure called to validate C_BURST_LEN
+	return true
+}
+
+proc C_TRANSACTIONS_NUM_updated {ipview} {
+	# Procedure called when C_TRANSACTIONS_NUM is updated
+	return true
+}
+
+proc validate_C_TRANSACTIONS_NUM {ipview} {
+	# Procedure called to validate C_TRANSACTIONS_NUM
+	return true
+}
+
+
+proc updateModel_C_TRANSACTIONS_NUM {ipview} {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+
+	set_property modelparam_value [get_property value [ipgui::get_paramspec C_TRANSACTIONS_NUM -of $ipview ]] [ipgui::get_modelparamspec C_TRANSACTIONS_NUM -of $ipview ]
+
+	return true
+}
+
+proc updateModel_C_BURST_LEN {ipview} {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+
+	set_property modelparam_value [get_property value [ipgui::get_paramspec C_BURST_LEN -of $ipview ]] [ipgui::get_modelparamspec C_BURST_LEN -of $ipview ]
+
+	return true
+}
+
+proc updateModel_C_M_AXI_DATA_WIDTH {ipview} {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+
+	set_property modelparam_value [get_property value [ipgui::get_paramspec C_M_AXI_DATA_WIDTH -of $ipview ]] [ipgui::get_modelparamspec C_M_AXI_DATA_WIDTH -of $ipview ]
+
+	return true
+}
+

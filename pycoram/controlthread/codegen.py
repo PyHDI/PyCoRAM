@@ -26,6 +26,11 @@ import pyverilog.dataflow.dataflow as vdflow
 import pyverilog.utils.scope as vscope
 from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 
+#-------------------------------------------------------------------------------
+def log2(v):
+    return int(math.ceil(math.log(v, 2)))
+
+#-------------------------------------------------------------------------------
 class CodeGenerator(object):
     def __init__(self, threadname, coram_memories, coram_instreams, coram_outstreams,
                  coram_channels, coram_registers,
@@ -44,6 +49,7 @@ class CodeGenerator(object):
         self.coram_registers = {}
         self.coram_iochannels = {}
         self.coram_ioregisters = {}
+        
         for c in coram_memories.values():
             if c.name in self.coram_memories: continue
             self.coram_memories[c.name] = c
@@ -143,15 +149,15 @@ class CodeGenerator(object):
         if length is not None and not isinstance(length, vast.IntConst):
             raise TypeError("CoRAM argument should be a constant.")
         obj.length = int(length.value) if length is not None else None
-        obj.loglength = int(math.ceil(math.log(obj.length, 2))) if length is not None else 0
+        obj.loglength = log2(obj.length) if length is not None else 0
 
         scattergather = self._optimize(obj.scattergather) if obj.scattergather is not None else None
         if scattergather is not None and not isinstance(scattergather, vast.IntConst):
             raise TypeError("CoRAM argument should be a constant.")
         obj.scattergather = (int(scattergather.value) > 0) if scattergather is not None else None
 
-        obj.addrwidth = int(math.ceil(math.log(obj.size, 2)))
-        obj.addroffset = int(math.log(int(math.ceil(obj.datawidth / 8)), 2))
+        obj.addrwidth = log2(obj.size)
+        obj.addroffset = log2(int(obj.datawidth / 8))
 
         req_ext_datawidth = (obj.datawidth if length is None else 
                              obj.datawidth if obj.scattergather is None else
@@ -162,11 +168,11 @@ class CodeGenerator(object):
 
         obj.numranks = (None if obj.length is None else
                         int(math.ceil(req_ext_datawidth / ext_datawidth)))
-        obj.lognumranks = int(math.ceil(math.log(obj.numranks, 2))) if obj.numranks is not None else 0
+        obj.lognumranks = log2(obj.numranks) if obj.numranks is not None else 0
 
         obj.numpages = (None if obj.length is None else
                         1 if obj.scattergather else obj.length)
-        obj.lognumpages = int(math.ceil(math.log(obj.numpages, 2))) if obj.numpages is not None else 0
+        obj.lognumpages = log2(obj.numpages) if obj.numpages is not None else 0
 
     #----------------------------------------------------------------------------
     def _insertCommand(self):
@@ -910,7 +916,7 @@ class CodeGenerator(object):
     #----------------------------------------------------------------------------
     def _generateFsm(self):
         items = []
-        fsm_width = vast.Width(vast.IntConst(str(int(math.ceil(math.log(self.fsm.count, 2)))-1+1)), vast.IntConst('0'))
+        fsm_width = vast.Width(vast.IntConst(str(log2(self.fsm.count)-1+1)), vast.IntConst('0'))
         items.append( vast.Reg(self.fsm_name, width=fsm_width) )
 
         fsm_statement = []
