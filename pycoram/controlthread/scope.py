@@ -63,14 +63,13 @@ class ScopeFrameList(object):
     def searchVariable(self, name, store=False):
         if self.current is None: return None
         targ = self.current
-        is_nonlocal = False
         is_global = False
         while targ is not None:
             ret = targ.searchVariable(name)
             if ret: return ret
             if targ.ftype == 'call':
-                #ret = targ.searchNonlocal(name)
-                #if ret: is_nonlocal = True
+                ret = targ.searchNonlocal(name)
+                if ret: continue
                 ret = targ.searchGlobal(name)
                 if ret: is_global = True
                 break
@@ -114,6 +113,19 @@ class ScopeFrameList(object):
             targ = self.previousframes[targ]
         return None
 
+    def searchFunction(self, name, store=False):
+        if self.current is None: return None
+        targ = self.current
+        while targ is not None:
+            ret = targ.searchFunction(name)
+            if ret: return ret
+            targ = self.previousframes[targ]
+        ret = self.globalframe.searchFunction(name)
+        return ret
+
+    def addFunction(self, func):
+        self.current.addFunction(func)
+        
     def addBind(self, state, dst, var, cond=None):
         if dst not in self.binds:
             self.binds[dst] = []
@@ -228,6 +240,7 @@ class ScopeFrame(object):
         self.variables = []
         self.nonlocals = []
         self.globals = []
+        self.functions = {}
 
         self.unresolved_break = []
         self.unresolved_continue = []
@@ -252,6 +265,13 @@ class ScopeFrame(object):
     def getGlobals(self):
         return tuple(self.globals)
 
+    def addFunction(self, func):
+        name = func.name
+        self.functions[name] = func
+
+    def getFunctions(self):
+        return self.functions
+        
     def getName(self):
         return self.name
 
@@ -270,6 +290,10 @@ class ScopeFrame(object):
         if name not in self.globals: return None
         return self.name.tocode() + '_' + name
 
+    def searchFunction(self, name):
+        if name not in self.functions: return None
+        return self.functions[name]
+    
     def addBreak(self, count):
         self.unresolved_break.append(count)
 

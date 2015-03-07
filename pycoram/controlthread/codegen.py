@@ -35,7 +35,7 @@ class CodeGenerator(object):
     def __init__(self, threadname, coram_memories, coram_instreams, coram_outstreams,
                  coram_channels, coram_registers,
                  coram_iochannels, coram_ioregisters,
-                 scope, fsm, speculative_fsm,
+                 scope, fsm,
                  signalwidth=64,
                  ext_addrwidth=64, 
                  ext_max_datawidth=512,
@@ -74,7 +74,6 @@ class CodeGenerator(object):
 
         self.scope = scope
         self.fsm = fsm
-        self.speculative_fsm = speculative_fsm
 
         self.signalwidth = signalwidth
         self.ext_addrwidth = ext_addrwidth

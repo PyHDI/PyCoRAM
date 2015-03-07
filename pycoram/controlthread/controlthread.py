@@ -73,7 +73,6 @@ class FunctionVisitor(ast.NodeVisitor):
 class CompileVisitor(ast.NodeVisitor):
     def __init__(self, thread_name, functions, default_width=64):
         self.thread_name = thread_name
-        self.functions = functions
         self.coram_memories = {}
         self.coram_instreams = {}
         self.coram_outstreams = {}
@@ -84,11 +83,13 @@ class CompileVisitor(ast.NodeVisitor):
         self.objects = {}
         self.scope = ScopeFrameList()
         self.fsm = Fsm()
-        self.speculative_fsm = Fsm()
         self.import_list = {}
         self.importfrom_list = {}
         self.vopt = vopt.VerilogOptimizer({}, default_width=default_width)
 
+        for func in functions.values():
+            self.scope.addFunction(func)
+        
     def dump(self):
         memories = {}
         instreams = {}
@@ -204,7 +205,7 @@ class CompileVisitor(ast.NodeVisitor):
                 self.coram_instreams, self.coram_outstreams,
                 self.coram_channels, self.coram_registers,
                 self.coram_iochannels, self.coram_ioregisters,
-                self.scope, self.fsm, self.speculative_fsm)
+                self.scope, self.fsm)
 
     #-------------------------------------------------------------------------
     def visit_Import(self, node):
@@ -235,9 +236,8 @@ class CompileVisitor(ast.NodeVisitor):
 
     #-------------------------------------------------------------------------
     def visit_FunctionDef(self, node):
-        if node.name not in self.functions: 
-            self.functions[node.name] = node
-
+        self.scope.addFunction(node)
+            
     def visit_Assign(self, node):
         if self.skip(): return
         right = self.visit(node.value)
@@ -422,10 +422,7 @@ class CompileVisitor(ast.NodeVisitor):
             return self._call_Name_int(node)
 
         # function call
-        if name in self.functions:
-            return self._call_Name_function(node, name)
-
-        raise NameError("function '%s' is not defined" % name)
+        return self._call_Name_function(node, name)
 
     def _call_Name_coram_module(self, node, name):
         args = []
@@ -522,9 +519,9 @@ class CompileVisitor(ast.NodeVisitor):
         return argvalues[0]
 
     def _call_Name_function(self, node, name):
-        if name not in self.functions:
+        tree = self.getFunction(name)
+        if tree is None:
             raise NameError("function '%s' is not defined" % name)
-        tree = self.functions[name]
 
         # prepare the argument values
         args = []
@@ -1420,9 +1417,8 @@ class CompileVisitor(ast.NodeVisitor):
 
     #--------------------------------------------------------------------------
     def visit_Nonlocal(self, node):
-        #for name in node.names:
-        #    self.addNonlocal(name)
-        raise TypeError("nonlocal is not supported.")
+        for name in node.names:
+            self.addNonlocal(name)
 
     def visit_Global(self, node):
         for name in node.names:
@@ -1533,7 +1529,7 @@ class CompileVisitor(ast.NodeVisitor):
         raise TypeError("%s in NameConst.value is not supported." % str(node.value))
 
     def visit_Name(self, node):
-        # for Python 3.3 or before
+        # for Python 3.3 or older
         if node.id == 'True':
             return vast.IntConst('1')
         if node.id == 'False':
@@ -1623,6 +1619,12 @@ class CompileVisitor(ast.NodeVisitor):
 
     def addGlobal(self, name):
         self.scope.addGlobal(name)
+
+    def getFunction(self, name):
+        func = self.scope.searchFunction(name)
+        if func is None:
+            raise NameError("function '%s' is not defined" % name)
+        return func
 
     def setBind(self, var, value, cond=None):
         if isinstance(value, vast.Node):
@@ -1867,7 +1869,7 @@ class ControlThreadGenerator(object):
         (coram_memories, coram_instreams, coram_outstreams, 
          coram_channels, coram_registers,
          coram_iochannels, coram_ioregisters,
-         scope, fsm, speculative_fsm) = compilevisitor.getStatus()
+         scope, fsm) = compilevisitor.getStatus()
 
         self.status[thread_name] = ( tuple(set(coram_memories.values())),
                                      tuple(set(coram_instreams.values())),
@@ -1880,7 +1882,7 @@ class ControlThreadGenerator(object):
                                 coram_instreams, coram_outstreams,
                                 coram_channels, coram_registers, 
                                 coram_iochannels, coram_ioregisters, 
-                                scope, fsm, speculative_fsm,
+                                scope, fsm,
                                 signalwidth=signalwidth, 
                                 ext_addrwidth=ext_addrwidth,
                                 ext_max_datawidth=ext_max_datawidth,
