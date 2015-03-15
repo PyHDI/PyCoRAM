@@ -29,6 +29,7 @@ from rtlconverter.rtlconverter import RtlConverter
 from controlthread.coram_module import *
 from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 import pyverilog.vparser.ast as vast
+import utils.componentgen
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
 
@@ -417,6 +418,7 @@ class SystemBuilder(object):
         #muiname = 'pycoram_' + userlogic_topmodule + mpd_version + '.mui'
         paoname = 'pycoram_' + userlogic_topmodule + mpd_version + '.pao'
         tclname = 'pycoram_' + userlogic_topmodule + mpd_version + '.tcl'
+        xmlname = 'component.xml'
         hdlname = 'pycoram_' + userlogic_topmodule + '.v'
         testname = 'test_pycoram_' + userlogic_topmodule + '.v'
         memname = 'mem.img'
@@ -429,6 +431,7 @@ class SystemBuilder(object):
         #muipath = dirname + 'data/'
         paopath = dirname + 'data/'
         tclpath = dirname + 'data/'
+        xmlpath = dirname
         testpath = dirname + 'test/'
         makefilepath = dirname + 'test/'
 
@@ -500,6 +503,14 @@ class SystemBuilder(object):
         f.write(tcl_code)
         f.close()
 
+        # component.xml
+        gen = utils.componentgen.ComponentGen()
+        xml_code = gen.generate(userlogic_topmodule, threads,
+                                ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength)
+        f = open(xmlpath+xmlname, 'w')
+        f.write(xml_code)
+        f.close()
+        
         # user test code
         usertestcode = None 
         if usertest is not None:

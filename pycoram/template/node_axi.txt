@@ -298,7 +298,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT,
 {%- if not lite %}
-   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWREGION,
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS,
    input  wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER,
 {%- endif %}
@@ -343,7 +342,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT,
 {%- if not lite %}
-   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARREGION,
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS,
    input  wire [(C_{{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER_WIDTH-1):0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER,
 {%- endif %}
@@ -383,7 +381,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT,
 {%- if not lite %}
-   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWREGION,
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS,
    input  wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER,
 {%- endif %}
@@ -428,7 +425,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT,
 {%- if not lite %}
-   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARREGION,
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS,
    input  wire [(C_{{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER_WIDTH-1):0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER,
 {%- endif %}
@@ -1649,7 +1645,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
      .S_AXI_AWPROT({{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT),
 {%- if not lite %}
-     .S_AXI_AWREGION({{ thread.name }}_{{ iochannel.name }}_AXI_AWREGION),
      .S_AXI_AWQOS({{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS),
      .S_AXI_AWUSER({{ thread.name }}_{{ iochannel.name }}_AXI_AWUSER),
 {%- endif %}
@@ -1691,7 +1686,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
      .S_AXI_ARPROT({{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT),
 {%- if not lite %}
-     .S_AXI_ARREGION({{ thread.name }}_{{ iochannel.name }}_AXI_ARREGION),
      .S_AXI_ARQOS({{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS),
      .S_AXI_ARUSER({{ thread.name }}_{{ iochannel.name }}_AXI_ARUSER),
 {%- endif %}
@@ -1775,7 +1769,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
      .S_AXI_AWPROT({{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT),
 {%- if not lite %}
-     .S_AXI_AWREGION({{ thread.name }}_{{ ioregister.name }}_AXI_AWREGION),
      .S_AXI_AWQOS({{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS),
      .S_AXI_AWUSER({{ thread.name }}_{{ ioregister.name }}_AXI_AWUSER),
 {%- endif %}
@@ -1817,7 +1810,6 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- endif %}
      .S_AXI_ARPROT({{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT),
 {%- if not lite %}
-     .S_AXI_ARREGION({{ thread.name }}_{{ ioregister.name }}_AXI_ARREGION),
      .S_AXI_ARQOS({{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS),
      .S_AXI_ARUSER({{ thread.name }}_{{ ioregister.name }}_AXI_ARUSER),
 {%- endif %}
