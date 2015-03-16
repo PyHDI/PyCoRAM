@@ -44,13 +44,18 @@ class ComponentGen(object):
         self.top.appendChild(self.mkAddressSpaces())
         self.top.appendChild(self.mkMemoryMaps())
         self.top.appendChild(self.mkModel())
+        self.top.appendChild(self.mkChoices())
+        self.top.appendChild(self.mkFileSets())
+        self.top.appendChild(self.mkDescription())
+        self.top.appendChild(self.mkDescParameters())
+        self.top.appendChild(self.mkVendorExtensions())
 
         return self.doc.toprettyxml(indent='  ')
 
     #---------------------------------------------------------------------------
     def setAttribute(self, obj, name, text):
         attrobj = self.doc.createAttribute(name)
-        attrobj.value = text
+        attrobj.value = str(text)
         obj.setAttributeNode(attrobj)
     
     def setText(self, obj, text):
@@ -86,6 +91,12 @@ class ComponentGen(object):
 
     def mkName(self, v):
         name = self.doc.createElement('spirit:name')
+        self.setText(name, v)
+        return name
+
+    #---------------------------------------------------------------------------
+    def mkTextNode(self, n, v):
+        name = self.doc.createElement(n)
         self.setText(name, v)
         return name
 
@@ -520,29 +531,17 @@ class ComponentGen(object):
     def mkView(self, name, displayname, envidentifier, language, modelname, localname):
         view = self.doc.createElement('spirit:view')
         view.appendChild(self.mkName(name))
-        
-        i_displayname = self.doc.createElement('spirit:displayName')
-        self.setText(i_displayname, displayname)
-        view.appendChild(i_displayname)
-        
-        i_envidentifier = self.doc.createElement('spirit:envIdentifier')
-        self.setText(i_envidentifier, envidentifier)
-        view.appendChild(i_envidentifier)
+        view.appendChild(self.mkTextNode('spirit:displayName', displayname))
+        view.appendChild(self.mkTextNode('spirit:envIdentifier', envidentifier))
         
         if language is not None:
-            i_language = self.doc.createElement('spirit:language')
-            self.setText(i_language, language)
-            view.appendChild(i_language)
+            view.appendChild(self.mkTextNode('spirit:language', language))
 
         if modelname is not None:
-            i_modelname = self.doc.createElement('spirit:modelName')
-            self.setText(i_modelname, modelname)
-            view.appendChild(i_modelname)
+            view.appendChild(self.mkTextNode('spirit:modelName', modelname))
         
         filesetref = self.doc.createElement('spirit:fileSetRef')
-        i_localname = self.doc.createElement('spirit:localName')
-        self.setText(i_localname, localname)
-        filesetref.appendChild(i_localname)
+        filesetref.appendChild(self.mkTextNode('spirit:localName', localname))
         view.appendChild(filesetref)
         
         return view
@@ -550,15 +549,15 @@ class ComponentGen(object):
     #---------------------------------------------------------------------------
     def mkPorts(self):
         ports = self.doc.createElement('spirit:ports')
-        ports.appendChild(self.mkPortSignal('UCLK', 'in',
-                                            None, None, None, None))
-        ports.appendChild(self.mkPortSignal('URESETN', 'in',
-                                            None, None, None, None))
+        ports.appendChild(self.mkPortEntry('UCLK', 'in',
+                                           None, None, None, None))
+        ports.appendChild(self.mkPortEntry('URESETN', 'in',
+                                           None, None, None, None))
         for thread in self.threads:
-            ports.appendChild(self.mkPortSignal(therad.name + '_CCLK', 'in',
-                                                None, None, None, None))
-            ports.appendChild(self.mkPortSignal(therad.name + '_CRESETN', 'in',
-                                                None, None, None, None))
+            ports.appendChild(self.mkPortEntry(thread.name + '_CCLK', 'in',
+                                               None, None, None, None))
+            ports.appendChild(self.mkPortEntry(thread.name + '_CRESETN', 'in',
+                                               None, None, None, None))
             for memory in thread.memories:
                 for p in self.mkPortMaster(thread, memory): ports.appendChild(p)
             for instream in thread.instreams:
@@ -574,8 +573,8 @@ class ComponentGen(object):
         for portname, portdir, portlvalue in self.ext_ports:
             lvalue = portlvalue if portlvalue is not None else None
             rvalue = 0 if portlvalue is not None else None
-            ports.appendChild(self.mkPortSignal(portname, portdir,
-                                                None, lvalue, None, rvalue))
+            ports.appendChild(self.mkPortEntry(portname, portdir,
+                                               None, lvalue, None, rvalue))
         return ports
 
     def mkPortMaster(self, thread, obj):
@@ -585,110 +584,110 @@ class ComponentGen(object):
         ret = []
         
         def mkStr(b, s):
-            return 'spirit:decode(id(&apos;MODELPARAM_VALUE.C_' + b + '_' + s '&apos;))' 
+            return 'spirit:decode(id(&apos;MODELPARAM_VALUE.C_' + b + '_' + s + '&apos;))' 
         
-        ret.append(self.mkPortSignal(base+'_AWID', 'out',
-                                     '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_AWADDR', 'out',
-                                     '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWLEN', 'out',
-                                     None, 7, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWSIZE', 'out',
-                                     None, 2, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWBURST', 'out',
-                                     None, 1, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWLOCK', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_AWCACHE', 'out',
-                                     None, 3, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWPROT', 'out',
-                                     None, 2, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWQOS', 'out',
-                                     None, 3, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWUSER', 'out',
-                                     '('+mkStr(base,'AWUSER_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'AWUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_AWVALID', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_AWREADY', 'in',
-                                     None, None, None, None))
-
-        ret.append(self.mkPortSignal(base+'_WDATA', 'out',
-                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_WSTRB', 'out',
-                                     '('+mkStr(base,'DATA_WIDTH')+'/8-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_WLAST', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_WUSER', 'out',
-                                     '('+mkStr(base,'WUSER_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'WUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_WVALID', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_WREADY', 'in',
-                                     None, None, None, None))
-
-        ret.append(self.mkPortSignal(base+'_BID', 'in',
-                                     '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_BRESP', 'in',
-                                     None, 1, None, 0))
-        ret.append(self.mkPortSignal(base+'_BUSER', 'in',
-                                     '('+mkStr(base,'BUSER_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'BUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_BVALID', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_BREADY', 'out',
-                                     None, None, None, None))
-
-        ret.append(self.mkPortSignal(base+'_ARID', 'out',
-                                     '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_ARADDR', 'out',
-                                     '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARLEN', 'out',
-                                     None, 7, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARSIZE', 'out',
-                                     None, 2, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARBURST', 'out',
-                                     None, 1, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARLOCK', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_ARCACHE', 'out',
-                                     None, 3, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARPROT', 'out',
-                                     None, 2, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARQOS', 'out',
-                                     None, 3, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARUSER', 'out',
-                                     '('+mkStr(base,'ARUSER_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'ARUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_ARVALID', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_ARREADY', 'in',
-                                     None, None, None, None))
-
-        ret.append(self.mkPortSignal(base+'_RID', 'in',
-                                     '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_RDATA', 'in',
-                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_RRESP', 'out',
-                                     None, 1, None, 0))
-        ret.append(self.mkPortSignal(base+'_RLAST', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_RUSER', 'in',
-                                     '('+mkStr(base,'RUSER_WIDTH')+'-1)', 0, None, 0,
-                                     True, True, mkStr(base,'RUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_RVALID', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_RREADY', 'out',
-                                     None, None, None, None))
-
-        ret.append(self.mkPortSignal(base+'_ACLK', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_ARESETN', 'in',
-                                     None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_AWID', 'out',
+                                    '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_AWADDR', 'out',
+                                    '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWLEN', 'out',
+                                    None, 7, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWSIZE', 'out',
+                                    None, 2, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWBURST', 'out',
+                                    None, 1, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWLOCK', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_AWCACHE', 'out',
+                                    None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWPROT', 'out',
+                                    None, 2, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWQOS', 'out',
+                                    None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWUSER', 'out',
+                                    '('+mkStr(base,'AWUSER_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'AWUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_AWVALID', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_AWREADY', 'in',
+                                    None, None, None, None))
+        
+        ret.append(self.mkPortEntry(base+'_WDATA', 'out',
+                                    '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_WSTRB', 'out',
+                                    '('+mkStr(base,'DATA_WIDTH')+'/8-1)', datawidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_WLAST', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_WUSER', 'out',
+                                    '('+mkStr(base,'WUSER_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'WUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_WVALID', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_WREADY', 'in',
+                                    None, None, None, None))
+        
+        ret.append(self.mkPortEntry(base+'_BID', 'in',
+                                    '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_BRESP', 'in',
+                                    None, 1, None, 0))
+        ret.append(self.mkPortEntry(base+'_BUSER', 'in',
+                                    '('+mkStr(base,'BUSER_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'BUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_BVALID', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_BREADY', 'out',
+                                    None, None, None, None))
+        
+        ret.append(self.mkPortEntry(base+'_ARID', 'out',
+                                    '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_ARADDR', 'out',
+                                    '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARLEN', 'out',
+                                    None, 7, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARSIZE', 'out',
+                                    None, 2, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARBURST', 'out',
+                                    None, 1, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARLOCK', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_ARCACHE', 'out',
+                                    None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARPROT', 'out',
+                                    None, 2, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARQOS', 'out',
+                                    None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARUSER', 'out',
+                                    '('+mkStr(base,'ARUSER_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'ARUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_ARVALID', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_ARREADY', 'in',
+                                    None, None, None, None))
+        
+        ret.append(self.mkPortEntry(base+'_RID', 'in',
+                                    '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_RDATA', 'in',
+                                    '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_RRESP', 'out',
+                                    None, 1, None, 0))
+        ret.append(self.mkPortEntry(base+'_RLAST', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_RUSER', 'in',
+                                    '('+mkStr(base,'RUSER_WIDTH')+'-1)', 0, None, 0,
+                                    True, True, mkStr(base,'RUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_RVALID', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_RREADY', 'out',
+                                    None, None, None, None))
+        
+        ret.append(self.mkPortEntry(base+'_ACLK', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_ARESETN', 'in',
+                                    None, None, None, None))
 
         return ret
         
@@ -699,132 +698,132 @@ class ComponentGen(object):
         ret = []
         
         def mkStr(b, s):
-            return 'spirit:decode(id(&apos;MODELPARAM_VALUE.C_' + b + '_' + s '&apos;))' 
+            return 'spirit:decode(id(&apos;MODELPARAM_VALUE.C_' + b + '_' + s + '&apos;))' 
 
         if not lite:
-            ret.append(self.mkPortSignal(base+'_AWID', 'in',
-                                         '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_AWADDR', 'in',
-                                     '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWID', 'in',
+                                        '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_AWADDR', 'in',
+                                    '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
         if not lite:
-            ret.append(self.mkPortSignal(base+'_AWLEN', 'in',
-                                         None, 7, None, 0))
-            ret.append(self.mkPortSignal(base+'_AWSIZE', 'in',
-                                         None, 2, None, 0))
-            ret.append(self.mkPortSignal(base+'_AWBURST', 'in',
-                                         None, 1, None, 0))
-            ret.append(self.mkPortSignal(base+'_AWLOCK', 'in',
-                                         None, None, None, None))
-            ret.append(self.mkPortSignal(base+'_AWCACHE', 'in',
-                                         None, 3, None, 0))
-        ret.append(self.mkPortSignal(base+'_AWPROT', 'in',
-                                     None, 2, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWLEN', 'in',
+                                        None, 7, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWSIZE', 'in',
+                                        None, 2, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWBURST', 'in',
+                                        None, 1, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWLOCK', 'in',
+                                        None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_AWCACHE', 'in',
+                                        None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWPROT', 'in',
+                                    None, 2, None, 0))
         if not lite:
-            ret.append(self.mkPortSignal(base+'_AWQOS', 'in',
-                                         None, 3, None, 0))
-            ret.append(self.mkPortSignal(base+'_AWUSER', 'in',
-                                         '('+mkStr(base,'AWUSER_WIDTH')+'-1)', 0, None, 0,
+            ret.append(self.mkPortEntry(base+'_AWQOS', 'in',
+                                        None, 3, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWUSER', 'in',
+                                        '('+mkStr(base,'AWUSER_WIDTH')+'-1)', 0, None, 0,
                                          True, True, mkStr(base,'AWUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_AWVALID', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_AWREADY', 'out',
-                                     None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_AWVALID', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_AWREADY', 'out',
+                                    None, None, None, None))
 
-        ret.append(self.mkPortSignal(base+'_WDATA', 'in',
-                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_WSTRB', 'in',
-                                     '('+mkStr(base,'DATA_WIDTH')+'/8-1)', datawidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_WDATA', 'in',
+                                    '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_WSTRB', 'in',
+                                    '('+mkStr(base,'DATA_WIDTH')+'/8-1)', datawidth-1, None, 0))
         if not lite:
-            ret.append(self.mkPortSignal(base+'_WLAST', 'in',
-                                         None, None, None, None))
-            ret.append(self.mkPortSignal(base+'_WUSER', 'in',
-                                         '('+mkStr(base,'WUSER_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'WUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_WVALID', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_WREADY', 'out',
-                                     None, None, None, None))
-
-        if not lite:
-            ret.append(self.mkPortSignal(base+'_BID', 'out',
-                                         '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_BRESP', 'out',
-                                     None, 1, None, 0))
-        if not lite:
-            ret.append(self.mkPortSignal(base+'_BUSER', 'out',
-                                         '('+mkStr(base,'BUSER_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'BUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_BVALID', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_BREADY', 'in',
-                                     None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_WLAST', 'in',
+                                        None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_WUSER', 'in',
+                                        '('+mkStr(base,'WUSER_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'WUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_WVALID', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_WREADY', 'out',
+                                    None, None, None, None))
 
         if not lite:
-            ret.append(self.mkPortSignal(base+'_ARID', 'in',
-                                         '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_ARADDR', 'in',
-                                     '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
+            ret.append(self.mkPortEntry(base+'_BID', 'out',
+                                        '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_BRESP', 'out',
+                                    None, 1, None, 0))
         if not lite:
-            ret.append(self.mkPortSignal(base+'_ARLEN', 'in',
-                                         None, 7, None, 0))
-            ret.append(self.mkPortSignal(base+'_ARSIZE', 'in',
-                                         None, 2, None, 0))
-            ret.append(self.mkPortSignal(base+'_ARBURST', 'in',
-                                         None, 1, None, 0))
-            ret.append(self.mkPortSignal(base+'_ARLOCK', 'in',
-                                         None, None, None, None))
-            ret.append(self.mkPortSignal(base+'_ARCACHE', 'in',
-                                         None, 3, None, 0))
-        ret.append(self.mkPortSignal(base+'_ARPROT', 'in',
-                                     None, 2, None, 0))
-        if not lite:
-            ret.append(self.mkPortSignal(base+'_ARQOS', 'in',
-                                         None, 3, None, 0))
-            ret.append(self.mkPortSignal(base+'_ARUSER', 'in',
-                                         '('+mkStr(base,'ARUSER_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'ARUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_ARVALID', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_ARREADY', 'out',
-                                     None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_BUSER', 'out',
+                                        '('+mkStr(base,'BUSER_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'BUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_BVALID', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_BREADY', 'in',
+                                    None, None, None, None))
 
         if not lite:
-            ret.append(self.mkPortSignal(base+'_RID', 'out',
-                                         '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
-        ret.append(self.mkPortSignal(base+'_RDATA', 'out',
-                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortSignal(base+'_RRESP', 'in',
-                                     None, 1, None, 0))
+            ret.append(self.mkPortEntry(base+'_ARID', 'in',
+                                        '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_ARADDR', 'in',
+                                    '('+mkStr(base,'ADDR_WIDTH')+'-1)', addrwidth-1, None, 0))
         if not lite:
-            ret.append(self.mkPortSignal(base+'_RLAST', 'out',
-                                         None, None, None, None))
-            ret.append(self.mkPortSignal(base+'_RUSER', 'out',
-                                         '('+mkStr(base,'RUSER_WIDTH')+'-1)', 0, None, 0,
-                                         True, True, mkStr(base,'RUSER_WIDTH')+' >0', 'false'))
-        ret.append(self.mkPortSignal(base+'_RVALID', 'out',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_RREADY', 'in',
-                                     None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_ARLEN', 'in',
+                                        None, 7, None, 0))
+            ret.append(self.mkPortEntry(base+'_ARSIZE', 'in',
+                                        None, 2, None, 0))
+            ret.append(self.mkPortEntry(base+'_ARBURST', 'in',
+                                        None, 1, None, 0))
+            ret.append(self.mkPortEntry(base+'_ARLOCK', 'in',
+                                        None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_ARCACHE', 'in',
+                                        None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARPROT', 'in',
+                                    None, 2, None, 0))
+        if not lite:
+            ret.append(self.mkPortEntry(base+'_ARQOS', 'in',
+                                        None, 3, None, 0))
+            ret.append(self.mkPortEntry(base+'_ARUSER', 'in',
+                                        '('+mkStr(base,'ARUSER_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'ARUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_ARVALID', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_ARREADY', 'out',
+                                    None, None, None, None))
 
-        ret.append(self.mkPortSignal(base+'_ACLK', 'in',
-                                     None, None, None, None))
-        ret.append(self.mkPortSignal(base+'_ARESETN', 'in',
-                                     None, None, None, None))
+        if not lite:
+            ret.append(self.mkPortEntry(base+'_RID', 'out',
+                                        '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
+        ret.append(self.mkPortEntry(base+'_RDATA', 'out',
+                                    '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
+        ret.append(self.mkPortEntry(base+'_RRESP', 'in',
+                                    None, 1, None, 0))
+        if not lite:
+            ret.append(self.mkPortEntry(base+'_RLAST', 'out',
+                                        None, None, None, None))
+            ret.append(self.mkPortEntry(base+'_RUSER', 'out',
+                                        '('+mkStr(base,'RUSER_WIDTH')+'-1)', 0, None, 0,
+                                        True, True, mkStr(base,'RUSER_WIDTH')+' >0', 'false'))
+        ret.append(self.mkPortEntry(base+'_RVALID', 'out',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_RREADY', 'in',
+                                    None, None, None, None))
+
+        ret.append(self.mkPortEntry(base+'_ACLK', 'in',
+                                    None, None, None, None))
+        ret.append(self.mkPortEntry(base+'_ARESETN', 'in',
+                                    None, None, None, None))
 
         return ret
         
-    def mkPortSignal(self, name, direction, lvar, lvalue, rvar, rvalue,
-                     withdriver=False,
-                     withextension=False, extensionvar=None, extensionvalue='true')
+    def mkPortEntry(self, name, direction, lvar, lvalue, rvar, rvalue,
+                    withdriver=False,
+                    withextension=False, extensionvar=None, extensionvalue='true'):
         port = self.doc.createElement('spirit:port')
         port.appendChild(self.mkName(name))
         port.appendChild(self.mkWire(direction, lvar, lvalue, rvar, rvalue, withdriver))
         if withextension:
-            port.appendChild(self.mkVendorExtensions(lvar, extensionvalue))
+            port.appendChild(self.mkPortVendorExtensions(lvar, extensionvalue))
         return port
         
     def mkWire(self, direction, lvar, lvalue, rvar, rvalue, withdriver=False):
@@ -838,9 +837,7 @@ class ComponentGen(object):
         return wire
 
     def mkDirection(self, direction):
-        i_direction  = self.doc.createElement('spirit:direction')
-        self.setText(i_direction, direction)
-        return i_direction
+        return self.mkTextNode('spirit:direction', direction)
         
     def mkVector(self, lvar, lvalue, rvar, rvalue):
         vector = self.doc.createElement('spirit:vector')
@@ -863,35 +860,25 @@ class ComponentGen(object):
         return vector
 
     def mkWireTypeDefs(self, wiretype):
-        return self.mkWire(wiretype)
+        return self.mkWireTypeDef(wiretype)
         
     def mkWireTypeDef(self, wiretype):
         wiretypedef = self.doc.createElement('spirit:wireTypeDef')
-        typename = self.doc.createElement('spirit:typeName')
-        self.setText(typename, wiretype)
-        wiretypedef.appendChild(typename)
-        viewnameref0 = self.doc.createElement('spirit:viewNameRef')
-        self.setText(viewnameref0, 'xilinx_verilogsynthesis')
-        wiretypedef.appendChild(viewnameref0)
-        viewnameref1 = self.doc.createElement('spirit:viewNameRef')
-        self.setText(viewnameref0, 'xilinx_verilogbehavioralsimulation')
-        wiretypedef.appendChild(viewnameref1)
+        wiretypedef.appendChild(self.mkTextNode('spirit:typeName', wiretype))
+        wiretypedef.appendChild(self.mkTextNode('spirit:viewNameRef', 'xilinx_verilogsynthesis'))
+        wiretypedef.appendChild(self.mkTextNode('spirit:viewNameRef', 'xilinx_verilogbehavioralsimulation'))
         return wiretypedef
 
     def mkDriver(self):
         driver = self.doc.createElement('spirit:driver')
-        defaultvalue = self.doc.createElement('spirit:defaultvalue')
-        self.setText(defaultvalue, 0)
-        driver.appendChild(defaultvalue)
+        driver.appendChild(self.mkTextNode('spirit:defaultvalue', 0))
         return driver
 
-    def mkVendorExtensions(self, var, value='true'):
-        extension = self.doc.createElement('spirit:vendorExtensions')
+    def mkPortVendorExtensions(self, var, value='true'):
+        extensions = self.doc.createElement('spirit:vendorExtensions')
         portinfo = self.doc.createElement('xilinx:portInfo')
         enablement = self.doc.createElement('xilinx:enablement')
-        presence = self.doc.createElement('xilinx:presence')
-        self.setText(presence, 'optional')
-        enablement.appendChild(presence)
+        enablement.appendChild(self.mkTextNode('xilinx:presence', 'optional'))
         isEnabled = self.doc.createElement('xilinx:isEnabled')
         self.setAttribute(isEnabled, 'xilinx:resolve', "dependent")
         self.setAttribute(isEnabled, 'xilinx:dependency',
@@ -900,39 +887,601 @@ class ComponentGen(object):
         self.setText(isEnabled, value)
         enablement.appendChild(isEnabled)
         portinfo.appendChild(enablement)
-        extension.appendChild(portinfo)
-        return extension
+        extensions.appendChild(portinfo)
+        return extensions
         
     #---------------------------------------------------------------------------
     def mkModelParameters(self):
         modelparameters = self.doc.createElement('spirit:modelParameters')
+        order = 3
         for thread in self.threads:
-            ports.appendChild(self.mkPortSignal(therad.name + '_CCLK', 'in',
-                                                None, None, None, None))
-            ports.appendChild(self.mkPortSignal(therad.name + '_CRESETN', 'in',
-                                                None, None, None, None))
             for memory in thread.memories:
-                for p in self.mkPortMaster(thread, memory): ports.appendChild(p)
+                order, rslt = self.mkModelParameter(thread, memory, order)
+                for p in rslt: modelparameters.appendChild(p)
             for instream in thread.instreams:
-                for p in self.mkPortMaster(thread, instream): ports.appendChild(p)
+                order, rslt = self.mkModelParameter(thread, instream, order)
+                for p in rslt: modelparameters.appendChild(p)
             for outstream in thread.outstreams:
-                for p in self.mkPortMaster(thread, oustream): ports.appendChild(p)
+                order, rslt = self.mkModelParameter(thread, outstream, order)
+                for p in rslt: modelparameters.appendChild(p)
             for iochannel in thread.iochannels:
-                for p in self.mkPortSlave(thread, iochannel, lite=self.lite):
-                    ports.appendChild(p)
+                order, rslt = self.mkModelParameter(thread, iochannel, order, lite=True)
+                for p in rslt: modelparameters.appendChild(p)
             for ioregister in thread.ioregisters:
-                for p in self.mkPortSlave(thread, ioregister, lite=self.lite):
-                    ports.appendChild(p)
-        for portname, portdir, portlvalue in self.ext_ports:
-            lvalue = portlvalue if portlvalue is not None else None
-            rvalue = 0 if portlvalue is not None else None
-            ports.appendChild(self.mkPortSignal(portname, portdir,
-                                                None, lvalue, None, rvalue))
-        
+                order, rslt = self.mkModelParameter(thread, ioregister, order, lite=True)
+                for p in rslt: modelparameters.appendChild(p)
         return modelparameters
+
+    def mkModelParameter(self, thread, obj, order, lite=True):
+        ret = []
+        name = thread.name + '_' + obj.name + '_AXI'
+        
+        baseaddr = self.doc.createElement('spirit:modelParameter')
+        self.setAttribute(baseaddr, 'xsi:type', 'spirit:nameValueTypeType')
+        self.setAttribute(baseaddr, 'spirit:dataType', " ")
+        baseaddr.appendChild(self.mkName("C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
+        baseaddr.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
+        baseaddr.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
+        value = self.doc.createElement('spirit:value')
+        self.setAttribute(value, 'spirit:format', 'bitString')
+        self.setAttribute(value, 'spirit:resolve', 'generated')
+        self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_TARGET_SLAVE_BASE_ADDR")
+        self.setAttribute(value, 'spirit:order', order)
+        self.setAttribute(value, 'spirit:bitStringLength', self.ext_addrwidth)
+        self.setText(value, 0x40000000)
+        baseaddr.appendChild(value)
+        ret.append(baseaddr)
+        order += 1
+
+        if not lite:
+            burstlen = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            burstlen.appendChild(self.mkName("C_" + name + "_BURST_LEN"))
+            burstlen.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BURST_LEN"))
+            burstlen.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BURST_LEN"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'generated')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_BURST_LEN")
+            self.setAttribute(value, 'spirit:choiseRef', "choices_5")
+            self.setAttribute(value, 'spirit:order', order)
+            self.setText(value, 256)
+            burstlen.appendChild(value)
+            ret.append(burstlen)
+            order += 1
     
+        if not lite:
+            idwidth = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            idwidth.appendChild(self.mkName("C_" + name + "_ID_WIDTH"))
+            idwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ID_WIDTH"))
+            idwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ID_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_ID_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_ID_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_ID_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "32")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            idwidth.appendChild(value)
+            ret.append(idwidth)
+            order += 1
+    
+        addrwidth = self.doc.createElement('spirit:modelParameter')
+        self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+        addrwidth.appendChild(self.mkName("C_" + name + "_ADDR_WIDTH"))
+        addrwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ADDR_WIDTH"))
+        addrwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ADDR_WIDTH"))
+        value = self.doc.createElement('spirit:value')
+        self.setAttribute(value, 'spirit:format', 'long')
+        self.setAttribute(value, 'spirit:resolve', 'generated')
+        self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_ADDR_WIDTH")
+        self.setAttribute(value, 'spirit:order', order)
+        self.setAttribute(value, 'spirit:rangeType', "long")
+        self.setText(value, self.ext_addrwidth)
+        addrwidth.appendChild(value)
+        ret.append(addrwidth)
+        order += 1
+    
+        datawidth = self.doc.createElement('spirit:modelParameter')
+        self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+        datawidth.appendChild(self.mkName("C_" + name + "_DATA_WIDTH"))
+        datawidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_DATA_WIDTH"))
+        datawidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_DATA_WIDTH"))
+        value = self.doc.createElement('spirit:value')
+        self.setAttribute(value, 'spirit:format', 'long')
+        self.setAttribute(value, 'spirit:resolve', 'generated')
+        self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_DATA_WIDTH")
+        self.setAttribute(value, 'spirit:order', order)
+        self.setAttribute(value, 'spirit:rangeType', "long")
+        self.setText(value, obj.ext_datawidth)
+        datawidth.appendChild(value)
+        ret.append(datawidth)
+        order += 1
+
+        if not lite:
+            awuserwidth = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            awuserwidth.appendChild(self.mkName("C_" + name + "_AWUSER_WIDTH"))
+            awuserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_AWUSER_WIDTH"))
+            awuserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_AWUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_AWUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_AWUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_AWUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            awuserwidth.appendChild(value)
+            ret.append(awuserwidth)
+            order += 1
+
+        if not lite:
+            aruserwidth = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            aruserwidth.appendChild(self.mkName("C_" + name + "_ARUSER_WIDTH"))
+            aruserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ARUSER_WIDTH"))
+            aruserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ARUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_ARUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_ARUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_ARUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            aruserwidth.appendChild(value)
+            ret.append(aruserwidth)
+            order += 1
+    
+        if not lite:
+            wuserwidth = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            wuserwidth.appendChild(self.mkName("C_" + name + "_WUSER_WIDTH"))
+            wuserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_WUSER_WIDTH"))
+            wuserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_WUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_WUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_WUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_WUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            wuserwidth.appendChild(value)
+            ret.append(wuserwidth)
+            order += 1
+    
+        if not lite:
+            ruserwidth = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            ruserwidth.appendChild(self.mkName("C_" + name + "_RUSER_WIDTH"))
+            ruserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_RUSER_WIDTH"))
+            ruserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_RUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_RUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_RUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_RUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            ruserwidth.appendChild(value)
+            ret.append(ruserwidth)
+            order += 1
+    
+        if not lite:
+            buserwidth = self.doc.createElement('spirit:modelParameter')
+            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            buserwidth.appendChild(self.mkName("C_" + name + "_BUSER_WIDTH"))
+            buserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BUSER_WIDTH"))
+            buserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_BUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_BUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_BUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            buserwidth.appendChild(value)
+            ret.append(buserwidth)
+            order += 1
+        
+        return order, ret
+
+    #---------------------------------------------------------------------------
+    def mkChoices(self):
+        choices = self.doc.createElement('spirit:choices')
+        choices.appendChild(self.mkChoice('choices_0', (32,) ))
+        
+        choices_1 = self.doc.createElement('spirit:choice')
+        choices_1.appendChild(self.mkName('choices_1'))
+        choices_1_true = self.doc.createElement('spirit:enumeration')
+        self.setAttribute(choices_1_true, 'spirit:text', 'true')
+        self.setText(choices_1_true, 1)
+        choices_1_false = self.doc.createElement('spirit:enumeration')
+        self.setAttribute(choices_1_false, 'spirit:text', 'false')
+        self.setText(choices_1_false, 0)
+        choices_1.appendChild(choices_1_true)
+        choices_1.appendChild(choices_1_false)
+
+        choices.appendChild(self.mkChoice('choices_2', (32,) ))
+        
+        choices_3 = self.doc.createElement('spirit:choice')
+        choices_3.appendChild(self.mkName('choices_3'))
+        choices_3_true = self.doc.createElement('spirit:enumeration')
+        self.setAttribute(choices_3_true, 'spirit:text', 'true')
+        self.setText(choices_3_true, 1)
+        choices_3_false = self.doc.createElement('spirit:enumeration')
+        self.setAttribute(choices_3_false, 'spirit:text', 'false')
+        self.setText(choices_3_false, 0)
+        choices_3.appendChild(choices_3_true)
+        choices_3.appendChild(choices_3_false)
+
+        choices.appendChild(self.mkChoice('choices_4', (1, 2, 4, 8, 16, 32, 64, 128, 256) ))
+        choices.appendChild(self.mkChoice('choices_5', (1, 2, 4, 8, 16, 32, 64, 128, 256) ))
+        
+        return choices
+
+    def mkChoice(self, name, *arg):
+        choice = self.doc.createElement('spirit:choice')
+        choice.appendChild(self.mkName(name))
+        for a in arg:
+            choice.appendChild(self.mkTextNode('spirit:enumeration', a))
+        return choice
+                
+    #---------------------------------------------------------------------------
+    def mkFileSets(self):
+        filesets = self.doc.createElement('spirit:fileSets')
+        source = self.doc.createElement('spirit:fileSet')
+        source.appendChild(self.mkName("xilinx_verilogsynthesis_view_fileset"))
+        source.appendChild(self.mkFileSet('hdl/pycoram_'+self.userlogic_name.lower()+'.v',
+                                          'verilogSource'))
+        filesets.appendChild(source)
+        
+        sim = self.doc.createElement('spirit:fileSet')
+        sim.appendChild(self.mkName("xilinx_verilogbehavioralsimulation_view_fileset"))
+        sim.appendChild(self.mkFileSet('hdl/pycoram_'+self.userlogic_name.lower()+'.v',
+                                       'verilogSource'))
+        sim.appendChild(self.mkFileSet('test/test_pycoram_'+self.userlogic_name.lower()+'.v',
+                                       'verilogSource'))
+        filesets.appendChild(sim)
+        
+        tcl = self.doc.createElement('spirit:fileSet')
+        tcl.appendChild(self.mkName("xilinx_xpgui_view_fileset"))
+        tcl.appendChild(self.mkFileSet('xgui/pycoram_'+self.userlogic_name.lower()+'.tcl',
+                                       'tclSource',
+                                       'XGUI_VERSION_2'))
+        filesets.appendChild(tcl)
+        
+        tcl = self.doc.createElement('spirit:fileSet')
+        tcl.appendChild(self.mkName("xilinx_xpgui_view_fileset"))
+        tcl.appendChild(self.mkFileSet('xgui/pycoram_'+self.userlogic_name.lower()+'.tcl',
+                                       'tclSource',
+                                       'XGUI_VERSION_2'))
+        filesets.appendChild(tcl)
+        
+        bdtcl = self.doc.createElement('spirit:fileSet')
+        bdtcl.appendChild(self.mkName("bd_tcl_view_fileset"))
+        bdtcl.appendChild(self.mkFileSet('bd/bd.tcl',
+                                       'tclSource'))
+        filesets.appendChild(bdtcl)
+        
+        return filesets
+
+    def mkFileSet(self, name, filetype, *userfiletypes):
+        fileset = self.doc.createElement('spirit:file')
+        fileset.appendChild(self.mkName(name))
+        fileset.appendChild(self.mkTextNode('spirit:fileType', filetype))
+        for u in userfiletypes:
+            fileset.appendChild(self.mkTextNode('spirit:userFileType', u))
+        return fileset
+
+    #---------------------------------------------------------------------------
+    def mkDescription(self):
+        return self.mkTextNode('spirit:description', 'PyCoRAM IP-core')
+
+    #---------------------------------------------------------------------------
+    def mkDescParameters(self):
+        parameters = self.doc.createElement('spirit:parameters')
+        return parameters
+
+        order = 3
+        for thread in self.threads:
+            for memory in thread.memories:
+                order, rslt = self.mkDescParameter(thread, memory, order)
+                for p in rslt: parameters.appendChild(p)
+            for instream in thread.instreams:
+                order, rslt = self.mkDescParameter(thread, instream, order)
+                for p in rslt: parameters.appendChild(p)
+            for outstream in thread.outstreams:
+                order, rslt = self.mkDescParameter(thread, outstream, order)
+                for p in rslt: parameters.appendChild(p)
+            for iochannel in thread.iochannels:
+                order, rslt = self.mkDescParameter(thread, iochannel, order, lite=True)
+                for p in rslt: parameters.appendChild(p)
+            for ioregister in thread.ioregisters:
+                order, rslt = self.mkDescParameter(thread, ioregister, order, lite=True)
+                for p in rslt: parameters.appendChild(p)
+        return parameters
+    
+    def mkDescParameter(self, thread, obj, order, lite=True):
+        ret = []
+        name = thread.name + '_' + obj.name + '_AXI'
+        
+        baseaddr = self.doc.createElement('spirit:parameter')
+        baseaddr.appendChild(self.mkName("C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
+        baseaddr.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
+        baseaddr.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
+        value = self.doc.createElement('spirit:value')
+        self.setAttribute(value, 'spirit:format', 'bitString')
+        self.setAttribute(value, 'spirit:resolve', 'user')
+        self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_TARGET_SLAVE_BASE_ADDR")
+        self.setAttribute(value, 'spirit:order', order)
+        self.setAttribute(value, 'spirit:bitStringLength', self.ext_addrwidth)
+        self.setText(value, 0x40000000)
+        baseaddr.appendChild(value)
+        ret.append(baseaddr)
+        order += 1
+
+        if not lite:
+            burstlen = self.doc.createElement('spirit:parameter')
+            burstlen.appendChild(self.mkName("C_" + name + "_BURST_LEN"))
+            burstlen.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BURST_LEN"))
+            burstlen.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BURST_LEN"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'user')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_BURST_LEN")
+            self.setAttribute(value, 'spirit:choiseRef', "choices_4")
+            self.setAttribute(value, 'spirit:order', order)
+            self.setText(value, 256)
+            burstlen.appendChild(value)
+            ret.append(burstlen)
+            order += 1
+    
+        if not lite:
+            idwidth = self.doc.createElement('spirit:parameter')
+            idwidth.appendChild(self.mkName("C_" + name + "_ID_WIDTH"))
+            idwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ID_WIDTH"))
+            idwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ID_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'user')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_ID_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_ID_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_ID_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "32")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 1)
+            idwidth.appendChild(value)
+            ret.append(idwidth)
+            order += 1
+    
+        addrwidth = self.doc.createElement('spirit:parameter')
+        addrwidth.appendChild(self.mkName("C_" + name + "_ADDR_WIDTH"))
+        addrwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ADDR_WIDTH"))
+        addrwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ADDR_WIDTH"))
+        value = self.doc.createElement('spirit:value')
+        self.setAttribute(value, 'spirit:format', 'long')
+        self.setAttribute(value, 'spirit:resolve', 'user')
+        self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_ADDR_WIDTH")
+        self.setAttribute(value, 'spirit:order', order)
+        self.setAttribute(value, 'spirit:rangeType', "long")
+        self.setText(value, self.ext_addrwidth)
+        addrwidth.appendChild(value)
+        extensions = self.doc.createElement('spirit:vendorExtensions')
+        parameterinfo = self.doc.createElement('xilinx:parameterInfo')
+        enablement = self.doc.createElement('xilinx:enablement')
+        enablement.appendChild(self.mkTextNode('xilinx:isEnabled', 'false'))
+        parameterinfo.appendChild(enablement)
+        extensions.appendChild(parameterinfos)
+        addrwidth.appendChild(extensions)
+        ret.append(addrwidth)
+        order += 1
+    
+        datawidth = self.doc.createElement('spirit:parameter')
+        datawidth.appendChild(self.mkName("C_" + name + "_DATA_WIDTH"))
+        datawidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_DATA_WIDTH"))
+        datawidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_DATA_WIDTH"))
+        value = self.doc.createElement('spirit:value')
+        self.setAttribute(value, 'spirit:format', 'long')
+        self.setAttribute(value, 'spirit:resolve', 'user')
+        self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_DATA_WIDTH")
+        self.setAttribute(value, 'spirit:order', order)
+        self.setAttribute(value, 'spirit:rangeType', "long")
+        self.setText(value, obj.ext_datawidth)
+        datawidth.appendChild(value)
+        extensions = self.doc.createElement('spirit:vendorExtensions')
+        parameterinfo = self.doc.createElement('xilinx:parameterInfo')
+        enablement = self.doc.createElement('xilinx:enablement')
+        enablement.appendChild(self.mkTextNode('xilinx:isEnabled', 'false'))
+        parameterinfo.appendChild(enablement)
+        extensions.appendChild(parameterinfo)
+        datawidth.appendChild(extensions)
+        ret.append(datawidth)
+        order += 1
+
+        if not lite:
+            awuserwidth = self.doc.createElement('spirit:parameter')
+            awuserwidth.appendChild(self.mkName("C_" + name + "_AWUSER_WIDTH"))
+            awuserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_AWUSER_WIDTH"))
+            awuserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_AWUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_AWUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_AWUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_AWUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 0)
+            awuserwidth.appendChild(value)
+            ret.append(awuserwidth)
+            order += 1
+
+        if not lite:
+            aruserwidth = self.doc.createElement('spirit:parameter')
+            aruserwidth.appendChild(self.mkName("C_" + name + "_ARUSER_WIDTH"))
+            aruserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ARUSER_WIDTH"))
+            aruserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ARUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_ARUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_ARUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_ARUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 0)
+            aruserwidth.appendChild(value)
+            ret.append(aruserwidth)
+            order += 1
+    
+        if not lite:
+            wuserwidth = self.doc.createElement('spirit:parameter')
+            wuserwidth.appendChild(self.mkName("C_" + name + "_WUSER_WIDTH"))
+            wuserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_WUSER_WIDTH"))
+            wuserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_WUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_WUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_WUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_WUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 0)
+            wuserwidth.appendChild(value)
+            ret.append(wuserwidth)
+            order += 1
+    
+        if not lite:
+            ruserwidth = self.doc.createElement('spirit:parameter')
+            ruserwidth.appendChild(self.mkName("C_" + name + "_RUSER_WIDTH"))
+            ruserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_RUSER_WIDTH"))
+            ruserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_RUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_RUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_RUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_RUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 0)
+            ruserwidth.appendChild(value)
+            ret.append(ruserwidth)
+            order += 1
+    
+        if not lite:
+            buserwidth = self.doc.createElement('spirit:parameter')
+            buserwidth.appendChild(self.mkName("C_" + name + "_BUSER_WIDTH"))
+            buserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BUSER_WIDTH"))
+            buserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BUSER_WIDTH"))
+            value = self.doc.createElement('spirit:value')
+            self.setAttribute(value, 'spirit:format', 'long')
+            self.setAttribute(value, 'spirit:resolve', 'dependent')
+            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_BUSER_WIDTH")
+            self.setAttribute(value, 'spirit:dependency',
+                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
+                               "_BUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
+                               name + "_BUSER_WIDTH&apos;))))"))
+            self.setAttribute(value, 'spirit:order', order)
+            self.setAttribute(value, 'spirit:minimum', "0")
+            self.setAttribute(value, 'spirit:maximum', "1024")
+            self.setAttribute(value, 'spirit:rangeType', "long")
+            self.setText(value, 0)
+            buserwidth.appendChild(value)
+            ret.append(buserwidth)
+            order += 1
+        
+        return order, ret
+
+    #---------------------------------------------------------------------------
+    def mkVendorExtensions(self):
+        extensions = self.doc.createElement('spirit:vendorExtensions')
+        coreextensions = self.doc.createElement('xilinx:coreExtensions')
+        supported = self.doc.createElement('xilinx:supportedFamilies')
+        family = self.doc.createElement('xilinx:family')
+        self.setAttribute(family, 'xilinx:lifeCycle', 'Pre-Production')
+        self.setText(family, 'zynq')
+        supported.appendChild(family)
+        coreextensions.appendChild(supported)
+        taxonomies = self.doc.createElement('xilinx:taxonomies')
+        taxonomies.appendChild(self.mkTextNode('xilinx:taxonomy', 'AXI_Peripheral'))
+        coreextensions.appendChild(taxonomies)
+        coreextensions.appendChild(self.mkTextNode('xilinx:displayName',
+                                                   ('pycoram_' + self.userlogic_name.lower() +
+                                                    '_v1_0')))
+        coreextensions.appendChild(self.mkTextNode('xilinx:coreRevison', 1))
+        dt = '2015-03-08T02:16:15Z'
+        coreextensions.appendChild(self.mkTextNode('xilinx:coreCreationDateTime', dt))
+        extensions.appendChild(coreextensions)
+        packageinfo = self.doc.createElement('xilinx:packagingInfo')
+        packageinfo.appendChild(self.mkTextNode('xilinx:xilinxVersion', '2014.4'))
+        extensions.appendChild(packageinfo)
+        return extensions
+            
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
     gen = ComponentGen()
     rslt = gen.generate('userlogic', ())
     print(rslt)
+
+
+
+
