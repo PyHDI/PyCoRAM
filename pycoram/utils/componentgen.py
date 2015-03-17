@@ -112,7 +112,7 @@ class ComponentGen(object):
             for instream in thread.instreams:
                 bus.appendChild(self.mkBusInterface(thread, instream))
             for outstream in thread.outstreams:
-                bus.appendChild(self.mkBusInterface(thread, oustream))
+                bus.appendChild(self.mkBusInterface(thread, outstream))
             for iochannel in thread.iochannels:
                 bus.appendChild(self.mkBusInterface(thread, iochannel, master=False))
             for ioregister in thread.ioregisters:
@@ -125,8 +125,8 @@ class ComponentGen(object):
                 bus.appendChild(self.mkBusInterfaceReset(thread, instream))
                 bus.appendChild(self.mkBusInterfaceClock(thread, instream))
             for outstream in thread.outstreams:
-                bus.appendChild(self.mkBusInterfaceReset(thread, oustream))
-                bus.appendChild(self.mkBusInterfaceClock(thread, oustream))
+                bus.appendChild(self.mkBusInterfaceReset(thread, outstream))
+                bus.appendChild(self.mkBusInterfaceClock(thread, outstream))
             for iochannel in thread.iochannels:
                 bus.appendChild(self.mkBusInterfaceReset(thread, iochannel))
                 bus.appendChild(self.mkBusInterfaceClock(thread, iochannel))
@@ -398,7 +398,7 @@ class ComponentGen(object):
                 spaces.appendChild(self.mkAddressSpace(thread, instream))
                 isempty = False
             for outstream in thread.outstreams:
-                spaces.appendChild(self.mkAddressSpace(thread, oustream))
+                spaces.appendChild(self.mkAddressSpace(thread, outstream))
                 isempty = False
         if isempty: return None
         return spaces
@@ -582,7 +582,7 @@ class ComponentGen(object):
             for instream in thread.instreams:
                 for p in self.mkPortMaster(thread, instream): ports.appendChild(p)
             for outstream in thread.outstreams:
-                for p in self.mkPortMaster(thread, oustream): ports.appendChild(p)
+                for p in self.mkPortMaster(thread, outstream): ports.appendChild(p)
             for iochannel in thread.iochannels:
                 for p in self.mkPortSlave(thread, iochannel, lite=self.lite):
                     ports.appendChild(p)
