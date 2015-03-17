@@ -414,7 +414,6 @@ class SystemBuilder(object):
         for pk, (pv, pwidth) in top_ioports.items():
             name_top_ioports.append( pk )
             new_pv = vast.Wire(pv.name, pv.width, pv.signed)
-            def_top_ioports.append( asttocode.visit(new_pv) )
             _name = pv.name
             _dir = ('in' if isinstance(pv, vast.Input) else
                     'out' if isinstance(pv, vast.Output) else
@@ -424,7 +423,6 @@ class SystemBuilder(object):
 
         for pk, pv in top_parameters.items():
             r = asttocode.visit(pv)
-            def_top_parameters.append( r )
             if r.count('localparam'):
                 def_top_localparams.append( r )
                 continue
