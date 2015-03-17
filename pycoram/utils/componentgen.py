@@ -10,6 +10,12 @@ PORTLIST = ('AWID', 'AWADDR', 'AWLEN', 'AWSIZE', 'AWBURST', 'AWLOCK',
             'ARCACHE', 'ARPROT', 'ARQOS', 'ARUSER', 'ARVALID', 'ARREADY', 
             'RID', 'RDATA', 'RRESP', 'RLAST', 'RUSER', 'RVALID', 'RREADY' )
 
+PORTLITELIST = ('AWADDR', 'AWPROT', 'AWVALID', 'AWREADY',
+                'WDATA', 'WSTRB', 'WVALID', 'WREADY', 
+                'BRESP', 'BVALID', 'BREADY', 
+                'ARADDR', 'ARPROT', 'ARVALID', 'ARREADY', 
+                'RDATA', 'RRESP', 'RVALID', 'RREADY' )
+
 #-------------------------------------------------------------------------------
 class ComponentGen(object):
     def __init__(self):
@@ -114,9 +120,9 @@ class ComponentGen(object):
             for outstream in thread.outstreams:
                 bus.appendChild(self.mkBusInterface(thread, outstream))
             for iochannel in thread.iochannels:
-                bus.appendChild(self.mkBusInterface(thread, iochannel, master=False))
+                bus.appendChild(self.mkBusInterface(thread, iochannel, master=False, lite=self.lite))
             for ioregister in thread.ioregisters:
-                bus.appendChild(self.mkBusInterface(thread, ioregister, master=False))
+                bus.appendChild(self.mkBusInterface(thread, ioregister, master=False, lite=self.lite))
         for thread in self.threads:
             for memory in thread.memories:
                 bus.appendChild(self.mkBusInterfaceReset(thread, memory))
@@ -136,7 +142,7 @@ class ComponentGen(object):
         return bus
 
     #---------------------------------------------------------------------------
-    def mkBusInterface(self, thread, obj, master=True):
+    def mkBusInterface(self, thread, obj, master=True, lite=False):
         name = thread.name + '_' + obj.name + '_AXI'
         datawidth = obj.ext_datawidth
         interface = self.doc.createElement('spirit:busInterface')
@@ -147,7 +153,7 @@ class ComponentGen(object):
             interface.appendChild(self.mkMaster(name))
         else:
             interface.appendChild(self.mkSlave(name))
-        interface.appendChild(self.mkPortMaps(name))
+        interface.appendChild(self.mkPortMaps(name, lite))
         interface.appendChild(self.mkParameters(name, datawidth, master))
         return interface
 
@@ -179,10 +185,14 @@ class ComponentGen(object):
         self.setAttribute(memorymapref, 'spirit:memoryMapRef', name)
         return slave
 
-    def mkPortMaps(self, name):
+    def mkPortMaps(self, name, lite=False):
         portmaps = self.doc.createElement('spirit:portMaps')
-        for port in PORTLIST:
-            portmaps.appendChild(self.mkPortMap(name, port))
+        if lite:
+            for port in PORTLITELIST:
+                portmaps.appendChild(self.mkPortMap(name, port))
+        else:
+            for port in PORTLIST:
+                portmaps.appendChild(self.mkPortMap(name, port))
         return portmaps
 
     def mkPortMap(self, name, attr):
@@ -926,10 +936,10 @@ class ComponentGen(object):
                 order, rslt = self.mkModelParameter(thread, outstream, order)
                 for p in rslt: modelparameters.appendChild(p)
             for iochannel in thread.iochannels:
-                order, rslt = self.mkModelParameter(thread, iochannel, order, lite=True)
+                order, rslt = self.mkModelParameter(thread, iochannel, order, lite=self.lite)
                 for p in rslt: modelparameters.appendChild(p)
             for ioregister in thread.ioregisters:
-                order, rslt = self.mkModelParameter(thread, ioregister, order, lite=True)
+                order, rslt = self.mkModelParameter(thread, ioregister, order, lite=self.lite)
                 for p in rslt: modelparameters.appendChild(p)
         return modelparameters
 
@@ -1146,7 +1156,7 @@ class ComponentGen(object):
     #---------------------------------------------------------------------------
     def mkChoices(self):
         choices = self.doc.createElement('spirit:choices')
-        choices.appendChild(self.mkChoice('choices_0', (32,) ))
+        choices.appendChild(self.mkChoice('choices_0', (32, 64, 128, 256, 512) ))
         
         choices_1 = self.doc.createElement('spirit:choice')
         choices_1.appendChild(self.mkName('choices_1'))
@@ -1160,7 +1170,7 @@ class ComponentGen(object):
         choices_1.appendChild(choices_1_false)
         choices.appendChild(choices_1)
 
-        choices.appendChild(self.mkChoice('choices_2', (32,) ))
+        choices.appendChild(self.mkChoice('choices_2', (32, 64, 128, 256, 512) ))
         
         choices_3 = self.doc.createElement('spirit:choice')
         choices_3.appendChild(self.mkName('choices_3'))
@@ -1174,8 +1184,8 @@ class ComponentGen(object):
         choices_3.appendChild(choices_3_false)
         choices.appendChild(choices_3)
 
-        choices.appendChild(self.mkChoice('choices_4', (1, 2, 4, 8, 16, 32, 64, 128, 256) ))
-        choices.appendChild(self.mkChoice('choices_5', (1, 2, 4, 8, 16, 32, 64, 128, 256) ))
+        choices.appendChild(self.mkChoice('choices_4', (1, 2, 4, 8, 16, 32, 64, 128, 256, 512) ))
+        choices.appendChild(self.mkChoice('choices_5', (1, 2, 4, 8, 16, 32, 64, 128, 256, 512) ))
         
         return choices
 
@@ -1250,10 +1260,10 @@ class ComponentGen(object):
                 order, rslt = self.mkDescParameter(thread, outstream, order)
                 for p in rslt: parameters.appendChild(p)
             for iochannel in thread.iochannels:
-                order, rslt = self.mkDescParameter(thread, iochannel, order, lite=True)
+                order, rslt = self.mkDescParameter(thread, iochannel, order, lite=self.lite)
                 for p in rslt: parameters.appendChild(p)
             for ioregister in thread.ioregisters:
-                order, rslt = self.mkDescParameter(thread, ioregister, order, lite=True)
+                order, rslt = self.mkDescParameter(thread, ioregister, order, lite=self.lite)
                 for p in rslt: parameters.appendChild(p)
         return parameters
     

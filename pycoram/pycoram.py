@@ -524,6 +524,7 @@ class SystemBuilder(object):
         # component.xml
         gen = utils.componentgen.ComponentGen()
         xml_code = gen.generate(userlogic_topmodule, threads,
+                                lite=configs['io_lite'], 
                                 ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength)
         f = open(xmlpath+xmlname, 'w')
         f.write(xml_code)
