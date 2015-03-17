@@ -413,25 +413,44 @@ class SystemBuilder(object):
         # with AXI interface, create IPcore dir
         ipcore_version = '_v1_00_a'
         mpd_version = '_v2_1_0'
+        
         dirname = 'pycoram_' + userlogic_topmodule + ipcore_version + '/'
+
+        # pcore
         mpdname = 'pycoram_' + userlogic_topmodule + mpd_version + '.mpd'
         #muiname = 'pycoram_' + userlogic_topmodule + mpd_version + '.mui'
         paoname = 'pycoram_' + userlogic_topmodule + mpd_version + '.pao'
         tclname = 'pycoram_' + userlogic_topmodule + mpd_version + '.tcl'
+
+        # IP-XACT
         xmlname = 'component.xml'
+        xdcname = 'pycoram_' + userlogic_topmodule + '.xdc'
+        bdname = 'bd.tcl'
+        xguiname = 'xgui.tcl'
+
+        # source
         hdlname = 'pycoram_' + userlogic_topmodule + '.v'
         testname = 'test_pycoram_' + userlogic_topmodule + '.v'
         memname = 'mem.img'
         makefilename = 'Makefile'
         copied_memimg = memname if memimg is not None else None
         binfile = (True if memimg is not None and memimg.endswith('.bin') else False)
-        hdlpath = dirname + 'hdl/'
-        verilogpath = dirname + 'hdl/verilog/'
+
+        # pcore
         mpdpath = dirname + 'data/'
         #muipath = dirname + 'data/'
         paopath = dirname + 'data/'
         tclpath = dirname + 'data/'
+
+        # IP-XACT
         xmlpath = dirname
+        xdcpath = dirname + 'data/'
+        bdpath = dirname + 'bd/'
+        xguipath = dirname + 'xgui/'
+
+        # source
+        hdlpath = dirname + 'hdl/'
+        verilogpath = dirname + 'hdl/verilog/'
         testpath = dirname + 'test/'
         makefilepath = dirname + 'test/'
 
@@ -441,17 +460,16 @@ class SystemBuilder(object):
             os.mkdir(dirname + '/' + 'data')
         if not os.path.exists(dirname + '/' + 'doc'):
             os.mkdir(dirname + '/' + 'doc')
+        if not os.path.exists(dirname + '/' + 'bd'):
+            os.mkdir(dirname + '/' + 'bd')
+        if not os.path.exists(dirname + '/' + 'xgui'):
+            os.mkdir(dirname + '/' + 'xgui')
         if not os.path.exists(dirname + '/' + 'hdl'):
             os.mkdir(dirname + '/' + 'hdl')
         if not os.path.exists(dirname + '/' + 'hdl/verilog'):
             os.mkdir(dirname + '/' + 'hdl/verilog')
         if not os.path.exists(dirname + '/' + 'test'):
             os.mkdir(dirname + '/' + 'test')
-
-        # hdl file
-        f = open(verilogpath+hdlname, 'w')
-        f.write(code)
-        f.close()
 
         # mpd file
         mpd_template_file = 'mpd.txt'
@@ -498,7 +516,7 @@ class SystemBuilder(object):
         # tcl file
         tcl_code = ''
         if not configs['single_clock']:
-            tcl_code = open(TEMPLATE_DIR+'tcl.tcl', 'r').read()
+            tcl_code = open(TEMPLATE_DIR+'pcore_tcl.tcl', 'r').read()
         f = open(tclpath+tclname, 'w')
         f.write(tcl_code)
         f.close()
@@ -510,7 +528,42 @@ class SystemBuilder(object):
         f = open(xmlpath+xmlname, 'w')
         f.write(xml_code)
         f.close()
+
+        # xdc
+        xdc_code = ''
+        if not configs['single_clock']:
+            xdc_code = open(TEMPLATE_DIR+'ipxact.xdc', 'r').read()
+        f = open(xdcpath+xdcname, 'w')
+        f.write(xdc_code)
+        f.close()
+
+        # bd
+        bd_code = ''
+        if not configs['single_clock']:
+            bd_code = open(TEMPLATE_DIR+'bd.tcl', 'r').read()
+        f = open(bdpath+bdname, 'w')
+        f.write(bd_code)
+        f.close()
         
+        # xgui file
+        xgui_template_file = 'xgui_tcl.txt'
+        xgui_code = self.render(xgui_template_file,
+                                userlogic_topmodule, threads,
+                                def_top_parameters, def_top_localparams, def_top_ioports, name_top_ioports,
+                                ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength,
+                                single_clock=configs['single_clock'], lite=configs['io_lite'],
+                                hdlname=hdlname,
+                                ipcore_version=ipcore_version, 
+                                mpd_ports=mpd_ports, mpd_parameters=mpd_parameters)
+        f = open(xguipath+xguiname, 'w')
+        f.write(xgui_code)
+        f.close()
+
+        # hdl file
+        f = open(verilogpath+hdlname, 'w')
+        f.write(code)
+        f.close()
+
         # user test code
         usertestcode = None 
         if usertest is not None:
@@ -618,26 +671,12 @@ class SystemBuilder(object):
 
         if not os.path.exists(dirname):
             os.mkdir(dirname)
-        #if not os.path.exists(dirname + '/' + 'data'):
-        #    os.mkdir(dirname + '/' + 'data')
-        #if not os.path.exists(dirname + '/' + 'doc'):
-        #    os.mkdir(dirname + '/' + 'doc')
         if not os.path.exists(dirname + '/' + 'hdl'):
             os.mkdir(dirname + '/' + 'hdl')
         if not os.path.exists(dirname + '/' + 'hdl/verilog'):
             os.mkdir(dirname + '/' + 'hdl/verilog')
         if not os.path.exists(dirname + '/' + 'test'):
             os.mkdir(dirname + '/' + 'test')
-
-        # hdl file
-        f = open(verilogpath+hdlname, 'w')
-        f.write(synthesized_code)
-        f.close()
-
-        # common hdl file
-        f = open(verilogpath+common_hdlname, 'w')
-        f.write(common_code)
-        f.close()
 
         # tcl file
         tcl_template_file = 'qsys_tcl.txt'
@@ -650,6 +689,16 @@ class SystemBuilder(object):
                                tcl_ports=tcl_ports, tcl_parameters=tcl_parameters)
         f = open(tclpath+tclname, 'w')
         f.write(tcl_code)
+        f.close()
+
+        # hdl file
+        f = open(verilogpath+hdlname, 'w')
+        f.write(synthesized_code)
+        f.close()
+
+        # common hdl file
+        f = open(verilogpath+common_hdlname, 'w')
+        f.write(common_code)
         f.close()
 
         # user test code

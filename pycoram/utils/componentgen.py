@@ -1,5 +1,6 @@
 import xml.dom.minidom
 import codecs
+import datetime
 
 PORTLIST = ('AWID', 'AWADDR', 'AWLEN', 'AWSIZE', 'AWBURST', 'AWLOCK',
             'AWCACHE', 'AWPROT', 'AWQOS', 'AWUSER', 'AWVALID', 'AWREADY',
@@ -41,8 +42,10 @@ class ComponentGen(object):
         self.top.appendChild(self.mkName('pycoram_' + self.userlogic_name.lower()))
         self.top.appendChild(self.mkVersion())
         self.top.appendChild(self.mkBusInterfaces())
-        self.top.appendChild(self.mkAddressSpaces())
-        self.top.appendChild(self.mkMemoryMaps())
+        r = self.mkAddressSpaces()
+        if r: self.top.appendChild(r)
+        r = self.mkMemoryMaps()
+        if r: self.top.appendChild(r)
         self.top.appendChild(self.mkModel())
         self.top.appendChild(self.mkChoices())
         self.top.appendChild(self.mkFileSets())
@@ -385,14 +388,19 @@ class ComponentGen(object):
 
     #---------------------------------------------------------------------------
     def mkAddressSpaces(self):
+        isempty = True
         spaces = self.doc.createElement('spirit:addressSpaces')
         for thread in self.threads:
             for memory in thread.memories:
                 spaces.appendChild(self.mkAddressSpace(thread, memory))
+                isempty = False
             for instream in thread.instreams:
                 spaces.appendChild(self.mkAddressSpace(thread, instream))
+                isempty = False
             for outstream in thread.outstreams:
                 spaces.appendChild(self.mkAddressSpace(thread, oustream))
+                isempty = False
+        if isempty: return None
         return spaces
 
     def mkAddressSpace(self, thread, obj):
@@ -421,37 +429,42 @@ class ComponentGen(object):
 
     #---------------------------------------------------------------------------
     def mkMemoryMaps(self):
+        isempty = True
         maps = self.doc.createElement('spirit:memoryMaps')
         for thread in self.threads:
-            for memory in thread.memories:
-                maps.appendChild(self.mkMemoryMap(thread, memory))
-            for instream in thread.instreams:
-                maps.appendChild(self.mkMemoryMap(thread, instream))
-            for outstream in thread.outstreams:
-                maps.appendChild(self.mkMemoryMap(thread, oustream))
+            for iochannel in thread.iochannels:
+                maps.appendChild(self.mkMemoryMap(thread, iochannel))
+                isempty = False
+            for ioregister in thread.ioregisters:
+                maps.appendChild(self.mkMemoryMap(thread, ioregister))
+                isempty = False
+        if isempty: return None
         return maps
     
     def mkMemoryMap(self, thread, obj):
         name = thread.name + '_' + obj.name + '_AXI'
         map = self.doc.createElement('spirit:memoryMap')
         map.appendChild(self.mkName(name))
+        addressblock = self.doc.createElement('spirit:addressBlock')
+        addressblock.appendChild(self.mkName(name + '_reg'))
         baseaddr = self.doc.createElement('spirit:baseAddress')
         self.setAttribute(baseaddr, 'spirit:format', "long")
         self.setAttribute(baseaddr, 'spirit:resolve', "user")
         self.setText(baseaddr, 0)
-        map.appendChild(baseaddr)
+        addressblock.appendChild(baseaddr)
         range = self.doc.createElement('spirit:range')
         self.setAttribute(range, 'spirit:format', "long")
         self.setText(range, 4096)
-        map.appendChild(range)
+        addressblock.appendChild(range)
         width = self.doc.createElement('spirit:width')
         self.setAttribute(width, 'spirit:format', "long")
         self.setText(width, obj.ext_datawidth)
-        map.appendChild(width)
+        addressblock.appendChild(width)
         usage = self.doc.createElement('spirit:usage')
         self.setText(usage, 'register')
-        map.appendChild(usage)
-        map.appendChild(self.mkMemoryMapParameters(name))
+        addressblock.appendChild(usage)
+        addressblock.appendChild(self.mkMemoryMapParameters(name))
+        map.appendChild(addressblock)
         return map
 
     def mkMemoryMapParameters(self, name):
@@ -507,13 +520,19 @@ class ComponentGen(object):
                                       'verilog',
                                       'pycoram_' + self.userlogic_name.lower() + '_v1_0',
                                       'xilinx_verilogbehavioralsimulation_view_fileset'))
-        views.appendChild(self.mkView('xilinx_softwaredriver'
-                                      'Software Driver',
-                                      'Verilog Simulation',
-                                      ':vivado.xilinx.com:sw.driver',
+        views.appendChild(self.mkView('xilinx_synthesisconstraints',
+                                      'Synthesis Constraints',
+                                      ':vivado.xilinx.com:synthesis.constraints',
                                       None,
                                       None,
-                                      'xilinx_softwaredriver_view_fileset'))
+                                      'xilinx_synthesisconstraints_view_fileset'))
+#        views.appendChild(self.mkView('xilinx_softwaredriver'
+#                                      'Software Driver',
+#                                      'Verilog Simulation',
+#                                      ':vivado.xilinx.com:sw.driver',
+#                                      None,
+#                                      None,
+#                                      'xilinx_softwaredriver_view_fileset'))
         views.appendChild(self.mkView('xilinx_xpgui',
                                       'UI Layout',
                                       ':vivado.xilinx.com:xgui.ui',
@@ -672,7 +691,7 @@ class ComponentGen(object):
                                     True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
         ret.append(self.mkPortEntry(base+'_RDATA', 'in',
                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortEntry(base+'_RRESP', 'out',
+        ret.append(self.mkPortEntry(base+'_RRESP', 'in',
                                     None, 1, None, 0))
         ret.append(self.mkPortEntry(base+'_RLAST', 'in',
                                     None, None, None, None))
@@ -796,7 +815,7 @@ class ComponentGen(object):
                                         True, True, mkStr(base,'ID_WIDTH')+' >0', 'true'))
         ret.append(self.mkPortEntry(base+'_RDATA', 'out',
                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
-        ret.append(self.mkPortEntry(base+'_RRESP', 'in',
+        ret.append(self.mkPortEntry(base+'_RRESP', 'out',
                                     None, 1, None, 0))
         if not lite:
             ret.append(self.mkPortEntry(base+'_RLAST', 'out',
@@ -860,7 +879,9 @@ class ComponentGen(object):
         return vector
 
     def mkWireTypeDefs(self, wiretype):
-        return self.mkWireTypeDef(wiretype)
+        wiretypedefs = self.doc.createElement('spirit:wireTypeDefs')
+        wiretypedefs.appendChild(self.mkWireTypeDef(wiretype))
+        return wiretypedefs
         
     def mkWireTypeDef(self, wiretype):
         wiretypedef = self.doc.createElement('spirit:wireTypeDef')
@@ -871,7 +892,7 @@ class ComponentGen(object):
 
     def mkDriver(self):
         driver = self.doc.createElement('spirit:driver')
-        driver.appendChild(self.mkTextNode('spirit:defaultvalue', 0))
+        driver.appendChild(self.mkTextNode('spirit:defaultValue', 0))
         return driver
 
     def mkPortVendorExtensions(self, var, value='true'):
@@ -928,14 +949,14 @@ class ComponentGen(object):
         self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_TARGET_SLAVE_BASE_ADDR")
         self.setAttribute(value, 'spirit:order', order)
         self.setAttribute(value, 'spirit:bitStringLength', self.ext_addrwidth)
-        self.setText(value, 0x40000000)
+        self.setText(value, "0x00000000")
         baseaddr.appendChild(value)
         ret.append(baseaddr)
         order += 1
 
         if not lite:
             burstlen = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(burstlen, 'spirit:dataType', "integer")
             burstlen.appendChild(self.mkName("C_" + name + "_BURST_LEN"))
             burstlen.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BURST_LEN"))
             burstlen.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BURST_LEN"))
@@ -952,7 +973,7 @@ class ComponentGen(object):
     
         if not lite:
             idwidth = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(idwidth, 'spirit:dataType', "integer")
             idwidth.appendChild(self.mkName("C_" + name + "_ID_WIDTH"))
             idwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ID_WIDTH"))
             idwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ID_WIDTH"))
@@ -974,7 +995,7 @@ class ComponentGen(object):
             order += 1
     
         addrwidth = self.doc.createElement('spirit:modelParameter')
-        self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+        self.setAttribute(addrwidth, 'spirit:dataType', "integer")
         addrwidth.appendChild(self.mkName("C_" + name + "_ADDR_WIDTH"))
         addrwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ADDR_WIDTH"))
         addrwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ADDR_WIDTH"))
@@ -990,7 +1011,7 @@ class ComponentGen(object):
         order += 1
     
         datawidth = self.doc.createElement('spirit:modelParameter')
-        self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+        self.setAttribute(datawidth, 'spirit:dataType', "integer")
         datawidth.appendChild(self.mkName("C_" + name + "_DATA_WIDTH"))
         datawidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_DATA_WIDTH"))
         datawidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_DATA_WIDTH"))
@@ -1007,7 +1028,7 @@ class ComponentGen(object):
 
         if not lite:
             awuserwidth = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(awuserwidth, 'spirit:dataType', "integer")
             awuserwidth.appendChild(self.mkName("C_" + name + "_AWUSER_WIDTH"))
             awuserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_AWUSER_WIDTH"))
             awuserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_AWUSER_WIDTH"))
@@ -1030,7 +1051,7 @@ class ComponentGen(object):
 
         if not lite:
             aruserwidth = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(aruserwidth, 'spirit:dataType', "integer")
             aruserwidth.appendChild(self.mkName("C_" + name + "_ARUSER_WIDTH"))
             aruserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_ARUSER_WIDTH"))
             aruserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_ARUSER_WIDTH"))
@@ -1053,7 +1074,7 @@ class ComponentGen(object):
     
         if not lite:
             wuserwidth = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(wuserwidth, 'spirit:dataType', "integer")
             wuserwidth.appendChild(self.mkName("C_" + name + "_WUSER_WIDTH"))
             wuserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_WUSER_WIDTH"))
             wuserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_WUSER_WIDTH"))
@@ -1076,7 +1097,7 @@ class ComponentGen(object):
     
         if not lite:
             ruserwidth = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(ruserwidth, 'spirit:dataType', "integer")
             ruserwidth.appendChild(self.mkName("C_" + name + "_RUSER_WIDTH"))
             ruserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_RUSER_WIDTH"))
             ruserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_RUSER_WIDTH"))
@@ -1099,7 +1120,7 @@ class ComponentGen(object):
     
         if not lite:
             buserwidth = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(baseaddr, 'spirit:dataType', "integer")
+            self.setAttribute(buserwidth, 'spirit:dataType', "integer")
             buserwidth.appendChild(self.mkName("C_" + name + "_BUSER_WIDTH"))
             buserwidth.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BUSER_WIDTH"))
             buserwidth.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BUSER_WIDTH"))
@@ -1137,6 +1158,7 @@ class ComponentGen(object):
         self.setText(choices_1_false, 0)
         choices_1.appendChild(choices_1_true)
         choices_1.appendChild(choices_1_false)
+        choices.appendChild(choices_1)
 
         choices.appendChild(self.mkChoice('choices_2', (32,) ))
         
@@ -1150,13 +1172,14 @@ class ComponentGen(object):
         self.setText(choices_3_false, 0)
         choices_3.appendChild(choices_3_true)
         choices_3.appendChild(choices_3_false)
+        choices.appendChild(choices_3)
 
         choices.appendChild(self.mkChoice('choices_4', (1, 2, 4, 8, 16, 32, 64, 128, 256) ))
         choices.appendChild(self.mkChoice('choices_5', (1, 2, 4, 8, 16, 32, 64, 128, 256) ))
         
         return choices
 
-    def mkChoice(self, name, *arg):
+    def mkChoice(self, name, arg):
         choice = self.doc.createElement('spirit:choice')
         choice.appendChild(self.mkName(name))
         for a in arg:
@@ -1168,44 +1191,42 @@ class ComponentGen(object):
         filesets = self.doc.createElement('spirit:fileSets')
         source = self.doc.createElement('spirit:fileSet')
         source.appendChild(self.mkName("xilinx_verilogsynthesis_view_fileset"))
-        source.appendChild(self.mkFileSet('hdl/pycoram_'+self.userlogic_name.lower()+'.v',
+        source.appendChild(self.mkFileSet('hdl/verilog/pycoram_'+self.userlogic_name.lower()+'.v',
                                           'verilogSource'))
         filesets.appendChild(source)
         
         sim = self.doc.createElement('spirit:fileSet')
         sim.appendChild(self.mkName("xilinx_verilogbehavioralsimulation_view_fileset"))
-        sim.appendChild(self.mkFileSet('hdl/pycoram_'+self.userlogic_name.lower()+'.v',
+        sim.appendChild(self.mkFileSet('hdl/verilog/pycoram_'+self.userlogic_name.lower()+'.v',
                                        'verilogSource'))
         sim.appendChild(self.mkFileSet('test/test_pycoram_'+self.userlogic_name.lower()+'.v',
                                        'verilogSource'))
         filesets.appendChild(sim)
         
-        tcl = self.doc.createElement('spirit:fileSet')
-        tcl.appendChild(self.mkName("xilinx_xpgui_view_fileset"))
-        tcl.appendChild(self.mkFileSet('xgui/pycoram_'+self.userlogic_name.lower()+'.tcl',
-                                       'tclSource',
-                                       'XGUI_VERSION_2'))
-        filesets.appendChild(tcl)
-        
-        tcl = self.doc.createElement('spirit:fileSet')
-        tcl.appendChild(self.mkName("xilinx_xpgui_view_fileset"))
-        tcl.appendChild(self.mkFileSet('xgui/pycoram_'+self.userlogic_name.lower()+'.tcl',
-                                       'tclSource',
-                                       'XGUI_VERSION_2'))
-        filesets.appendChild(tcl)
+        xguitcl = self.doc.createElement('spirit:fileSet')
+        xguitcl.appendChild(self.mkName("xilinx_xpgui_view_fileset"))
+        xguitcl.appendChild(self.mkFileSet('xgui/xgui.tcl',
+                                           'tclSource', 'XGUI_VERSION_2'))
+        filesets.appendChild(xguitcl)
         
         bdtcl = self.doc.createElement('spirit:fileSet')
         bdtcl.appendChild(self.mkName("bd_tcl_view_fileset"))
-        bdtcl.appendChild(self.mkFileSet('bd/bd.tcl',
-                                       'tclSource'))
+        bdtcl.appendChild(self.mkFileSet('bd/bd.tcl', 'tclSource'))
         filesets.appendChild(bdtcl)
+        
+        xdc = self.doc.createElement('spirit:fileSet')
+        xdc.appendChild(self.mkName("xilinx_synthesisconstraints_view_fileset"))
+        xdc.appendChild(self.mkFileSet('data/pycoram_'+self.userlogic_name.lower()+'.xdc',
+                                       None, 'xdc'))
+        filesets.appendChild(xdc)
         
         return filesets
 
-    def mkFileSet(self, name, filetype, *userfiletypes):
+    def mkFileSet(self, name, filetype=None, *userfiletypes):
         fileset = self.doc.createElement('spirit:file')
         fileset.appendChild(self.mkName(name))
-        fileset.appendChild(self.mkTextNode('spirit:fileType', filetype))
+        if filetype is not None:
+            fileset.appendChild(self.mkTextNode('spirit:fileType', filetype))
         for u in userfiletypes:
             fileset.appendChild(self.mkTextNode('spirit:userFileType', u))
         return fileset
@@ -1217,8 +1238,6 @@ class ComponentGen(object):
     #---------------------------------------------------------------------------
     def mkDescParameters(self):
         parameters = self.doc.createElement('spirit:parameters')
-        return parameters
-
         order = 3
         for thread in self.threads:
             for memory in thread.memories:
@@ -1252,7 +1271,7 @@ class ComponentGen(object):
         self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_TARGET_SLAVE_BASE_ADDR")
         self.setAttribute(value, 'spirit:order', order)
         self.setAttribute(value, 'spirit:bitStringLength', self.ext_addrwidth)
-        self.setText(value, 0x40000000)
+        self.setText(value, "0x00000000")
         baseaddr.appendChild(value)
         ret.append(baseaddr)
         order += 1
@@ -1312,7 +1331,7 @@ class ComponentGen(object):
         enablement = self.doc.createElement('xilinx:enablement')
         enablement.appendChild(self.mkTextNode('xilinx:isEnabled', 'false'))
         parameterinfo.appendChild(enablement)
-        extensions.appendChild(parameterinfos)
+        extensions.appendChild(parameterinfo)
         addrwidth.appendChild(extensions)
         ret.append(addrwidth)
         order += 1
@@ -1468,7 +1487,8 @@ class ComponentGen(object):
                                                    ('pycoram_' + self.userlogic_name.lower() +
                                                     '_v1_0')))
         coreextensions.appendChild(self.mkTextNode('xilinx:coreRevison', 1))
-        dt = '2015-03-08T02:16:15Z'
+        now = datetime.datetime.now()
+        dt = now.strftime("%Y-%m-%d") # '2015-03-08T02:16:15Z'
         coreextensions.appendChild(self.mkTextNode('xilinx:coreCreationDateTime', dt))
         extensions.appendChild(coreextensions)
         packageinfo = self.doc.createElement('xilinx:packagingInfo')
