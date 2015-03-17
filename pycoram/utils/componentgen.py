@@ -965,40 +965,6 @@ class ComponentGen(object):
         ret = []
         name = thread.name + '_' + obj.name + '_AXI'
         
-        #baseaddr = self.doc.createElement('spirit:modelParameter')
-        #self.setAttribute(baseaddr, 'xsi:type', 'spirit:nameValueTypeType')
-        #self.setAttribute(baseaddr, 'spirit:dataType', " ")
-        #baseaddr.appendChild(self.mkName("C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
-        #baseaddr.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
-        #baseaddr.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
-        #value = self.doc.createElement('spirit:value')
-        #self.setAttribute(value, 'spirit:format', 'bitString')
-        #self.setAttribute(value, 'spirit:resolve', 'generated')
-        #self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_TARGET_SLAVE_BASE_ADDR")
-        #self.setAttribute(value, 'spirit:order', order)
-        #self.setAttribute(value, 'spirit:bitStringLength', self.ext_addrwidth)
-        #self.setText(value, "0x00000000")
-        #baseaddr.appendChild(value)
-        #ret.append(baseaddr)
-        #order += 1
-
-        if not lite:
-            burstlen = self.doc.createElement('spirit:modelParameter')
-            self.setAttribute(burstlen, 'spirit:dataType', "integer")
-            burstlen.appendChild(self.mkName("C_" + name + "_BURST_LEN"))
-            burstlen.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BURST_LEN"))
-            burstlen.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BURST_LEN"))
-            value = self.doc.createElement('spirit:value')
-            self.setAttribute(value, 'spirit:format', 'long')
-            self.setAttribute(value, 'spirit:resolve', 'generated')
-            self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_BURST_LEN")
-            self.setAttribute(value, 'spirit:choiseRef', "choices_5")
-            self.setAttribute(value, 'spirit:order', order)
-            self.setText(value, 256)
-            burstlen.appendChild(value)
-            ret.append(burstlen)
-            order += 1
-    
         if not lite:
             idwidth = self.doc.createElement('spirit:modelParameter')
             self.setAttribute(idwidth, 'spirit:dataType', "integer")
@@ -1315,37 +1281,6 @@ class ComponentGen(object):
         ret = []
         name = thread.name + '_' + obj.name + '_AXI'
         
-        #baseaddr = self.doc.createElement('spirit:parameter')
-        #baseaddr.appendChild(self.mkName("C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
-        #baseaddr.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
-        #baseaddr.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_TARGET_SLAVE_BASE_ADDR"))
-        #value = self.doc.createElement('spirit:value')
-        #self.setAttribute(value, 'spirit:format', 'bitString')
-        #self.setAttribute(value, 'spirit:resolve', 'user')
-        #self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_TARGET_SLAVE_BASE_ADDR")
-        #self.setAttribute(value, 'spirit:order', order)
-        #self.setAttribute(value, 'spirit:bitStringLength', self.ext_addrwidth)
-        #self.setText(value, "0x00000000")
-        #baseaddr.appendChild(value)
-        #ret.append(baseaddr)
-        #order += 1
-
-        if not lite:
-            burstlen = self.doc.createElement('spirit:parameter')
-            burstlen.appendChild(self.mkName("C_" + name + "_BURST_LEN"))
-            burstlen.appendChild(self.mkTextNode('spirit:displayName', "C_" + name + "_BURST_LEN"))
-            burstlen.appendChild(self.mkTextNode('spirit:description', "C_" + name + "_BURST_LEN"))
-            value = self.doc.createElement('spirit:value')
-            self.setAttribute(value, 'spirit:format', 'long')
-            self.setAttribute(value, 'spirit:resolve', 'user')
-            self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_BURST_LEN")
-            self.setAttribute(value, 'spirit:choiseRef', "choices_4")
-            self.setAttribute(value, 'spirit:order', order)
-            self.setText(value, 256)
-            burstlen.appendChild(value)
-            ret.append(burstlen)
-            order += 1
-    
         if not lite:
             idwidth = self.doc.createElement('spirit:parameter')
             idwidth.appendChild(self.mkName("C_" + name + "_THREAD_ID_WIDTH"))
