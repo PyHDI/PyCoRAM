@@ -411,8 +411,8 @@ class ComponentGen(object):
         self.setAttribute(range, 'spirit:format', "long")
         self.setAttribute(range, 'spirit:resolve', "dependent")
         self.setAttribute(range, 'spirit:dependency',
-                          ("pow(2,(spirit:decode(id(&apos;MODELPARAM_VALUE.C_" +
-                           name + "_ADDR_WIDTH&apos;)) - 1) + 1)"))
+                          ("pow(2,(spirit:decode(id('MODELPARAM_VALUE.C_" +
+                           name + "_ADDR_WIDTH')) - 1) + 1)"))
         self.setAttribute(range, 'spirit:minimum', "0")
         self.setAttribute(range, 'spirit:maximum', "4294967296")
         self.setText(range, 4294967296)
@@ -421,8 +421,8 @@ class ComponentGen(object):
         self.setAttribute(width, 'spirit:format', "long")
         self.setAttribute(width, 'spirit:resolve', "dependent")
         self.setAttribute(width, 'spirit:dependency',
-                          ("(spirit:decode(id(&apos;MODELPARAM_VALUE.C_" +
-                           name + "_DATA_WIDTH&apos;)) - 1) + 1"))
+                          ("(spirit:decode(id('MODELPARAM_VALUE.C_" +
+                           name + "_DATA_WIDTH')) - 1) + 1"))
         self.setText(width, self.ext_addrwidth)
         space.appendChild(width)
         return space
@@ -603,7 +603,7 @@ class ComponentGen(object):
         ret = []
         
         def mkStr(b, s):
-            return 'spirit:decode(id(&apos;MODELPARAM_VALUE.C_' + b + '_' + s + '&apos;))' 
+            return "spirit:decode(id('MODELPARAM_VALUE.C_" + b + '_' + s + "'))"
         
         ret.append(self.mkPortEntry(base+'_AWID', 'out',
                                     '('+mkStr(base,'ID_WIDTH')+'-1)', 0, None, 0,
@@ -717,7 +717,7 @@ class ComponentGen(object):
         ret = []
         
         def mkStr(b, s):
-            return 'spirit:decode(id(&apos;MODELPARAM_VALUE.C_' + b + '_' + s + '&apos;))' 
+            return "spirit:decode(id('MODELPARAM_VALUE.C_" + b + '_' + s + "'))"
 
         if not lite:
             ret.append(self.mkPortEntry(base+'_AWID', 'in',
@@ -841,8 +841,8 @@ class ComponentGen(object):
         port = self.doc.createElement('spirit:port')
         port.appendChild(self.mkName(name))
         port.appendChild(self.mkWire(direction, lvar, lvalue, rvar, rvalue, withdriver))
-        if withextension:
-            port.appendChild(self.mkPortVendorExtensions(lvar, extensionvalue))
+        #if withextension:
+        #    port.appendChild(self.mkPortVendorExtensions(lvar, extensionvalue))
         return port
         
     def mkWire(self, direction, lvar, lvalue, rvar, rvalue, withdriver=False):
@@ -860,8 +860,8 @@ class ComponentGen(object):
         
     def mkVector(self, lvar, lvalue, rvar, rvalue):
         vector = self.doc.createElement('spirit:vector')
-        lresolve = "immediate" if isinstance(lvar, int) else "dependent"
-        rresolve = "immediate" if isinstance(rvar, int) else "dependent"
+        lresolve = "immediate" if lvar is None else "dependent"
+        rresolve = "immediate" if rvar is None else "dependent"
         left = self.doc.createElement('spirit:left')
         self.setAttribute(left, 'spirit:format', "long")
         self.setAttribute(left, 'spirit:resolve', lresolve)
@@ -903,8 +903,8 @@ class ComponentGen(object):
         isEnabled = self.doc.createElement('xilinx:isEnabled')
         self.setAttribute(isEnabled, 'xilinx:resolve', "dependent")
         self.setAttribute(isEnabled, 'xilinx:dependency',
-                          ("spirit:decode(id(&apos;MODELPARAM_VALUE." + var +
-                           "&apos;)) >0"))
+                          ("spirit:decode(id('MODELPARAM_VALUE." + var +
+                           "')) >0"))
         self.setText(isEnabled, value)
         enablement.appendChild(isEnabled)
         portinfo.appendChild(enablement)
@@ -933,7 +933,7 @@ class ComponentGen(object):
                 for p in rslt: modelparameters.appendChild(p)
         return modelparameters
 
-    def mkModelParameter(self, thread, obj, order, lite=True):
+    def mkModelParameter(self, thread, obj, order, lite=False):
         ret = []
         name = thread.name + '_' + obj.name + '_AXI'
         
@@ -982,9 +982,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_ID_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_ID_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_ID_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_ID_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_ID_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "32")
@@ -1037,9 +1037,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_AWUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_AWUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_AWUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_AWUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_AWUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1060,9 +1060,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_ARUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_ARUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_ARUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_ARUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_ARUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1083,9 +1083,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_WUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_WUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_WUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_WUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_WUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1106,9 +1106,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_RUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_RUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_RUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_RUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_RUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1129,9 +1129,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "MODELPARAM_VALUE.C_" + name + "_BUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_BUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_BUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_BUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_BUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1257,7 +1257,7 @@ class ComponentGen(object):
                 for p in rslt: parameters.appendChild(p)
         return parameters
     
-    def mkDescParameter(self, thread, obj, order, lite=True):
+    def mkDescParameter(self, thread, obj, order, lite=False):
         ret = []
         name = thread.name + '_' + obj.name + '_AXI'
         
@@ -1302,9 +1302,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'user')
             self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_ID_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_ID_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_ID_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_ID_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_ID_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "32")
@@ -1368,9 +1368,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_AWUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_AWUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_AWUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_AWUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_AWUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1390,9 +1390,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_ARUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_ARUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_ARUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_ARUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_ARUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1412,9 +1412,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_WUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_WUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_WUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_WUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_WUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1434,9 +1434,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_RUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_RUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_RUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_RUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_RUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1456,9 +1456,9 @@ class ComponentGen(object):
             self.setAttribute(value, 'spirit:resolve', 'dependent')
             self.setAttribute(value, 'spirit:id', "PARAM_VALUE.C_" + name + "_BUSER_WIDTH")
             self.setAttribute(value, 'spirit:dependency',
-                              ("((spirit:decode(id(&apos;PARAM_VALUE.C_" + name +
-                               "_BUSER_WIDTH&apos;)) &lt;= 0 ) + (spirit:decode(id(&apos;PARAM_VALUE.C_" +
-                               name + "_BUSER_WIDTH&apos;))))"))
+                              ("((spirit:decode(id('PARAM_VALUE.C_" + name +
+                               "_BUSER_WIDTH')) <= 0 ) + (spirit:decode(id('PARAM_VALUE.C_" +
+                               name + "_BUSER_WIDTH'))))"))
             self.setAttribute(value, 'spirit:order', order)
             self.setAttribute(value, 'spirit:minimum', "0")
             self.setAttribute(value, 'spirit:maximum', "1024")
@@ -1473,10 +1473,17 @@ class ComponentGen(object):
     #---------------------------------------------------------------------------
     def mkVendorExtensions(self):
         extensions = self.doc.createElement('spirit:vendorExtensions')
+        extensions.appendChild(self.mkCoreExtensions())
+        packageinfo = self.doc.createElement('xilinx:packagingInfo')
+        packageinfo.appendChild(self.mkTextNode('xilinx:xilinxVersion', '2014.4'))
+        extensions.appendChild(packageinfo)
+        return extensions
+
+    def mkCoreExtensions(self):
         coreextensions = self.doc.createElement('xilinx:coreExtensions')
         supported = self.doc.createElement('xilinx:supportedFamilies')
         family = self.doc.createElement('xilinx:family')
-        self.setAttribute(family, 'xilinx:lifeCycle', 'Pre-Production')
+        self.setAttribute(family, 'xilinx:lifeCycle', 'Production')
         self.setText(family, 'zynq')
         supported.appendChild(family)
         coreextensions.appendChild(supported)
@@ -1486,16 +1493,12 @@ class ComponentGen(object):
         coreextensions.appendChild(self.mkTextNode('xilinx:displayName',
                                                    ('pycoram_' + self.userlogic_name.lower() +
                                                     '_v1_0')))
-        coreextensions.appendChild(self.mkTextNode('xilinx:coreRevison', 1))
-        now = datetime.datetime.now()
-        dt = now.strftime("%Y-%m-%d") # '2015-03-08T02:16:15Z'
-        coreextensions.appendChild(self.mkTextNode('xilinx:coreCreationDateTime', dt))
-        extensions.appendChild(coreextensions)
-        packageinfo = self.doc.createElement('xilinx:packagingInfo')
-        packageinfo.appendChild(self.mkTextNode('xilinx:xilinxVersion', '2014.4'))
-        extensions.appendChild(packageinfo)
-        return extensions
-            
+        #coreextensions.appendChild(self.mkTextNode('xilinx:coreRevison', 1))
+        #now = datetime.datetime.now()
+        #dt = now.strftime("%Y-%m-%d") # '2015-03-08T02:16:15Z'
+        #coreextensions.appendChild(self.mkTextNode('xilinx:coreCreationDateTime', dt))
+        return coreextensions
+
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
     gen = ComponentGen()
