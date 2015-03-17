@@ -384,6 +384,8 @@ class SystemBuilder(object):
         name_top_ioports = []
         mpd_parameters = []
         mpd_ports = []
+        ext_params = []
+        ext_ports = []
 
         asttocode = ASTCodeGenerator()
 
@@ -408,6 +410,28 @@ class SystemBuilder(object):
                     'IO')
             _vec = '' if pv.width is None else asttocode.visit(pv.width) 
             mpd_ports.append( (_name, _dir, _vec) )
+
+        for pk, (pv, pwidth) in top_ioports.items():
+            name_top_ioports.append( pk )
+            new_pv = vast.Wire(pv.name, pv.width, pv.signed)
+            def_top_ioports.append( asttocode.visit(new_pv) )
+            _name = pv.name
+            _dir = ('in' if isinstance(pv, vast.Input) else
+                    'out' if isinstance(pv, vast.Output) else
+                    'inout')
+            _vec = None if pv.width is None else asttocode.visit(pv.width.msb) 
+            ext_ports.append( (_name, _dir, _vec) )
+
+        for pk, pv in top_parameters.items():
+            r = asttocode.visit(pv)
+            def_top_parameters.append( r )
+            if r.count('localparam'):
+                def_top_localparams.append( r )
+                continue
+            _name = pv.name
+            _value = asttocode.visit( pv.value )
+            _dt = 'string' if r.count('"') else 'integer'
+            ext_params.append( (_name, _value, _dt) )
 
         # write to files 
         # with AXI interface, create IPcore dir
@@ -525,7 +549,10 @@ class SystemBuilder(object):
         gen = utils.componentgen.ComponentGen()
         xml_code = gen.generate(userlogic_topmodule, threads,
                                 lite=configs['io_lite'], 
-                                ext_addrwidth=configs['ext_addrwidth'], ext_burstlength=ext_burstlength)
+                                ext_addrwidth=configs['ext_addrwidth'],
+                                ext_burstlength=ext_burstlength,
+                                ext_ports=ext_ports,
+                                ext_params=ext_params)
         f = open(xmlpath+xmlname, 'w')
         f.write(xml_code)
         f.close()
@@ -540,8 +567,7 @@ class SystemBuilder(object):
 
         # bd
         bd_code = ''
-        if not configs['single_clock']:
-            bd_code = open(TEMPLATE_DIR+'bd.tcl', 'r').read()
+        bd_code = open(TEMPLATE_DIR+'bd.tcl', 'r').read()
         f = open(bdpath+bdname, 'w')
         f.write(bd_code)
         f.close()
