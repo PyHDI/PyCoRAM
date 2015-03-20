@@ -415,10 +415,12 @@ module OnchipRam #
   reg [W_A-1:0] d_addr1;
   always @(posedge CLK) begin
     d_addr0 <= addr0;
-    d_addr1 <= addr1;
     if(we0) begin
       mem[addr0] <= d0;
     end
+  end
+  always @(posedge CLK) begin
+    d_addr1 <= addr1;
     if(we1) begin
       mem[addr1] <= d1;
     end
