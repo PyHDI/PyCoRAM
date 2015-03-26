@@ -412,7 +412,6 @@ class SystemBuilder(object):
             mpd_ports.append( (_name, _dir, _vec) )
 
         for pk, (pv, pwidth) in top_ioports.items():
-            name_top_ioports.append( pk )
             new_pv = vast.Wire(pv.name, pv.width, pv.signed)
             _name = pv.name
             _dir = ('in' if isinstance(pv, vast.Input) else
