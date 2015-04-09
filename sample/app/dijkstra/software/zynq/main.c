@@ -65,6 +65,7 @@ Nodechain** addr_table;  // ID -> Address
 Nodechain* addr_table_entry;  // ID -> Address
 
 PriorityQueue pqueue;
+Heapelement* pqueue_ptr;
 
 Uint node_index; // for node count
 Uint page_index; // for edge count
@@ -312,6 +313,11 @@ int main(int argc, char *argv[])
     printf("can allocate a memory for addr_table_entry.\n");
     exit(-1);
   }
+  pqueue_ptr = (Heapelement*) malloc(sizeof(Heapelement) * (MAX_NODES+1));
+  if(pqueue_ptr == NULL){
+    printf("can allocate a memory for pqueue_ptr.\n");
+    exit(-1);
+  }
 #else
   node_array = (Node*) umem_malloc(sizeof(Node) * MAX_NODES);
   if(node_array == NULL){
@@ -338,9 +344,14 @@ int main(int argc, char *argv[])
     printf("can allocate a memory for addr_table_entry.\n");
     exit(-1);
   }
+  pqueue_ptr = (Heapelement*) umem_malloc(sizeof(Heapelement) * (MAX_NODES+1));
+  if(pqueue_ptr == NULL){
+    printf("can allocate a memory for pqueue_ptr.\n");
+    exit(-1);
+  }
 #endif
-
-  init_queue(&pqueue, MAX_NODES);
+  
+  init_queue(&pqueue, MAX_NODES, pqueue_ptr);
 
   Uint i;
   for(i=0; i<MAX_NODES; i++){

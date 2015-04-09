@@ -90,10 +90,12 @@ Heapelement dequeue(PriorityQueue *q)
   return rv; 
 }
 
-void init_queue(PriorityQueue *q, Uint n)
+//void init_queue(PriorityQueue *q, Uint n)
+void init_queue(PriorityQueue *q, Uint n, Heapelement* ptr)
 {
   q->size = 0;
-  q->heap = (Heapelement*) malloc(sizeof(Heapelement) * (n+1));
+  //q->heap = (Heapelement*) malloc(sizeof(Heapelement) * (n+1));
+  q->heap = ptr;
   if(q->heap == NULL){
     //printf("can allocate a memory for heap.\n");
     exit(-1);
