@@ -9,9 +9,8 @@
 #include "pycoram.h"
 
 //------------------------------------------------------------------------------
-#define MAX_NODES (32 * 1024 * 1024)
-#define MAX_PAGES (16 * 1024 * 1024)
-#define PAGE_SIZE (32)
+#define MAX_NODES (4 * 1024 * 1024)
+#define MAX_PAGES (256 * 1024)
 #define HASH_SIZE (1024)
 #define HASH(__id__) (__id__ % HASH_SIZE)
 
