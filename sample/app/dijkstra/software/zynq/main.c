@@ -1,4 +1,4 @@
-//#define __UMEM__
+#define __UMEM__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -323,6 +323,9 @@ int main(int argc, char *argv[])
     exit(-1);
   }
 #else
+  umem_open();
+  printf("UMEM is opened.\n");
+
   node_array = (Node*) umem_malloc(sizeof(Node) * number_of_nodes);
   if(node_array == NULL){
     printf("can not allocate a memory for node_array.\n");
@@ -392,6 +395,7 @@ int main(int argc, char *argv[])
     sum_of_cost = find_shortest_path(start, goal);
     cycles = 0;
   }else{
+    printf("with PyCoRAM\n");
     Node* start_addr = get_node(start);
     Node* goal_addr = get_node(goal);
     pycoram_open();
@@ -419,6 +423,8 @@ int main(int argc, char *argv[])
   free(id_table);
   free(addr_table);
   free(addr_table_entry);
+#else
+  umem_close();
 #endif
 
   return 0;
