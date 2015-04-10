@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
   unsigned int goal = atoi(argv[2]);
   int runmode = 0;
   if(argc > 4){
-    runmode = atoi(argv[1]);
+    runmode = atoi(argv[4]);
   }
   printf("runmode: %d\n", runmode);
   
@@ -398,6 +398,9 @@ int main(int argc, char *argv[])
     printf("with PyCoRAM\n");
     Node* start_addr = get_node(start);
     Node* goal_addr = get_node(goal);
+    umem_cache_clean((char*)node_array, sizeof(Node) * number_of_nodes);
+    umem_cache_clean((char*)page_array, sizeof(Node) * number_of_edges);
+
     pycoram_open();
     pycoram_write_4b((unsigned int)pqueue_ptr);
     pycoram_write_4b((unsigned int)start_addr);
