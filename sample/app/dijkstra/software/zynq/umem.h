@@ -1,6 +1,8 @@
 #define UIO_MEM "/dev/uio0"
-#define UMEM_SIZE (0x10000000)
+#define UMEM_SIZE   (0x10000000)
 #define UMEM_OFFSET (0x10000000)
+
+#define UMEM_PAGE_SIZE (4*1024)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,12 +32,26 @@ void* umem_malloc(unsigned int bytes)
     printf("umem_malloc(): UMEM is not opened.\n");
     return NULL;
   }
-  if(umem_used + bytes > UMEM_SIZE){
+
+  unsigned int numpages = bytes / UMEM_PAGE_SIZE;
+  if(bytes % UMEM_PAGE_SIZE != 0){
+    numpages++;
+  }
+
+  unsigned int size = UMEM_PAGE_SIZE*numpages;
+
+  if(umem_used + size > UMEM_SIZE){
     return NULL;
   }
+
   void* ptr = (void*)(umem_ptr + umem_used);
-  umem_used += bytes;
+  umem_used += size;
   return ptr;
+}
+
+unsigned int umem_get_physical_address(void* ptr)
+{
+  return UMEM_OFFSET + ((unsigned int) ptr) - ((unsigned int)umem_ptr);
 }
 
 void umem_cache_clean(char* addr, unsigned int bytes)

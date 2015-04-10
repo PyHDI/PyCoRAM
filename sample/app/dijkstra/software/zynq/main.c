@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
   }
   else{
     umem_open();
-    printf("UMEM is opened.\n");
+    printf("# UMEM is opened.\n");
     
     node_array = (Node*) umem_malloc(sizeof(Node) * number_of_nodes);
     if(node_array == NULL){
@@ -386,32 +386,41 @@ int main(int argc, char *argv[])
   printf("num_nodes:%d num_edges:%d\r\n", number_of_nodes, number_of_edges);
 
   struct timeval s, e;
-  gettimeofday(&s, NULL);
 
   Uint sum_of_cost;
   Uint cycles;
 
   if(runmode == 0 || runmode == 1){
+    gettimeofday(&s, NULL);
     sum_of_cost = find_shortest_path(start, goal);
+    gettimeofday(&e, NULL);
     cycles = 0;
   }else{
-    printf("with PyCoRAM\n");
+    printf("# with PyCoRAM\n");
     Node* start_addr = get_node(start);
     Node* goal_addr = get_node(goal);
     umem_cache_clean((char*)node_array, sizeof(Node) * number_of_nodes);
     umem_cache_clean((char*)page_array, sizeof(Node) * number_of_edges);
 
     pycoram_open();
-    pycoram_write_4b((unsigned int)pqueue_ptr);
-    pycoram_write_4b((unsigned int)start_addr);
-    pycoram_write_4b((unsigned int)goal_addr);
+
+    unsigned int pqueue_ptr_offset = umem_get_physical_address((void*)pqueue_ptr);
+    unsigned int start_addr_offset = umem_get_physical_address((void*)start_addr);
+    unsigned int goal_addr_offset = umem_get_physical_address((void*)goal_addr);
+
+    pycoram_write_4b(pqueue_ptr_offset);
+    pycoram_write_4b(start_addr_offset);
+    pycoram_write_4b(goal_addr_offset);
+
+    gettimeofday(&s, NULL);
     pycoram_read_4b(&sum_of_cost);
     pycoram_read_4b(&cycles);
+    gettimeofday(&e, NULL);
+
     pycoram_close();
     //sleep(1);
   }
 
-  gettimeofday(&e, NULL);
   double exec_time = (e.tv_sec - s.tv_sec) + (e.tv_usec - s.tv_usec) * 1.0E-6;
 
   if(sum_of_cost < MAX_INT){
