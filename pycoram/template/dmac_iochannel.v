@@ -11,7 +11,10 @@ module DMAC_IOCHANNEL #
    parameter MAX_BURST_LEN = 256, // burst length
 
    parameter FIFO_ADDR_WIDTH = 4,
-   parameter ASYNC = 1
+   parameter ASYNC = 1,
+
+   parameter WITH_TIMEOUT = 1,
+   parameter TIMEOUT_VALUE = 'h3fff_ffff
    )
   (
    //---------------------------------------------------------------------------
@@ -114,6 +117,8 @@ module DMAC_IOCHANNEL #
   reg read_busy;
   reg write_busy;
 
+  reg read_status_busy;
+
   reg [W_EXT_A:0] read_count;
   reg [W_EXT_A:0] write_count;
 
@@ -121,6 +126,14 @@ module DMAC_IOCHANNEL #
   reg d_rready;
   reg [W_D-1:0] d_rdata;
   reg d_fifo_read_deq;
+
+  reg [63:0] timeout_count;
+  reg timeout;
+  
+  function [W_BOUNDARY_A-1:0] get_offset;
+    input [W_EXT_A-1:0] in;
+    get_offset = in[W_BOUNDARY_A-1:0];
+  endfunction
   
   always @(posedge ACLK) begin
     if(aresetn_rrr == 0) begin
@@ -129,8 +142,11 @@ module DMAC_IOCHANNEL #
       bvalid <= 0;
       read_busy <= 0;
       write_busy <= 0;
+      read_status_busy <= 0;
       read_count <= 0;
       write_count <= 0;
+      timeout_count <= 0;
+      timeout <= 0;
 
     //------------------------------------------------------------------------------
     // Read Mode (BRAM -> Off-chip)
@@ -141,9 +157,22 @@ module DMAC_IOCHANNEL #
       arready <= 0;
       if(fifo_read_deq) begin
         read_count <= read_count - 1;
+        timeout_count <= 0;
+        timeout <= 0;
       end
       if(read_count == 0 && rvalid && rready) begin
         read_busy <= 0;
+      end
+
+      // timeout
+      if(!fifo_read_deq) begin
+        timeout_count <= timeout_count + 1;
+        if(timeout_count == TIMEOUT_VALUE - 1) begin
+          timeout <= 1;
+        end
+      end
+      if(WITH_TIMEOUT && timeout) begin
+        read_count <= read_count - 1;
       end
       
     //------------------------------------------------------------------------------
@@ -154,6 +183,8 @@ module DMAC_IOCHANNEL #
       arready <= 0;
       if(wvalid && !fifo_write_almost_full) begin
         write_count <= write_count - 1;
+        timeout_count <= 0;
+        timeout <= 0;
         if(write_count == 1) begin
           bvalid <= 1;
         end
@@ -161,6 +192,36 @@ module DMAC_IOCHANNEL #
       if(bvalid && bready) begin
         bvalid <= 0;
         write_busy <= 0;
+      end
+
+      // timeout 
+      if(wvalid && fifo_write_almost_full) begin
+        timeout_count <= timeout_count + 1;
+        if(timeout_count == TIMEOUT_VALUE - 1) begin
+          timeout <= 1;
+        end
+      end
+      if(wvalid && WITH_TIMEOUT && timeout) begin
+        write_count <= write_count - 1;
+        if(write_count == 1) begin
+          bvalid <= 1;
+        end
+      end
+
+    //------------------------------------------------------------------------------
+    // Read Stasus Mode
+    //------------------------------------------------------------------------------
+    end else if(read_status_busy) begin
+      bvalid <= 0;
+      awready <= 0;
+      arready <= 0;
+      timeout_count <= 0;
+      timeout <= 0;
+      if(rvalid && rready) begin
+        read_count <= read_count - 1;
+        if(read_count == 1) begin
+          read_status_busy <= 0;
+        end
       end
       
     //------------------------------------------------------------------------------
@@ -172,14 +233,22 @@ module DMAC_IOCHANNEL #
       arready <= 0;
       read_count <= 0;
       write_count <= 0;
+      timeout_count <= 0;
+      timeout <= 0;
       if(awvalid) begin
         write_busy <= 1;
         awready <= 1;
         write_count <= awlen + 1;
       end else if(arvalid) begin
-        read_busy <= 1;
-        arready <= 1;
-        read_count <= arlen + 1;
+        if(get_offset(araddr) == 0) begin
+          read_busy <= 1;
+          arready <= 1;
+          read_count <= arlen + 1;
+        end else begin
+          read_status_busy <= 1;
+          arready <= 1;
+          read_count <= arlen + 1;
+        end
       end
     end
   end
@@ -191,8 +260,12 @@ module DMAC_IOCHANNEL #
   assign fifo_write_enq = wvalid && !fifo_write_almost_full && write_busy;
   assign fifo_write_data = wdata;
   assign fifo_read_deq = read_busy && (!rvalid || rready) && read_count > 0 && !fifo_read_empty;
-  assign rdata = (d_fifo_read_deq)? fifo_read_data : d_rdata;
-  assign rvalid = d_fifo_read_deq || (d_rvalid && !d_rready) && read_busy;
+  assign rdata = (read_status_busy)? {fifo_write_full, fifo_read_empty}:
+                 (timeout)? 'hffff_ffff:
+                 (d_fifo_read_deq)? fifo_read_data : d_rdata;
+  assign rvalid = (read_status_busy)? 1'b1:
+                  (d_fifo_read_deq || (d_rvalid && !d_rready) && read_busy) ||
+                  (WITH_TIMEOUT && timeout);
   assign rlast = (read_count == 0);
 
   always @(posedge ACLK) begin
