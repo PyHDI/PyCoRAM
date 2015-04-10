@@ -1,5 +1,5 @@
-INPUT=n2048.gr
-#INPUT=USA-road-d.NY.gr
+#INPUT=n2048.gr
+INPUT=USA-road-d.NY.gr
 #INPUT=USA-road-d.CAL.gr
 #INPUT=USA-road-d.COL.gr
 

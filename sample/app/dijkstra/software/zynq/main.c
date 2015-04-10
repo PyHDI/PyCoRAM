@@ -1,4 +1,4 @@
-#define __UMEM__
+//#define __UMEM__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 #define MAX_NODES (4 * 1024 * 1024)
 #define MAX_PAGES (256 * 1024)
+#define PAGE_SIZE (32)
 #define HASH_SIZE (1024)
 #define HASH(__id__) (__id__ % HASH_SIZE)
 
@@ -259,20 +260,24 @@ void walk_result(Uint sum_of_cost, Uint start, Uint goal)
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  if(argc < 5){
-    printf("# Usage: ./a.out filename start goal runmode\n");
+  if(argc < 4){
+    printf("# Usage: ./a.out start goal filename [runmode]\n");
     return -1;
   }
 
-  FILE* fp = fopen(argv[1], "r");
+  FILE* fp = fopen(argv[3], "r");
   if(fp == NULL){
     printf("no such file\n");
     return -1;
   }
 
-  unsigned int start = atoi(argv[2]);
-  unsigned int goal = atoi(argv[3]);
-
+  unsigned int start = atoi(argv[1]);
+  unsigned int goal = atoi(argv[2]);
+  int runmode = 0;
+  if(argc > 4){
+    runmode = atoi(argv[1]);
+  }
+  
   if(fscanf(fp, "%d %d\n", &number_of_nodes, &number_of_edges) != 2){
     exit(-1);
   }
@@ -380,7 +385,24 @@ int main(int argc, char *argv[])
   struct timeval s, e;
   gettimeofday(&s, NULL);
 
-  Uint sum_of_cost = find_shortest_path(start, goal);
+  Uint sum_of_cost;
+  Uint cycles;
+
+  if(runmode == 0){
+    sum_of_cost = find_shortest_path(start, goal);
+    cycles = 0;
+  }else{
+    Node* start_addr = get_node(start);
+    Node* goal_addr = get_node(goal);
+    pycoram_open();
+    pycoram_write_4b((unsigned int)pqueue_ptr);
+    pycoram_write_4b((unsigned int)start_addr);
+    pycoram_write_4b((unsigned int)goal_addr);
+    pycoram_read_4b(&sum_of_cost);
+    pycoram_read_4b(&cycles);
+    pycoram_close();
+    //sleep(1);
+  }
 
   gettimeofday(&e, NULL);
   double exec_time = (e.tv_sec - s.tv_sec) + (e.tv_usec - s.tv_usec) * 1.0E-6;
