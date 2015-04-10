@@ -355,10 +355,10 @@ int main(int argc, char *argv[])
   }
 #endif
   
-  init_queue(&pqueue, MAX_NODES, pqueue_ptr);
+  init_queue(&pqueue, pqueue_ptr);
 
   Uint i;
-  for(i=0; i<MAX_NODES; i++){
+  for(i=0; i<number_of_nodes; i++){
     id_table[i] = 0;
   }
   for(i=0; i<HASH_SIZE; i++){
