@@ -294,63 +294,63 @@ int main(int argc, char *argv[])
 #ifndef __UMEM__  
   node_array = (Node*) malloc(sizeof(Node) * MAX_NODES);
   if(node_array == NULL){
-    printf("can allocate a memory for node_array.\n");
+    printf("can not allocate a memory for node_array.\n");
     exit(-1);
   }
   page_array = (Page*) malloc(sizeof(Page) * MAX_PAGES);
   if(page_array == NULL){
-    printf("can allocate a memory for page_array.\n");
+    printf("can not allocate a memory for page_array.\n");
     exit(-1);
   }
   id_table = (Uint*) malloc(sizeof(Uint) * MAX_NODES);
   if(id_table == NULL){
-    printf("can allocate a memory for id_table.\n");
+    printf("can not allocate a memory for id_table.\n");
     exit(-1);
   }
   addr_table = (Nodechain**) malloc(sizeof(Nodechain*) * HASH_SIZE);
   if(addr_table == NULL){
-    printf("can allocate a memory for addr_table.\n");
+    printf("can not allocate a memory for addr_table.\n");
     exit(-1);
   }
   addr_table_entry = (Nodechain*) malloc(sizeof(Nodechain) * MAX_NODES);
   if(addr_table_entry == NULL){
-    printf("can allocate a memory for addr_table_entry.\n");
+    printf("can not allocate a memory for addr_table_entry.\n");
     exit(-1);
   }
   pqueue_ptr = (Heapelement*) malloc(sizeof(Heapelement) * (MAX_NODES+1));
   if(pqueue_ptr == NULL){
-    printf("can allocate a memory for pqueue_ptr.\n");
+    printf("can not allocate a memory for pqueue_ptr.\n");
     exit(-1);
   }
 #else
   node_array = (Node*) umem_malloc(sizeof(Node) * MAX_NODES);
   if(node_array == NULL){
-    printf("can allocate a memory for node_array.\n");
+    printf("can not allocate a memory for node_array.\n");
     exit(-1);
   }
   page_array = (Page*) umem_malloc(sizeof(Page) * MAX_PAGES);
   if(page_array == NULL){
-    printf("can allocate a memory for page_array.\n");
+    printf("can not allocate a memory for page_array.\n");
     exit(-1);
   }
   id_table = (Uint*) umem_malloc(sizeof(Uint) * MAX_NODES);
   if(id_table == NULL){
-    printf("can allocate a memory for id_table.\n");
+    printf("can not allocate a memory for id_table.\n");
     exit(-1);
   }
   addr_table = (Nodechain**) umem_malloc(sizeof(Nodechain*) * HASH_SIZE);
   if(addr_table == NULL){
-    printf("can allocate a memory for addr_table.\n");
+    printf("can not allocate a memory for addr_table.\n");
     exit(-1);
   }
   addr_table_entry = (Nodechain*) umem_malloc(sizeof(Nodechain) * MAX_NODES);
   if(addr_table_entry == NULL){
-    printf("can allocate a memory for addr_table_entry.\n");
+    printf("can not allocate a memory for addr_table_entry.\n");
     exit(-1);
   }
   pqueue_ptr = (Heapelement*) umem_malloc(sizeof(Heapelement) * (MAX_NODES+1));
   if(pqueue_ptr == NULL){
-    printf("can allocate a memory for pqueue_ptr.\n");
+    printf("can not allocate a memory for pqueue_ptr.\n");
     exit(-1);
   }
 #endif
