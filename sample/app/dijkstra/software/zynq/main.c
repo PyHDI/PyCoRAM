@@ -1,5 +1,3 @@
-#define __UMEM__
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -277,6 +275,7 @@ int main(int argc, char *argv[])
   if(argc > 4){
     runmode = atoi(argv[1]);
   }
+  printf("runmode: %d\n", runmode);
   
   if(fscanf(fp, "%d %d\n", &number_of_nodes, &number_of_edges) != 2){
     exit(-1);
@@ -291,72 +290,73 @@ int main(int argc, char *argv[])
   page_index = 0;
   addr_table_entry_index = 0;
 
-#ifndef __UMEM__  
-  node_array = (Node*) malloc(sizeof(Node) * number_of_nodes);
-  if(node_array == NULL){
-    printf("can not allocate a memory for node_array.\n");
-    exit(-1);
+  if(runmode == 0){
+    node_array = (Node*) malloc(sizeof(Node) * number_of_nodes);
+    if(node_array == NULL){
+      printf("can not allocate a memory for node_array.\n");
+      exit(-1);
+    }
+    page_array = (Page*) malloc(sizeof(Page) * number_of_edges);
+    if(page_array == NULL){
+      printf("can not allocate a memory for page_array.\n");
+      exit(-1);
+    }
+    id_table = (Uint*) malloc(sizeof(Uint) * number_of_nodes);
+    if(id_table == NULL){
+      printf("can not allocate a memory for id_table.\n");
+      exit(-1);
+    }
+    addr_table = (Nodechain**) malloc(sizeof(Nodechain*) * HASH_SIZE);
+    if(addr_table == NULL){
+      printf("can not allocate a memory for addr_table.\n");
+      exit(-1);
+    }
+    addr_table_entry = (Nodechain*) malloc(sizeof(Nodechain) * number_of_nodes);
+    if(addr_table_entry == NULL){
+      printf("can not allocate a memory for addr_table_entry.\n");
+      exit(-1);
+    }
+    pqueue_ptr = (Heapelement*) malloc(sizeof(Heapelement) * (number_of_nodes+1));
+    if(pqueue_ptr == NULL){
+      printf("can not allocate a memory for pqueue_ptr.\n");
+      exit(-1);
+    }
   }
-  page_array = (Page*) malloc(sizeof(Page) * number_of_edges);
-  if(page_array == NULL){
-    printf("can not allocate a memory for page_array.\n");
+  else{
+    umem_open();
+    printf("UMEM is opened.\n");
+    
+    node_array = (Node*) umem_malloc(sizeof(Node) * number_of_nodes);
+    if(node_array == NULL){
+      printf("can not allocate a memory for node_array.\n");
+      exit(-1);
+    }
+    page_array = (Page*) umem_malloc(sizeof(Page) * number_of_edges);
+    if(page_array == NULL){
+      printf("can not allocate a memory for page_array.\n");
+      exit(-1);
+    }
+    id_table = (Uint*) umem_malloc(sizeof(Uint) * number_of_nodes);
+    if(id_table == NULL){
+      printf("can not allocate a memory for id_table.\n");
+      exit(-1);
+    }
+    addr_table = (Nodechain**) umem_malloc(sizeof(Nodechain*) * HASH_SIZE);
+    if(addr_table == NULL){
+      printf("can not allocate a memory for addr_table.\n");
+      exit(-1);
+    }
+    addr_table_entry = (Nodechain*) umem_malloc(sizeof(Nodechain) * number_of_nodes);
+    if(addr_table_entry == NULL){
+      printf("can not allocate a memory for addr_table_entry.\n");
+      exit(-1);
+    }
+    pqueue_ptr = (Heapelement*) umem_malloc(sizeof(Heapelement) * (number_of_nodes+1));
+    if(pqueue_ptr == NULL){
+      printf("can not allocate a memory for pqueue_ptr.\n");
     exit(-1);
+    }
   }
-  id_table = (Uint*) malloc(sizeof(Uint) * number_of_nodes);
-  if(id_table == NULL){
-    printf("can not allocate a memory for id_table.\n");
-    exit(-1);
-  }
-  addr_table = (Nodechain**) malloc(sizeof(Nodechain*) * HASH_SIZE);
-  if(addr_table == NULL){
-    printf("can not allocate a memory for addr_table.\n");
-    exit(-1);
-  }
-  addr_table_entry = (Nodechain*) malloc(sizeof(Nodechain) * number_of_nodes);
-  if(addr_table_entry == NULL){
-    printf("can not allocate a memory for addr_table_entry.\n");
-    exit(-1);
-  }
-  pqueue_ptr = (Heapelement*) malloc(sizeof(Heapelement) * (number_of_nodes+1));
-  if(pqueue_ptr == NULL){
-    printf("can not allocate a memory for pqueue_ptr.\n");
-    exit(-1);
-  }
-#else
-  umem_open();
-  printf("UMEM is opened.\n");
-
-  node_array = (Node*) umem_malloc(sizeof(Node) * number_of_nodes);
-  if(node_array == NULL){
-    printf("can not allocate a memory for node_array.\n");
-    exit(-1);
-  }
-  page_array = (Page*) umem_malloc(sizeof(Page) * number_of_edges);
-  if(page_array == NULL){
-    printf("can not allocate a memory for page_array.\n");
-    exit(-1);
-  }
-  id_table = (Uint*) umem_malloc(sizeof(Uint) * number_of_nodes);
-  if(id_table == NULL){
-    printf("can not allocate a memory for id_table.\n");
-    exit(-1);
-  }
-  addr_table = (Nodechain**) umem_malloc(sizeof(Nodechain*) * HASH_SIZE);
-  if(addr_table == NULL){
-    printf("can not allocate a memory for addr_table.\n");
-    exit(-1);
-  }
-  addr_table_entry = (Nodechain*) umem_malloc(sizeof(Nodechain) * number_of_nodes);
-  if(addr_table_entry == NULL){
-    printf("can not allocate a memory for addr_table_entry.\n");
-    exit(-1);
-  }
-  pqueue_ptr = (Heapelement*) umem_malloc(sizeof(Heapelement) * (number_of_nodes+1));
-  if(pqueue_ptr == NULL){
-    printf("can not allocate a memory for pqueue_ptr.\n");
-    exit(-1);
-  }
-#endif
   
   init_queue(&pqueue, pqueue_ptr);
 
@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
   Uint sum_of_cost;
   Uint cycles;
 
-  if(runmode == 0){
+  if(runmode == 0 || runmode == 1){
     sum_of_cost = find_shortest_path(start, goal);
     cycles = 0;
   }else{
@@ -417,15 +417,15 @@ int main(int argc, char *argv[])
 
   printf("exectuion time=%lf\n", exec_time);
 
-#ifndef __UMEM__  
-  free(node_array);
-  free(page_array);
-  free(id_table);
-  free(addr_table);
-  free(addr_table_entry);
-#else
-  umem_close();
-#endif
+  if(runmode == 0){
+    free(node_array);
+    free(page_array);
+    free(id_table);
+    free(addr_table);
+    free(addr_table_entry);
+  }else{
+    umem_close();
+  }
 
   return 0;
 }
