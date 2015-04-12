@@ -233,6 +233,12 @@ Publication
    `Paper <http://users.ece.cmu.edu/~jhoe/distribution/2013/carl13pycoram.pdf>`__
    `Slide <http://www.slideshare.net/shtaxxx/pycoramcarl2013>`__
 
+-  Zynq + PyCoRAM (+ Debian) (slideshare, in Japanese)
+   `Slide <http://www.slideshare.net/shtaxxx/zynqpycoram>`__
+
+-  PyCoRAM for HLS meet up (slideshare, in Japanese)
+   `Slide <http://www.slideshare.net/shtaxxx/pycoram20150116hls>`__
+
 Related Project
 ===============
 

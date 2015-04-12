@@ -152,6 +152,12 @@ Publication
 - Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. [Paper](http://users.ece.cmu.edu/~jhoe/distribution/2013/carl13pycoram.pdf)
 [Slide](http://www.slideshare.net/shtaxxx/pycoramcarl2013)
 
+- Zynq + PyCoRAM (+ Debian) (slideshare, in Japanese)
+[Slide](http://www.slideshare.net/shtaxxx/zynqpycoram)
+
+- PyCoRAM for HLS meet up (slideshare, in Japanese)
+[Slide](http://www.slideshare.net/shtaxxx/pycoram20150116hls)
+
 
 Related Project
 ==============================
