@@ -130,9 +130,11 @@ class InstanceConvertVisitor(SignalVisitor):
 
     #----------------------------------------------------------------------------
     def updateInstancePort(self, node, generate=False):
-        instance = copy.deepcopy(node)
-        ioport = not (len(node.portlist) == 0 or 
-                      node.portlist[0].portname is None)
+        new_node = copy.deepcopy(node)
+        instance = new_node.instances[0]
+        
+        ioport = not (len(instance.portlist) == 0 or 
+                      instance.portlist[0].portname is None)
         new_portlist = list(instance.portlist)
         if ioport:
             for i, a in enumerate(self.additionalport):
@@ -145,7 +147,7 @@ class InstanceConvertVisitor(SignalVisitor):
 
         if generate:
             blockstatement = []
-            blockstatement.append(instance)
+            blockstatement.append(new_node)
             block = Block( tuple(blockstatement) )
 
             genconds = self.frames.getGenerateConditions()
@@ -171,7 +173,7 @@ class InstanceConvertVisitor(SignalVisitor):
             ret = IfStatement(cond, block, None)
             self.appendInstance(node, ret)
         else:
-            ret = instance
+            ret = new_node
             self.appendInstance(node, ret)
 
         module = self.getModuleDefinition(node.module)
@@ -321,9 +323,13 @@ class InstanceConvertVisitor(SignalVisitor):
             self.additionalport.append( Input(name=nameprefix+'_deq') )
             self.additionalport.append( Output(name=nameprefix+'_empty') )
 
-        instance = copy.deepcopy(node)
-        noportname = True if len(instance.portlist) == 0 or instance.portlist[0].portname is None else False
+        new_node = copy.deepcopy(node)
+        instance = new_node.instances[0]
+        
+        noportname = (len(instance.portlist) == 0 or
+                      instance.portlist[0].portname is None)
         new_portlist = list(instance.portlist)
+        
         if noportname:
             if mode == 'CoramMemory':
                 new_portlist.append( PortArg(None, Identifier(nameprefix+'_clk')) )
@@ -415,7 +421,7 @@ class InstanceConvertVisitor(SignalVisitor):
 
         if generate:
             blockstatement = []
-            blockstatement.append(instance)
+            blockstatement.append(new_node)
             block = Block( tuple(blockstatement) )
 
             genconds = self.frames.getGenerateConditions()
@@ -441,7 +447,7 @@ class InstanceConvertVisitor(SignalVisitor):
             ret = IfStatement(cond, block, None)
             self.appendInstance(node, ret)
         else:
-            ret = instance
+            ret = new_node
             self.appendInstance(node, ret)
 
     #----------------------------------------------------------------------------
@@ -461,38 +467,13 @@ class InstanceConvertVisitor(SignalVisitor):
         self.generic_visit(new_node)
 
     #----------------------------------------------------------------------------
-    def visit_Instance(self, node):
+    def visit_InstanceList(self, node):
+        if len(node.instances) > 1: return
+        
         m = re.match('(Coram.*)', node.module)
         if not m: # normal instance
-            if self.isUsed(node.module):
-                tmp = self.additionalport
-                self.additionalport = []
-                new_module = self.rename(node.module)
-                self.copyModuleInfo(node.module, new_module)
-                prev_module_name = node.module
-                node.module = new_module
-                self.changeModuleName(node.module, node.module)
-                SignalVisitor.visit_Instance(self, node)
-                if self.additionalport:
-                    self.setUsed(node.module)
-                    self.updateInstancePort(node, generate=self.frames.isGenerate())
-                    tmp.extend(self.additionalport)
-                self.additionalport = tmp
-                node.module = prev_module_name
-                self.changeModuleName(node.module, prev_module_name)
-
-            else:
-                tmp = self.additionalport
-                self.additionalport = []
-                self.copyModuleInfo(node.module, node.module)
-                SignalVisitor.visit_Instance(self, node)
-                if self.additionalport:
-                    self.setUsed(node.module)
-                    self.updateInstancePort(node, generate=self.frames.isGenerate())
-                    tmp.extend(self.additionalport)
-                self.additionalport = tmp
-            return
-
+            return self._visit_InstanceList_normal(node)
+            
         memory = re.match('(CoramMemory).*', node.module)
         instream = re.match('(CoramInStream).*', node.module)
         outstream = re.match('(CoramOutStream).*', node.module)
@@ -520,6 +501,35 @@ class InstanceConvertVisitor(SignalVisitor):
 
         self.convertCoramInstance(node, mode, generate=False)
 
+    #----------------------------------------------------------------------------
+    def _visit_InstanceList_normal(self, node):
+        if self.isUsed(node.module):
+            tmp = self.additionalport
+            self.additionalport = []
+            new_module = self.rename(node.module)
+            self.copyModuleInfo(node.module, new_module)
+            prev_module_name = node.module
+            node.module = new_module
+            self.changeModuleName(node.module, node.module)
+            SignalVisitor.visit_InstanceList(self, node)
+            if self.additionalport:
+                self.setUsed(node.module)
+                self.updateInstancePort(node, generate=self.frames.isGenerate())
+                tmp.extend(self.additionalport)
+            self.additionalport = tmp
+            node.module = prev_module_name
+            self.changeModuleName(node.module, prev_module_name)
+        else:
+            tmp = self.additionalport
+            self.additionalport = []
+            self.copyModuleInfo(node.module, node.module)
+            SignalVisitor.visit_InstanceList(self, node)
+            if self.additionalport:
+                self.setUsed(node.module)
+                self.updateInstancePort(node, generate=self.frames.isGenerate())
+                tmp.extend(self.additionalport)
+            self.additionalport = tmp
+        
 #-------------------------------------------------------------------------------
 def ischild(node, attr):
     if not isinstance(node, Node): return False
@@ -603,7 +613,7 @@ class InstanceReplaceVisitor(NodeVisitor):
         actualkey = id(key)
         return (actualkey in self.replaced_items)
 
-    def visit_Instance(self, node):
+    def visit_InstanceList(self, node):
         if not self.hasReplacedNode(node):
             return self.generic_visit(node)
         return self.getReplacedNode(node)
