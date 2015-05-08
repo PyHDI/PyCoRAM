@@ -78,8 +78,8 @@ Software
 
    -  Install from pip: 'pip install pyverilog' for Python2.7 or 'pip3
       install pyverilog' for Python3
-   -  Install from github into this package: 'cd Pycoram; git clone
-      https://github.com/shtaxxx/Pyverilog.git; cd pycoram; ln -s
+   -  Install from github into this package: 'cd Pycoram; git submodule
+      add https://github.com/shtaxxx/Pyverilog.git; cd pycoram; ln -s
       ../Pyverilog/pyverilog'
 
 for RTL simulation
@@ -93,8 +93,9 @@ for RTL simulation
 for bitstream synthesis
 ~~~~~~~~~~~~~~~~~~~~~~~
 
--  for Xilinx: Xilinx Platform Studio (14.6 or later)
--  for Altera: Qsys (14.0 or later)
+-  Xilinx: Xilinx Platform Studio (14.6 or later) and Vivado (2014.4 or
+   later)
+-  Altera: Qsys (14.0 or later)
 
 (Recommended) FPGA Board
 ------------------------
