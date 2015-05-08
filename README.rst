@@ -78,9 +78,8 @@ Software
 
    -  Install from pip: 'pip install pyverilog' for Python2.7 or 'pip3
       install pyverilog' for Python3
-   -  Install from github into this package: 'cd Pycoram; git submodule
-      add https://github.com/shtaxxx/Pyverilog.git; cd pycoram; ln -s
-      ../Pyverilog/pyverilog'
+   -  Install from github into this package: 'cd Pycoram/Pyverilog ; git
+      submodule init; git submodule update'
 
 for RTL simulation
 ~~~~~~~~~~~~~~~~~~
