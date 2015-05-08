@@ -62,8 +62,8 @@ Software
 
 ### for bitstream synthesis
 
-* for Xilinx: Xilinx Platform Studio (14.6 or later)
-* for Altera: Qsys (14.0 or later)
+* Xilinx: Xilinx Platform Studio (14.6 or later) and Vivado (2014.4 or later)
+* Altera: Qsys (14.0 or later)
 
 (Recommended) FPGA Board
 --------------------------------------------------------------------------------
