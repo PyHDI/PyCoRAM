@@ -39,25 +39,15 @@ Software
 
 ### for RTL simulation
 
-* Icarus Verilog or Synopsys VCS
-   - Icarus Verilog is an open-sourced Verilog simulator
-   - VCS is a very fast commercial Verilog simulator
+* Icarus Verilog
+    - Icarus Verilog is an open-sourced Verilog simulator
+* Synopsys VCS (option, if you have) 
+    - VCS is a very fast commercial Verilog simulator
 
 ### for bitstream synthesis
 
-* for Xilinx: Xilinx Platform Studio (14.6 or later)
-* for Altera: Qsys (14.0 or later)
-
-(Recommended) FPGA Board
---------------------------------------------------------------------------------
-
-* Digilent Atlys (Xilinx Spartan-6)
-* Xilinx ML605 (Xilinx Virtex-6)
-* Xilinx VC707 (Xilinx Virtex-7)
-* Xilinx ZedBoard (Xilinx Zynq 7020)
-* Xilinx ZC706 (Xilinx Zynq 7045)
-* Altera DE2-115 (Altera Cyclone-4)
-* Altera Cyclone-5 GX Starter Kit
+* Xilinx: Vivado (2014.4 or later) and Xilinx Platform Studio (14.6 or later)
+* Altera: Qsys (14.0 or later)
 
 
 Installation
@@ -107,10 +97,10 @@ PyCoRAM compiler generates a directory for IP-core (pycoram\_userlogic\_v1\_00\_
 * IP-core RTL design (hdl/verilog/pycoram\_userlogic.v)
 * Test bench (test/test\_pycoram\_userlogic.v) 
 * XPS setting files (pycoram\_userlogic\_v2\_1\_0.{mpd,pao,tcl})
+* IP-XACT file (component.xml)
 
 A bit-stream can be synthesized by using Xilinx Platform Studio.
 Please copy the generated IP-core into 'pcores' directory of XPS project.
-
 
 This software has some sample project in 'sample'.
 To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST)
