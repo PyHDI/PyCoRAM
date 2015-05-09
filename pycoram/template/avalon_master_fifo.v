@@ -63,7 +63,7 @@ module avalon_master_fifo #
    output wire [C_AVM_ADDR_WIDTH-1:0]   avm_address,
    input  wire                          avm_waitrequest,
    output wire [C_AVM_DATA_WIDTH/8-1:0] avm_byteenable,
-   output wire [8-1:0]                  avm_burstcount,
+   output wire [8:0]                    avm_burstcount,
    
    // Read
    output wire                          avm_read,

@@ -131,6 +131,7 @@ class SystemBuilder(object):
         self.env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
         self.env.globals['int'] = int
         self.env.globals['log'] = math.log
+        self.env.globals['log2'] = log2
         self.env.globals['len'] = len
 
     #---------------------------------------------------------------------------

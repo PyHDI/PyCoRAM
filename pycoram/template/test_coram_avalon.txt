@@ -115,7 +115,7 @@ module test;
   wire [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_address;
   wire avm_{{ thread.name }}_{{ memory.name }}_waitrequest;
   wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ memory.name }}_byteenable;
-  wire [8-1:0] avm_{{ thread.name }}_{{ memory.name }}_burstcount;
+  wire [8:0] avm_{{ thread.name }}_{{ memory.name }}_burstcount;
   // Read
   wire avm_{{ thread.name }}_{{ memory.name }}_read;
   wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_readdata;
@@ -137,7 +137,7 @@ module test;
   wire [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_address;
   wire avm_{{ thread.name }}_{{ instream.name }}_waitrequest;
   wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ instream.name }}_byteenable;
-  wire [8-1:0] avm_{{ thread.name }}_{{ instream.name }}_burstcount;
+  wire [8:0] avm_{{ thread.name }}_{{ instream.name }}_burstcount;
   // Read
   wire avm_{{ thread.name }}_{{ instream.name }}_read;
   wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_readdata;
@@ -159,7 +159,7 @@ module test;
   wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_address;
   wire avm_{{ thread.name }}_{{ outstream.name }}_waitrequest;
   wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ outstream.name }}_byteenable;
-  wire [8-1:0] avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
+  wire [8:0] avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
   // Read
   wire avm_{{ thread.name }}_{{ outstream.name }}_read;
   wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_readdata;
@@ -181,7 +181,7 @@ module test;
   wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_address;
   wire avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest;
   wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH/8-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_byteenable;
-  wire [8-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_burstcount;
+  wire [8:0] avs_{{ thread.name }}_{{ iochannel.name }}_burstcount;
   // Read
   wire avs_{{ thread.name }}_{{ iochannel.name }}_read;
   wire [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] avs_{{ thread.name }}_{{ iochannel.name }}_readdata;
@@ -203,7 +203,7 @@ module test;
   wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_ADDR_WIDTH-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_address;
   wire avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest;
   wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH/8-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_byteenable;
-  wire [8-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_burstcount;
+  wire [8:0] avs_{{ thread.name }}_{{ ioregister.name }}_burstcount;
   // Read
   wire avs_{{ thread.name }}_{{ ioregister.name }}_read;
   wire [C_AVS_{{ thread.name }}_{{ ioregister.name }}_DATA_WIDTH-1:0] avs_{{ thread.name }}_{{ ioregister.name }}_readdata;
@@ -266,7 +266,7 @@ module test;
    .csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk(csi_sys_{{ thread.name }}_{{ iochannel.name }}_clk),
    .csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n(csi_sys_{{ thread.name }}_{{ iochannel.name }}_reset_n),
 {%- endif %}
-   .avs_{{ thread.name }}_{{ iochannel.name }}_address(avs_{{ thread.name }}_{{ iochannel.name }}_address[0]),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_address(avs_{{ thread.name }}_{{ iochannel.name }}_address >> {{ log2(iochannel.ext_datawidth/8) }}),
    .avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest(avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest),
 {% if not lite %}
    .avs_{{ thread.name }}_{{ iochannel.name }}_burstcount(avs_{{ thread.name }}_{{ iochannel.name }}_burstcount),
@@ -282,7 +282,7 @@ module test;
    .csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk(csi_sys_{{ thread.name }}_{{ ioregister.name }}_clk),
    .csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n(csi_sys_{{ thread.name }}_{{ ioregister.name }}_reset_n),
 {%- endif %}
-   .avs_{{ thread.name }}_{{ ioregister.name }}_address(avs_{{ thread.name }}_{{ ioregister.name }}_address[0]),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_address(avs_{{ thread.name }}_{{ ioregister.name }}_address >> {{ log2(ioregister.ext_datawidth/8) }}),
    .avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest(avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest),
 {% if not lite %}
    .avs_{{ thread.name }}_{{ ioregister.name }}_burstcount(avs_{{ thread.name }}_{{ ioregister.name }}_burstcount),
@@ -865,7 +865,7 @@ module dram_stub #
 
    input  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_address,
    output reg                                avm_{{ thread.name }}_{{ memory.name }}_waitrequest,
-   input  wire [8-1:0]                       avm_{{ thread.name }}_{{ memory.name }}_burstcount,
+   input  wire [8:0]                         avm_{{ thread.name }}_{{ memory.name }}_burstcount,
 
    input  wire                               avm_{{ thread.name }}_{{ memory.name }}_read,
    output reg  [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_readdata,
@@ -880,7 +880,7 @@ module dram_stub #
 
    input  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_address,
    output reg                                avm_{{ thread.name }}_{{ instream.name }}_waitrequest,
-   input  wire [8-1:0]                       avm_{{ thread.name }}_{{ instream.name }}_burstcount,
+   input  wire [8:0]                         avm_{{ thread.name }}_{{ instream.name }}_burstcount,
 
    input  wire                               avm_{{ thread.name }}_{{ instream.name }}_read,
    output reg  [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_readdata,
@@ -895,7 +895,7 @@ module dram_stub #
 
    input  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_address,
    output reg                                avm_{{ thread.name }}_{{ outstream.name }}_waitrequest,
-   input  wire [8-1:0]                       avm_{{ thread.name }}_{{ outstream.name }}_burstcount,
+   input  wire [8:0]                         avm_{{ thread.name }}_{{ outstream.name }}_burstcount,
 
    input  wire                               avm_{{ thread.name }}_{{ outstream.name }}_read,
    output reg  [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_readdata,
@@ -1029,7 +1029,7 @@ module dram_stub #
   reg {{ thread.name }}_{{ memory.name }}_write_mode;
   reg {{ thread.name }}_{{ memory.name }}_read_mode;
   reg [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] d_avm_{{ thread.name }}_{{ memory.name }}_address;
-  reg [8-1:0] d_avm_{{ thread.name }}_{{ memory.name }}_burstcount;
+  reg [8:0] d_avm_{{ thread.name }}_{{ memory.name }}_burstcount;
   reg [31:0] {{ thread.name }}_{{ memory.name }}_stall_count;
   
   always @(negedge csi_sys_{{ thread.name }}_{{ memory.name }}_clk) begin
@@ -1098,7 +1098,7 @@ module dram_stub #
   reg {{ thread.name }}_{{ instream.name }}_write_mode;
   reg {{ thread.name }}_{{ instream.name }}_read_mode;
   reg [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] d_avm_{{ thread.name }}_{{ instream.name }}_address;
-  reg [8-1:0] d_avm_{{ thread.name }}_{{ instream.name }}_burstcount;
+  reg [8:0] d_avm_{{ thread.name }}_{{ instream.name }}_burstcount;
   reg [31:0] {{ thread.name }}_{{ instream.name }}_stall_count;
   
   always @(negedge csi_sys_{{ thread.name }}_{{ instream.name }}_clk) begin
@@ -1167,7 +1167,7 @@ module dram_stub #
   reg {{ thread.name }}_{{ outstream.name }}_write_mode;
   reg {{ thread.name }}_{{ outstream.name }}_read_mode;
   reg [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] d_avm_{{ thread.name }}_{{ outstream.name }}_address;
-  reg [8-1:0] d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
+  reg [8:0] d_avm_{{ thread.name }}_{{ outstream.name }}_burstcount;
   reg [31:0] {{ thread.name }}_{{ outstream.name }}_stall_count;
   
   always @(negedge csi_sys_{{ thread.name }}_{{ outstream.name }}_clk) begin

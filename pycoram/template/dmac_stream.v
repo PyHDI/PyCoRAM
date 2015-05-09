@@ -54,32 +54,29 @@ module DMAC_STREAM #
    // Bus Interface
    //----------------------------------------------------------------------------
    // Write Address
-   output reg                awvalid,
-   output reg [W_EXT_A-1:0]  awaddr,
-   output reg [W_BLEN-1:0]   awlen,
-   input wire                awready,
+   output reg [W_EXT_A-1:0]      awaddr,
+   output reg [W_BLEN-1:0]       awlen,
+   output reg                    awvalid,
+   input wire                    awready,
   
    // Write Data
-   output wire               wvalid,
-   output wire [W_EXT_D-1:0] wdata,
-   output wire               wlast,
-   input wire                wready,
+   output wire [W_EXT_D-1:0]     wdata,
+   output wire [(W_EXT_D/8)-1:0] wstrb,
+   output wire                   wlast,
+   output wire                   wvalid,
+   input wire                    wready,
 
-   // Write Response
-   input wire                bvalid,
-   output wire               bready,
-   
    // Read Address
-   output reg                arvalid,
-   output reg [W_EXT_A-1:0]  araddr,
-   output reg [W_BLEN-1:0]   arlen,
-   input wire                arready,
+   output reg [W_EXT_A-1:0]      araddr,
+   output reg [W_BLEN-1:0]       arlen,
+   output reg                    arvalid,
+   input wire                    arready,
 
    // Read Data
-   input wire                rvalid,
-   input wire [W_EXT_D-1:0]  rdata,
-   input wire                rlast,
-   output wire               rready
+   input wire [W_EXT_D-1:0]     rdata,
+   input wire                   rlast,
+   input wire                   rvalid,
+   output wire                  rready
    );
 
   //----------------------------------------------------------------------------
@@ -385,13 +382,13 @@ module DMAC_STREAM #
   end
 
   assign rready = !core_write_almost_full && read_offchip_busy;
-  assign bready = SUPPORTS_WRITE; // always accepting write response
   assign core_write_enable = rvalid && !core_write_almost_full;
   assign core_write_data = rdata;
   assign core_read_enable = write_offchip_busy && (!wvalid || (wvalid && wready)) &&
                             write_count > 0 && !core_read_empty;
   assign wvalid = write_offchip_busy && (d_core_read_enable || (d_wvalid && !d_wready));
   assign wdata = d_core_read_enable? core_read_data : d_wdata;
+  assign wstrb = {(W_EXT_D/8){1'b1}};
   assign wlast = write_count == 0;
   
   always @(posedge ACLK) begin
@@ -419,9 +416,6 @@ module DMAC_STREAM #
       if(core_read_enable) begin
         write_count <= write_count - 1;
       end
-      //if(bvalid) begin
-      //  write_offchip_busy <= 0;
-      //end
       if(wvalid && wready && wlast) begin
         write_offchip_busy <= 0;
       end

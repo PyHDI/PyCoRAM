@@ -42,13 +42,10 @@ module DMAC_IOREGISTER #
    // Write Data
    input wire               wvalid,
    input wire [W_D-1:0]     wdata,
+   input wire [(W_D/8)-1:0] wstrb,
    input wire               wlast,
    output wire              wready,
 
-   // Write Response
-   output reg               bvalid,
-   input wire               bready,
-   
    // Read Address
    input wire               arvalid,
    input wire [W_EXT_A-1:0] araddr,
@@ -144,7 +141,6 @@ module DMAC_IOREGISTER #
     if(aresetn_rrr == 0) begin
       awready <= 0;
       arready <= 0;
-      bvalid <= 0;
       rvalid <= 0;
       read_busy <= 0;
       write_busy <= 0;
@@ -155,7 +151,6 @@ module DMAC_IOREGISTER #
     // Read Mode (BRAM -> Off-chip)
     //------------------------------------------------------------------------------
     end else if(read_busy) begin
-      bvalid <= 0;
       awready <= 0;
       arready <= 0;
       rvalid <= 1;
@@ -176,19 +171,14 @@ module DMAC_IOREGISTER #
       if(wvalid) begin
         write_count <= write_count - 1;
         if(write_count == 1) begin
-          bvalid <= 1;
+          write_busy <= 0;
         end
-      end
-      if(bvalid && bready) begin
-        bvalid <= 0;
-        write_busy <= 0;
       end
       
     //------------------------------------------------------------------------------
     // New Command
     //------------------------------------------------------------------------------
     end else begin
-      bvalid <= 0;
       awready <= 0;
       arready <= 0;
       rvalid <= 0;

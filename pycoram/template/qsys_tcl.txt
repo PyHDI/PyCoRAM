@@ -86,7 +86,7 @@ set_interface_property {{ thread.name }}_{{ memory.name }} SVD_ADDRESS_GROUP ""
 add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_address address Output {{ ext_addrwidth }}
 add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_waitrequest waitrequest Input 1
 add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_byteenable byteenable Output {{ int(memory.ext_datawidth / 8) }}
-add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_burstcount burstcount Output 8
+add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_burstcount burstcount Output 9
 add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_read read Output 1
 add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_readdata readdata Input {{ memory.ext_datawidth }}
 add_interface_port {{ thread.name }}_{{ memory.name }} avm_{{ thread.name }}_{{ memory.name }}_readdatavalid readdatavalid Input 1
@@ -131,7 +131,7 @@ set_interface_property {{ thread.name }}_{{ instream.name }} SVD_ADDRESS_GROUP "
 add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_address address Output {{ ext_addrwidth }}
 add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_waitrequest waitrequest Input 1
 add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_byteenable byteenable Output {{ int(instream.ext_datawidth / 8) }}
-add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_burstcount burstcount Output 8
+add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_burstcount burstcount Output 9
 add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_read read Output 1
 add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_readdata readdata Input {{ instream.ext_datawidth }}
 add_interface_port {{ thread.name }}_{{ instream.name }} avm_{{ thread.name }}_{{ instream.name }}_readdatavalid readdatavalid Input 1
@@ -176,7 +176,7 @@ set_interface_property {{ thread.name }}_{{ outstream.name }} SVD_ADDRESS_GROUP 
 add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_address address Output {{ ext_addrwidth }}
 add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_waitrequest waitrequest Input 1
 add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_byteenable byteenable Output {{ int(outstream.ext_datawidth / 8) }}
-add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_burstcount burstcount Output 8
+add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_burstcount burstcount Output 9
 add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_read read Output 1
 add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_readdata readdata Input {{ outstream.ext_datawidth }}
 add_interface_port {{ thread.name }}_{{ outstream.name }} avm_{{ thread.name }}_{{ outstream.name }}_readdatavalid readdatavalid Input 1
@@ -199,7 +199,11 @@ set_interface_property {{ thread.name }}_{{ iochannel.name }} associatedClock sy
 set_interface_property {{ thread.name }}_{{ iochannel.name }} associatedReset sys_user_reset
 {%- endif %}
 set_interface_property {{ thread.name }}_{{ iochannel.name }} bitsPerSymbol 8
+{%- if lite %}
 set_interface_property {{ thread.name }}_{{ iochannel.name }} burstOnBurstBoundariesOnly true
+{%- else %}
+set_interface_property {{ thread.name }}_{{ iochannel.name }} burstOnBurstBoundariesOnly false
+{%- endif %}
 set_interface_property {{ thread.name }}_{{ iochannel.name }} burstcountUnits WORDS
 set_interface_property {{ thread.name }}_{{ iochannel.name }} explicitAddressSpan 0
 set_interface_property {{ thread.name }}_{{ iochannel.name }} holdTime 0
@@ -220,6 +224,9 @@ set_interface_property {{ thread.name }}_{{ iochannel.name }} SVD_ADDRESS_GROUP 
 add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_address address Input 1
 add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest waitrequest Output 1
 add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_byteenable byteenable Input {{ int(iochannel.ext_datawidth / 8) }}
+{%- if not lite %}
+add_interface_port {{ thread.name }}_{{ iochannel.name }} avm_{{ thread.name }}_{{ iochannel.name }}_burstcount burstcount Output 9
+{%- endif %}
 add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_read read Input 1
 add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_readdata readdata Output {{ iochannel.ext_datawidth }}
 add_interface_port {{ thread.name }}_{{ iochannel.name }} avs_{{ thread.name }}_{{ iochannel.name }}_readdatavalid readdatavalid Output 1
@@ -246,7 +253,11 @@ set_interface_property {{ thread.name }}_{{ ioregister.name }} associatedClock s
 set_interface_property {{ thread.name }}_{{ ioregister.name }} associatedReset sys_user_reset
 {%- endif %}
 set_interface_property {{ thread.name }}_{{ ioregister.name }} bitsPerSymbol 8
+{%- if lite %}
 set_interface_property {{ thread.name }}_{{ ioregister.name }} burstOnBurstBoundariesOnly true
+{%- else %}
+set_interface_property {{ thread.name }}_{{ ioregister.name }} burstOnBurstBoundariesOnly false
+{%- endif %}
 set_interface_property {{ thread.name }}_{{ ioregister.name }} burstcountUnits WORDS
 set_interface_property {{ thread.name }}_{{ ioregister.name }} explicitAddressSpan 0
 set_interface_property {{ thread.name }}_{{ ioregister.name }} holdTime 0
@@ -267,6 +278,9 @@ set_interface_property {{ thread.name }}_{{ ioregister.name }} SVD_ADDRESS_GROUP
 add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_address address Input 1
 add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest waitrequest Output 1
 add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_byteenable byteenable Input {{ int(ioregister.ext_datawidth / 8) }}
+{%- if not lite %}
+add_interface_port {{ thread.name }}_{{ ioregister.name }} avm_{{ thread.name }}_{{ ioregister.name }}_burstcount burstcount Output 9
+{%- endif %}
 add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_read read Input 1
 add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_readdata readdata Output {{ ioregister.ext_datawidth }}
 add_interface_port {{ thread.name }}_{{ ioregister.name }} avs_{{ thread.name }}_{{ ioregister.name }}_readdatavalid readdatavalid Output 1

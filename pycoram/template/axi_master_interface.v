@@ -22,9 +22,9 @@ module axi_master_interface #
    //----------------------------------------------------------------------------
    // AXI Parameter
    //----------------------------------------------------------------------------
-   parameter integer C_M_AXI_THREAD_ID_WIDTH       = 1,
    parameter integer C_M_AXI_ADDR_WIDTH            = 32,
    parameter integer C_M_AXI_DATA_WIDTH            = 32,
+   parameter integer C_M_AXI_THREAD_ID_WIDTH       = 1,
    parameter integer C_M_AXI_AWUSER_WIDTH          = 1,
    parameter integer C_M_AXI_ARUSER_WIDTH          = 1,
    parameter integer C_M_AXI_WUSER_WIDTH           = 1,
@@ -32,7 +32,6 @@ module axi_master_interface #
    parameter integer C_M_AXI_BUSER_WIDTH           = 1,
    parameter integer C_M_AXI_SUPPORTS_WRITE        = 1,
    parameter integer C_M_AXI_SUPPORTS_READ         = 1,
-   
    parameter C_M_AXI_TARGET = 'h00000000
    )
   (
@@ -46,35 +45,32 @@ module axi_master_interface #
    // User Bus Interface
    //----------------------------------------------------------------------------
    // Write Address
-   input wire                           awvalid,
-   input wire  [C_M_AXI_ADDR_WIDTH-1:0] awaddr,
-   input wire  [8-1:0]                  awlen,
-   output wire                          awready,
+   input wire  [C_M_AXI_ADDR_WIDTH-1:0]   awaddr,
+   input wire  [8-1:0]                    awlen,
+   input wire                             awvalid,
+   output wire                            awready,
   
    // Write Data
-   input wire  [C_M_AXI_DATA_WIDTH-1:0] wdata,
-   input wire                           wlast,
-   input wire                           wvalid,
-   output wire                          wready,
-
-   // Write Response
-   output wire                          bvalid,
-   input wire                           bready,
+   input wire  [C_M_AXI_DATA_WIDTH-1:0]   wdata,
+   input wire  [C_M_AXI_DATA_WIDTH/8-1:0] wstrb,
+   input wire                             wlast,
+   input wire                             wvalid,
+   output wire                            wready,
    
    // Read Address
-   input wire                           arvalid,
-   input wire  [C_M_AXI_ADDR_WIDTH-1:0] araddr,
-   input wire  [8-1:0]                  arlen,
-   output wire                          arready,
+   input wire  [C_M_AXI_ADDR_WIDTH-1:0]   araddr,
+   input wire  [8-1:0]                    arlen,
+   input wire                             arvalid,
+   output wire                            arready,
 
    // Read Data
-   output wire [C_M_AXI_DATA_WIDTH-1:0] rdata,
-   output wire                          rlast,
-   output wire                          rvalid,
-   input wire                           rready,
+   output wire [C_M_AXI_DATA_WIDTH-1:0]   rdata,
+   output wire                            rlast,
+   output wire                            rvalid,
+   input wire                             rready,
 
    // Error
-   output reg                           error,
+   output reg                             error,
    
    //----------------------------------------------------------------------------
    // AXI Master Interface
@@ -172,7 +168,7 @@ module axi_master_interface #
   // Write Data(W)
   //----------------------------------------------------------------------------
   assign M_AXI_WDATA = wdata;
-  assign M_AXI_WSTRB = {(C_M_AXI_DATA_WIDTH/8){1'b1}}; 
+  assign M_AXI_WSTRB = wstrb;
   assign M_AXI_WLAST = wlast;
   assign M_AXI_WUSER = 'b0;
   assign M_AXI_WVALID = wvalid;
@@ -181,9 +177,7 @@ module axi_master_interface #
   //----------------------------------------------------------------------------
   // Write Response (B)
   //----------------------------------------------------------------------------
-  //assign M_AXI_BREADY = bready;
   assign M_AXI_BREADY = C_M_AXI_SUPPORTS_WRITE;
-  assign bvalid = M_AXI_BVALID;
 
   //----------------------------------------------------------------------------  
   // Read Address (AR)

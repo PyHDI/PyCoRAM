@@ -1,11 +1,12 @@
+
 module axi_slave_interface #
   (
    //----------------------------------------------------------------------------
    // AXI Parameter
    //----------------------------------------------------------------------------
-   parameter integer C_S_AXI_ID_WIDTH              = 1,
    parameter integer C_S_AXI_ADDR_WIDTH            = 32,
    parameter integer C_S_AXI_DATA_WIDTH            = 32,
+   parameter integer C_S_AXI_ID_WIDTH              = 1,
    parameter integer C_S_AXI_AWUSER_WIDTH          = 1,
    parameter integer C_S_AXI_ARUSER_WIDTH          = 1,
    parameter integer C_S_AXI_WUSER_WIDTH           = 1,
@@ -23,32 +24,29 @@ module axi_slave_interface #
    // User Bus Interface
    //----------------------------------------------------------------------------
    // Write Address
-   output wire                          awvalid,
-   output wire [C_S_AXI_ADDR_WIDTH-1:0] awaddr,
-   output wire [8-1:0]                  awlen,
-   input wire                           awready,
+   output wire [C_S_AXI_ADDR_WIDTH-1:0]   awaddr,
+   output wire [8-1:0]                    awlen,
+   output wire                            awvalid,
+   input wire                             awready,
   
    // Write Data
-   output wire [C_S_AXI_DATA_WIDTH-1:0] wdata,
-   output wire                          wlast,
-   output wire                          wvalid,
-   input wire                           wready,
+   output wire [C_S_AXI_DATA_WIDTH-1:0]   wdata,
+   output wire [C_S_AXI_DATA_WIDTH/8-1:0] wstrb,
+   output wire                            wlast,
+   output wire                            wvalid,
+   input wire                             wready,
 
-   // Write Response
-   input wire                           bvalid,
-   output wire                          bready,
-   
    // Read Address
-   output wire                          arvalid,
-   output wire [C_S_AXI_ADDR_WIDTH-1:0] araddr,
-   output wire [8-1:0]                  arlen,
-   input wire                           arready,
+   output wire [C_S_AXI_ADDR_WIDTH-1:0]   araddr,
+   output wire [8-1:0]                    arlen,
+   output wire                            arvalid,
+   input wire                             arready,
 
    // Read Data
-   input wire  [C_S_AXI_DATA_WIDTH-1:0] rdata,
-   input wire                           rlast,
-   input wire                           rvalid,
-   output wire                          rready,
+   input wire  [C_S_AXI_DATA_WIDTH-1:0]   rdata,
+   input wire                             rlast,
+   input wire                             rvalid,
+   output wire                            rready,
 
    //----------------------------------------------------------------------------
    // AXI Slave Interface
@@ -134,6 +132,7 @@ module axi_slave_interface #
   //----------------------------------------------------------------------------
   reg [C_S_AXI_ID_WIDTH-1:0] bid;
   reg [C_S_AXI_ID_WIDTH-1:0] rid;
+  reg                        bvalid;
   wire [2-1:0]               bresp;
   wire [2-1:0]               rresp;
   
@@ -141,15 +140,16 @@ module axi_slave_interface #
   // Write Address (AW)
   //----------------------------------------------------------------------------
   // Single threaded
-  assign awvalid = S_AXI_AWVALID;
   assign awaddr = S_AXI_AWADDR;
   assign awlen = S_AXI_AWLEN;
+  assign awvalid = S_AXI_AWVALID;
   assign S_AXI_AWREADY = awready;
 
   //----------------------------------------------------------------------------
   // Write Data(W)
   //----------------------------------------------------------------------------
   assign wdata = S_AXI_WDATA;
+  assign wstrb = S_AXI_WSTRB;
   assign wlast = S_AXI_WLAST;
   assign wvalid = S_AXI_WVALID;
   assign S_AXI_WREADY = wready;
@@ -161,14 +161,13 @@ module axi_slave_interface #
   assign S_AXI_BRESP = bresp;
   assign S_AXI_BUSER = 'h0;
   assign S_AXI_BVALID = bvalid;
-  assign bready = S_AXI_BREADY;
 
   //----------------------------------------------------------------------------  
   // Read Address (AR)
   //----------------------------------------------------------------------------
-  assign arvalid = S_AXI_ARVALID;
   assign araddr = S_AXI_ARADDR;
   assign arlen = S_AXI_ARLEN;
+  assign arvalid = S_AXI_ARVALID;
   assign S_AXI_ARREADY = arready;
 
   //----------------------------------------------------------------------------    
@@ -178,8 +177,8 @@ module axi_slave_interface #
   assign S_AXI_RDATA = rdata;
   assign S_AXI_RRESP = rresp;
   assign S_AXI_RLAST = rlast;
-  assign S_AXI_RVALID = rvalid;
   assign S_AXI_RUSER = 'h0;
+  assign S_AXI_RVALID = rvalid;
   assign rready = S_AXI_RREADY;
 
   //------------------------------------------------------------------------------
@@ -187,6 +186,7 @@ module axi_slave_interface #
   //------------------------------------------------------------------------------
   always @(posedge ACLK) begin
     if (aresetn_rrr == 0) begin
+      bvalid <= 0;
       bid <= 0;
       rid <= 0;
     end else begin
@@ -195,6 +195,12 @@ module axi_slave_interface #
       end
       if(S_AXI_ARVALID && S_AXI_ARREADY) begin
         rid <= S_AXI_ARID;
+      end
+      if(bvalid && S_AXI_BREADY) begin
+        bvalid <= 0;
+      end
+      if(S_AXI_WVALID && S_AXI_WREADY && S_AXI_WLAST) begin
+        bvalid <= 1;
       end
     end
   end

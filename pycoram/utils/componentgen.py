@@ -746,8 +746,8 @@ class ComponentGen(object):
                                         None, 1, None, 0))
             ret.append(self.mkPortEntry(base+'_AWLOCK', 'in',
                                         None, 1, None, 0))
-            ret.append(self.mkPortEntry(base+'_AWCACHE', 'in',
-                                        None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_AWCACHE', 'in',
+                                    None, 3, None, 0))
         ret.append(self.mkPortEntry(base+'_AWPROT', 'in',
                                     None, 2, None, 0))
         if not lite:
@@ -806,8 +806,8 @@ class ComponentGen(object):
                                         None, 1, None, 0))
             ret.append(self.mkPortEntry(base+'_ARLOCK', 'in',
                                         None, 1, None, 0))
-            ret.append(self.mkPortEntry(base+'_ARCACHE', 'in',
-                                        None, 3, None, 0))
+        ret.append(self.mkPortEntry(base+'_ARCACHE', 'in',
+                                    None, 3, None, 0))
         ret.append(self.mkPortEntry(base+'_ARPROT', 'in',
                                     None, 2, None, 0))
         if not lite:

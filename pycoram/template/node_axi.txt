@@ -294,8 +294,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK,
-   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE,
 {%- endif %}
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE,
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS,
@@ -338,8 +338,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK,
-   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE,
 {%- endif %}
+   input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE,
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS,
@@ -377,8 +377,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK,
-   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE,
 {%- endif %}
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE,
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS,
@@ -421,8 +421,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK,
-   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE,
 {%- endif %}
+   input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE,
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS,
@@ -749,13 +749,10 @@ module pycoram_{{ userlogic_name.lower() }} #
    
   // Master Interface Write Data
   wire [C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_wdata;
+  wire [((C_{{ thread.name }}_{{ memory.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ memory.name }}_wstrb;
   wire {{ thread.name }}_{{ memory.name }}_wlast;
   wire {{ thread.name }}_{{ memory.name }}_wvalid;
   wire {{ thread.name }}_{{ memory.name }}_wready;
-   
-  // Master Interface Write Response
-  wire {{ thread.name }}_{{ memory.name }}_bvalid;
-  wire {{ thread.name }}_{{ memory.name }}_bready;
    
   // Master Interface Read Address
   wire [C_{{ thread.name }}_{{ memory.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ memory.name }}_araddr;
@@ -779,13 +776,10 @@ module pycoram_{{ userlogic_name.lower() }} #
    
   // Master Interface Write Data
   wire [C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_wdata;
+  wire [((C_{{ thread.name }}_{{ instream.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ instream.name }}_wstrb;
   wire {{ thread.name }}_{{ instream.name }}_wlast;
   wire {{ thread.name }}_{{ instream.name }}_wvalid;
   wire {{ thread.name }}_{{ instream.name }}_wready;
-   
-  // Master Interface Write Response
-  wire {{ thread.name }}_{{ instream.name }}_bvalid;
-  wire {{ thread.name }}_{{ instream.name }}_bready;
    
   // Master Interface Read Address
   wire [C_{{ thread.name }}_{{ instream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ instream.name }}_araddr;
@@ -809,13 +803,10 @@ module pycoram_{{ userlogic_name.lower() }} #
    
   // Master Interface Write Data
   wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_wdata;
+  wire [((C_{{ thread.name }}_{{ outstream.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ outstream.name }}_wstrb;
   wire {{ thread.name }}_{{ outstream.name }}_wlast;
   wire {{ thread.name }}_{{ outstream.name }}_wvalid;
   wire {{ thread.name }}_{{ outstream.name }}_wready;
-   
-  // Master Interface Write Response
-  wire {{ thread.name }}_{{ outstream.name }}_bvalid;
-  wire {{ thread.name }}_{{ outstream.name }}_bready;
    
   // Master Interface Read Address
   wire [C_{{ thread.name }}_{{ outstream.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ outstream.name }}_araddr;
@@ -839,13 +830,10 @@ module pycoram_{{ userlogic_name.lower() }} #
    
   // Master Interface Write Data
   wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_wdata;
+  wire [((C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ iochannel.name }}_wstrb;
   wire {{ thread.name }}_{{ iochannel.name }}_wlast;
   wire {{ thread.name }}_{{ iochannel.name }}_wvalid;
   wire {{ thread.name }}_{{ iochannel.name }}_wready;
-   
-  // Master Interface Write Response
-  wire {{ thread.name }}_{{ iochannel.name }}_bvalid;
-  wire {{ thread.name }}_{{ iochannel.name }}_bready;
    
   // Master Interface Read Address
   wire [C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ iochannel.name }}_araddr;
@@ -869,13 +857,10 @@ module pycoram_{{ userlogic_name.lower() }} #
    
   // Master Interface Write Data
   wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_wdata;
+  wire [((C_{{ thread.name }}_{{ ioregister.name }}_AXI_DATA_WIDTH/8) -1):0] {{ thread.name }}_{{ ioregister.name }}_wstrb;
   wire {{ thread.name }}_{{ ioregister.name }}_wlast;
   wire {{ thread.name }}_{{ ioregister.name }}_wvalid;
   wire {{ thread.name }}_{{ ioregister.name }}_wready;
-   
-  // Master Interface Write Response
-  wire {{ thread.name }}_{{ ioregister.name }}_bvalid;
-  wire {{ thread.name }}_{{ ioregister.name }}_bready;
    
   // Master Interface Read Address
   wire [C_{{ thread.name }}_{{ ioregister.name }}_AXI_ADDR_WIDTH-1:0] {{ thread.name }}_{{ ioregister.name }}_araddr;
@@ -1055,27 +1040,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .req_ready({{ thread.name }}_{{ memory.name }}_req_ready),
      .req_busy({{ thread.name }}_{{ memory.name }}_req_busy),
 
-     .awvalid({{ thread.name }}_{{ memory.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ memory.name }}_awaddr),
      .awlen({{ thread.name }}_{{ memory.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ memory.name }}_awvalid),
      .awready({{ thread.name }}_{{ memory.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ memory.name }}_wvalid),
      .wdata({{ thread.name }}_{{ memory.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ memory.name }}_wstrb),
      .wlast({{ thread.name }}_{{ memory.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ memory.name }}_wvalid),
      .wready({{ thread.name }}_{{ memory.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ memory.name }}_bvalid),
-     .bready({{ thread.name }}_{{ memory.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ memory.name }}_arvalid),
      .araddr({{ thread.name }}_{{ memory.name }}_araddr),
      .arlen({{ thread.name }}_{{ memory.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ memory.name }}_arvalid),
      .arready({{ thread.name }}_{{ memory.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ memory.name }}_rvalid),
      .rdata({{ thread.name }}_{{ memory.name }}_rdata),
      .rlast({{ thread.name }}_{{ memory.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ memory.name }}_rvalid),
      .rready({{ thread.name }}_{{ memory.name }}_rready)
      );
 {% endfor %}
@@ -1116,27 +1099,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .req_ready({{ thread.name }}_{{ instream.name }}_req_ready),
      .req_busy({{ thread.name }}_{{ instream.name }}_req_busy),
 
-     .awvalid({{ thread.name }}_{{ instream.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ instream.name }}_awaddr),
      .awlen({{ thread.name }}_{{ instream.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ instream.name }}_awvalid),
      .awready({{ thread.name }}_{{ instream.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
      .wdata({{ thread.name }}_{{ instream.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ instraem.name }}_wstrb),
      .wlast({{ thread.name }}_{{ instream.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
      .wready({{ thread.name }}_{{ instream.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ instream.name }}_bvalid),
-     .bready({{ thread.name }}_{{ instream.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ instream.name }}_arvalid),
      .araddr({{ thread.name }}_{{ instream.name }}_araddr),
      .arlen({{ thread.name }}_{{ instream.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ instream.name }}_arvalid),
      .arready({{ thread.name }}_{{ instream.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ instream.name }}_rvalid),
      .rdata({{ thread.name }}_{{ instream.name }}_rdata),
      .rlast({{ thread.name }}_{{ instream.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ instream.name }}_rvalid),
      .rready({{ thread.name }}_{{ instream.name }}_rready)
      );
 {% endfor %}
@@ -1177,27 +1158,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .req_ready({{ thread.name }}_{{ outstream.name }}_req_ready),
      .req_busy({{ thread.name }}_{{ outstream.name }}_req_busy),
 
-     .awvalid({{ thread.name }}_{{ outstream.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ outstream.name }}_awaddr),
      .awlen({{ thread.name }}_{{ outstream.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ outstream.name }}_awvalid),
      .awready({{ thread.name }}_{{ outstream.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
      .wdata({{ thread.name }}_{{ outstream.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ outstraem.name }}_wstrb),
      .wlast({{ thread.name }}_{{ outstream.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
      .wready({{ thread.name }}_{{ outstream.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ outstream.name }}_bvalid),
-     .bready({{ thread.name }}_{{ outstream.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ outstream.name }}_arvalid),
      .araddr({{ thread.name }}_{{ outstream.name }}_araddr),
      .arlen({{ thread.name }}_{{ outstream.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ outstream.name }}_arvalid),
      .arready({{ thread.name }}_{{ outstream.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ outstream.name }}_rvalid),
      .rdata({{ thread.name }}_{{ outstream.name }}_rdata),
      .rlast({{ thread.name }}_{{ outstream.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ outstream.name }}_rvalid),
      .rready({{ thread.name }}_{{ outstream.name }}_rready)
      );
 {% endfor %}
@@ -1228,27 +1207,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .coram_d({{ thread.name }}_{{ iochannel.name }}_d),
      .coram_almost_full({{ thread.name }}_{{ iochannel.name }}_almost_full),
 
-     .awvalid({{ thread.name }}_{{ iochannel.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ iochannel.name }}_awaddr),
      .awlen({{ thread.name }}_{{ iochannel.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ iochannel.name }}_awvalid),
      .awready({{ thread.name }}_{{ iochannel.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ iochannel.name }}_wvalid),
      .wdata({{ thread.name }}_{{ iochannel.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ iochannel.name }}_wstrb),
      .wlast({{ thread.name }}_{{ iochannel.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ iochannel.name }}_wvalid),
      .wready({{ thread.name }}_{{ iochannel.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ iochannel.name }}_bvalid),
-     .bready({{ thread.name }}_{{ iochannel.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ iochannel.name }}_arvalid),
      .araddr({{ thread.name }}_{{ iochannel.name }}_araddr),
      .arlen({{ thread.name }}_{{ iochannel.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ iochannel.name }}_arvalid),
      .arready({{ thread.name }}_{{ iochannel.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ iochannel.name }}_rvalid),
      .rdata({{ thread.name }}_{{ iochannel.name }}_rdata),
      .rlast({{ thread.name }}_{{ iochannel.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ iochannel.name }}_rvalid),
      .rready({{ thread.name }}_{{ iochannel.name }}_rready)
      );
 {% endfor %}
@@ -1275,27 +1252,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .coram_we({{ thread.name }}_{{ ioregister.name }}_we),
      .coram_q({{ thread.name }}_{{ ioregister.name }}_q),
 
-     .awvalid({{ thread.name }}_{{ ioregister.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ ioregister.name }}_awaddr),
      .awlen({{ thread.name }}_{{ ioregister.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ ioregister.name }}_awvalid),
      .awready({{ thread.name }}_{{ ioregister.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ ioregister.name }}_wvalid),
      .wdata({{ thread.name }}_{{ ioregister.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ ioregister.name }}_wstrb),
      .wlast({{ thread.name }}_{{ ioregister.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ ioregister.name }}_wvalid),
      .wready({{ thread.name }}_{{ ioregister.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ ioregister.name }}_bvalid),
-     .bready({{ thread.name }}_{{ ioregister.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ ioregister.name }}_arvalid),
      .araddr({{ thread.name }}_{{ ioregister.name }}_araddr),
      .arlen({{ thread.name }}_{{ ioregister.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ ioregister.name }}_arvalid),
      .arready({{ thread.name }}_{{ ioregister.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ ioregister.name }}_rvalid),
      .rdata({{ thread.name }}_{{ ioregister.name }}_rdata),
      .rlast({{ thread.name }}_{{ ioregister.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ ioregister.name }}_rvalid),
      .rready({{ thread.name }}_{{ ioregister.name }}_rready)
      );
 {% endfor %}
@@ -1326,27 +1301,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .ACLK({{ thread.name }}_{{ memory.name }}_AXI_ACLK), // AXI clock
      .ARESETN({{ thread.name }}_{{ memory.name }}_AXI_ARESETN), // AXI reset
 
-     .awvalid({{ thread.name }}_{{ memory.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ memory.name }}_awaddr),
      .awlen({{ thread.name }}_{{ memory.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ memory.name }}_awvalid),
      .awready({{ thread.name }}_{{ memory.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ memory.name }}_wvalid),
      .wdata({{ thread.name }}_{{ memory.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ memory.name }}_wstrb),
      .wlast({{ thread.name }}_{{ memory.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ memory.name }}_wvalid),
      .wready({{ thread.name }}_{{ memory.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ memory.name }}_bvalid),
-     .bready({{ thread.name }}_{{ memory.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ memory.name }}_arvalid),
      .araddr({{ thread.name }}_{{ memory.name }}_araddr),
      .arlen({{ thread.name }}_{{ memory.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ memory.name }}_arvalid),
      .arready({{ thread.name }}_{{ memory.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ memory.name }}_rvalid),
      .rdata({{ thread.name }}_{{ memory.name }}_rdata),
      .rlast({{ thread.name }}_{{ memory.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ memory.name }}_rvalid),
      .rready({{ thread.name }}_{{ memory.name }}_rready),
 
      .M_AXI_AWID({{ thread.name }}_{{ memory.name }}_AXI_AWID),
@@ -1418,27 +1391,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .ACLK({{ thread.name }}_{{ instream.name }}_AXI_ACLK), // AXI clock
      .ARESETN({{ thread.name }}_{{ instream.name }}_AXI_ARESETN), // AXI reset
  
-     .awvalid({{ thread.name }}_{{ instream.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ instream.name }}_awaddr),
      .awlen({{ thread.name }}_{{ instream.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ instream.name }}_awvalid),
      .awready({{ thread.name }}_{{ instream.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
      .wdata({{ thread.name }}_{{ instream.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ instream.name }}_wstrb),
      .wlast({{ thread.name }}_{{ instream.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
      .wready({{ thread.name }}_{{ instream.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ instream.name }}_bvalid),
-     .bready({{ thread.name }}_{{ instream.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ instream.name }}_arvalid),
      .araddr({{ thread.name }}_{{ instream.name }}_araddr),
      .arlen({{ thread.name }}_{{ instream.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ instream.name }}_arvalid),
      .arready({{ thread.name }}_{{ instream.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ instream.name }}_rvalid),
      .rdata({{ thread.name }}_{{ instream.name }}_rdata),
      .rlast({{ thread.name }}_{{ instream.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ instream.name }}_rvalid),
      .rready({{ thread.name }}_{{ instream.name }}_rready),
 
      .M_AXI_AWID({{ thread.name }}_{{ instream.name }}_AXI_AWID),
@@ -1510,27 +1481,25 @@ module pycoram_{{ userlogic_name.lower() }} #
      .ACLK({{ thread.name }}_{{ outstream.name }}_AXI_ACLK), // AXI clock
      .ARESETN({{ thread.name }}_{{ outstream.name }}_AXI_ARESETN), // AXI reset
 
-     .awvalid({{ thread.name }}_{{ outstream.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ outstream.name }}_awaddr),
      .awlen({{ thread.name }}_{{ outstream.name }}_awlen),
+     .awvalid({{ thread.name }}_{{ outstream.name }}_awvalid),
      .awready({{ thread.name }}_{{ outstream.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
      .wdata({{ thread.name }}_{{ outstream.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ outstream.name }}_wstrb),
      .wlast({{ thread.name }}_{{ outstream.name }}_wlast),
+     .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
      .wready({{ thread.name }}_{{ outstream.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ outstream.name }}_bvalid),
-     .bready({{ thread.name }}_{{ outstream.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ outstream.name }}_arvalid),
      .araddr({{ thread.name }}_{{ outstream.name }}_araddr),
      .arlen({{ thread.name }}_{{ outstream.name }}_arlen),
+     .arvalid({{ thread.name }}_{{ outstream.name }}_arvalid),
      .arready({{ thread.name }}_{{ outstream.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ outstream.name }}_rvalid),
      .rdata({{ thread.name }}_{{ outstream.name }}_rdata),
      .rlast({{ thread.name }}_{{ outstream.name }}_rlast),
+     .rvalid({{ thread.name }}_{{ outstream.name }}_rvalid),
      .rready({{ thread.name }}_{{ outstream.name }}_rready),
 
      .M_AXI_AWID({{ thread.name }}_{{ outstream.name }}_AXI_AWID),
@@ -1609,27 +1578,33 @@ module pycoram_{{ userlogic_name.lower() }} #
      .ACLK({{ thread.name }}_{{ iochannel.name }}_AXI_ACLK), // AXI clock
      .ARESETN({{ thread.name }}_{{ iochannel.name }}_AXI_ARESETN), // AXI reset
 
-     .awvalid({{ thread.name }}_{{ iochannel.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ iochannel.name }}_awaddr),
+{%- if not lite %}
      .awlen({{ thread.name }}_{{ iochannel.name }}_awlen),
+{%- endif %}
+     .awvalid({{ thread.name }}_{{ iochannel.name }}_awvalid),
      .awready({{ thread.name }}_{{ iochannel.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ iochannel.name }}_wvalid),
      .wdata({{ thread.name }}_{{ iochannel.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ iochannel.name }}_wstrb),
+{%- if not lite %}
      .wlast({{ thread.name }}_{{ iochannel.name }}_wlast),
+{%- endif %}
+     .wvalid({{ thread.name }}_{{ iochannel.name }}_wvalid),
      .wready({{ thread.name }}_{{ iochannel.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ iochannel.name }}_bvalid),
-     .bready({{ thread.name }}_{{ iochannel.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ iochannel.name }}_arvalid),
      .araddr({{ thread.name }}_{{ iochannel.name }}_araddr),
+{%- if not lite %}
      .arlen({{ thread.name }}_{{ iochannel.name }}_arlen),
+{%- endif %}
+     .arvalid({{ thread.name }}_{{ iochannel.name }}_arvalid),
      .arready({{ thread.name }}_{{ iochannel.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ iochannel.name }}_rvalid),
      .rdata({{ thread.name }}_{{ iochannel.name }}_rdata),
+{%- if not lite %}
      .rlast({{ thread.name }}_{{ iochannel.name }}_rlast),
+{%- endif %}
+     .rvalid({{ thread.name }}_{{ iochannel.name }}_rvalid),
      .rready({{ thread.name }}_{{ iochannel.name }}_rready),
 
 {% if not lite %}
@@ -1641,8 +1616,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_AWSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE),
      .S_AXI_AWBURST({{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST),
      .S_AXI_AWLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK),
-     .S_AXI_AWCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE),
 {%- endif %}
+     .S_AXI_AWCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE),
      .S_AXI_AWPROT({{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT),
 {%- if not lite %}
      .S_AXI_AWQOS({{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS),
@@ -1682,8 +1657,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_ARSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE),
      .S_AXI_ARBURST({{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST),
      .S_AXI_ARLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK),
-     .S_AXI_ARCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE),
 {%- endif %}
+     .S_AXI_ARCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE),
      .S_AXI_ARPROT({{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT),
 {%- if not lite %}
      .S_AXI_ARQOS({{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS),
@@ -1704,7 +1679,14 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_RVALID({{ thread.name }}_{{ iochannel.name }}_AXI_RVALID),
      .S_AXI_RREADY({{ thread.name }}_{{ iochannel.name }}_AXI_RREADY)
      );
+     
+{% if lite %}
+  assign {{ thread.name }}_{{ iochannel.name }}_awlen = 0;
+  assign {{ thread.name }}_{{ iochannel.name }}_arlen = 0;
+  assign {{ thread.name }}_{{ iochannel.name }}_wlast = 1;
+{%- endif %}
 {% endfor %}
+
 
 {% for ioregister in thread.ioregisters | sort(attribute='name') %}
 {%- if not lite %}
@@ -1733,27 +1715,33 @@ module pycoram_{{ userlogic_name.lower() }} #
      .ACLK({{ thread.name }}_{{ ioregister.name }}_AXI_ACLK), // AXI clock
      .ARESETN({{ thread.name }}_{{ ioregister.name }}_AXI_ARESETN), // AXI reset
 
-     .awvalid({{ thread.name }}_{{ ioregister.name }}_awvalid),
      .awaddr({{ thread.name }}_{{ ioregister.name }}_awaddr),
+{%- if not lite %}
      .awlen({{ thread.name }}_{{ ioregister.name }}_awlen),
+{%- endif %}
+     .awvalid({{ thread.name }}_{{ ioregister.name }}_awvalid),
      .awready({{ thread.name }}_{{ ioregister.name }}_awready),
 
-     .wvalid({{ thread.name }}_{{ ioregister.name }}_wvalid),
      .wdata({{ thread.name }}_{{ ioregister.name }}_wdata),
+     .wstrb({{ thread.name }}_{{ ioregister.name }}_wstrb),
+{%- if not lite %}
      .wlast({{ thread.name }}_{{ ioregister.name }}_wlast),
+{%- endif %}
+     .wvalid({{ thread.name }}_{{ ioregister.name }}_wvalid),
      .wready({{ thread.name }}_{{ ioregister.name }}_wready),
 
-     .bvalid({{ thread.name }}_{{ ioregister.name }}_bvalid),
-     .bready({{ thread.name }}_{{ ioregister.name }}_bready),
-
-     .arvalid({{ thread.name }}_{{ ioregister.name }}_arvalid),
      .araddr({{ thread.name }}_{{ ioregister.name }}_araddr),
+{%- if not lite %}
      .arlen({{ thread.name }}_{{ ioregister.name }}_arlen),
+{%- endif %}
+     .arvalid({{ thread.name }}_{{ ioregister.name }}_arvalid),
      .arready({{ thread.name }}_{{ ioregister.name }}_arready),
 
-     .rvalid({{ thread.name }}_{{ ioregister.name }}_rvalid),
      .rdata({{ thread.name }}_{{ ioregister.name }}_rdata),
+{%- if not lite %}
      .rlast({{ thread.name }}_{{ ioregister.name }}_rlast),
+{%- endif %}
+     .rvalid({{ thread.name }}_{{ ioregister.name }}_rvalid),
      .rready({{ thread.name }}_{{ ioregister.name }}_rready),
 
 {% if not lite %}
@@ -1765,8 +1753,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_AWSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE),
      .S_AXI_AWBURST({{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST),
      .S_AXI_AWLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK),
-     .S_AXI_AWCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE),
 {%- endif %}
+     .S_AXI_AWCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE),
      .S_AXI_AWPROT({{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT),
 {%- if not lite %}
      .S_AXI_AWQOS({{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS),
@@ -1806,8 +1794,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_ARSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE),
      .S_AXI_ARBURST({{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST),
      .S_AXI_ARLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK),
-     .S_AXI_ARCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE),
 {%- endif %}
+     .S_AXI_ARCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE),
      .S_AXI_ARPROT({{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT),
 {%- if not lite %}
      .S_AXI_ARQOS({{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS),
@@ -1828,6 +1816,11 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_RVALID({{ thread.name }}_{{ ioregister.name }}_AXI_RVALID),
      .S_AXI_RREADY({{ thread.name }}_{{ ioregister.name }}_AXI_RREADY)
      );
+{% if lite %}
+  assign {{ thread.name }}_{{ ioregister.name }}_awlen = 0;
+  assign {{ thread.name }}_{{ ioregister.name }}_arlen = 0;
+  assign {{ thread.name }}_{{ ioregister.name }}_wlast = 1;
+{%- endif %}
 {% endfor %}
 
 {%- endfor %}

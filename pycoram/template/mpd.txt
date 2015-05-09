@@ -285,8 +285,8 @@ PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWLEN = AWLEN, BUS = {{ thread.n
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE = AWSIZE, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [2:0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST = AWBURST, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [1:0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK = AWLOCK, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [1:0]
-PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE = AWCACHE, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [3:0]
 {%- endif %}
+PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE = AWCACHE, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [3:0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT = AWPROT, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [2:0]
 {%- if not lite %}
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS = AWQOS, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [3:0]
@@ -320,8 +320,8 @@ PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARLEN = ARLEN, BUS = {{ thread.n
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE = ARSIZE, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [2:0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST = ARBURST, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [1:0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK = ARLOCK, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [1:0]
-PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE = ARCACHE, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [3:0]
 {%- endif %}
+PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE = ARCACHE, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [3:0]
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT = ARPROT, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [2:0]
 {%- if not lite %}
 PORT {{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS = ARQOS, BUS = {{ thread.name }}_{{ iochannel.name }}_AXI, DIR = I, VEC = [3:0]
@@ -386,8 +386,8 @@ PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWLEN = AWLEN, BUS = {{ thread.
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE = AWSIZE, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [2:0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST = AWBURST, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [1:0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK = AWLOCK, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [1:0]
-PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE = AWCACHE, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [3:0]
 {%- endif %}
+PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE = AWCACHE, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [3:0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT = AWPROT, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [2:0]
 {%- if not lite %}
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS = AWQOS, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [3:0]
@@ -421,8 +421,8 @@ PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARLEN = ARLEN, BUS = {{ thread.
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE = ARSIZE, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [2:0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST = ARBURST, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [1:0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK = ARLOCK, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [1:0]
-PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE = ARCACHE, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [3:0]
 {%- endif %}
+PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE = ARCACHE, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [3:0]
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT = ARPROT, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [2:0]
 {%- if not lite %}
 PORT {{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS = ARQOS, BUS = {{ thread.name }}_{{ ioregister.name }}_AXI, DIR = I, VEC = [3:0]

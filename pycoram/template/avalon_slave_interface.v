@@ -18,32 +18,29 @@ module avalon_slave_interface #
    // User Bus Interface
    //----------------------------------------------------------------------------
    // Write Address
-   output wire                        awvalid,
-   output wire [C_AVS_ADDR_WIDTH-1:0] awaddr,
-   output wire [8-1:0]                awlen,
-   input wire                         awready,
+   output wire [C_AVS_ADDR_WIDTH-1:0]   awaddr,
+   output wire [8-1:0]                  awlen,
+   output wire                          awvalid,
+   input wire                           awready,
   
    // Write Data
-   output wire [C_AVS_DATA_WIDTH-1:0] wdata,
-   output wire                        wlast,
-   output wire                        wvalid,
-   input wire                         wready,
+   output wire [C_AVS_DATA_WIDTH-1:0]   wdata,
+   output wire [C_AVS_DATA_WIDTH/8-1:0] wstrb,
+   output wire                          wlast,
+   output wire                          wvalid,
+   input wire                           wready,
 
-   // Write Response
-   input wire                         bvalid,
-   output wire                        bready,
-   
    // Read Address
-   output wire                        arvalid,
-   output wire [C_AVS_ADDR_WIDTH-1:0] araddr,
-   output wire [8-1:0]                arlen,
-   input wire                         arready,
+   output wire [C_AVS_ADDR_WIDTH-1:0]   araddr,
+   output wire [8-1:0]                  arlen,
+   output wire                          arvalid,
+   input wire                           arready,
 
    // Read Data
-   input wire  [C_AVS_DATA_WIDTH-1:0] rdata,
-   input wire                         rlast,
-   input wire                         rvalid,
-   output wire                        rready,
+   input wire  [C_AVS_DATA_WIDTH-1:0]   rdata,
+   input wire                           rlast,
+   input wire                           rvalid,
+   output wire                          rready,
 
    //----------------------------------------------------------------------------
    // Avalon Slave Interface
@@ -52,7 +49,7 @@ module avalon_slave_interface #
    input  wire [C_AVS_ADDR_WIDTH-1:0]   avs_address,
    output wire                          avs_waitrequest,
    input  wire [C_AVS_DATA_WIDTH/8-1:0] avs_byteenable,
-   input  wire [8-1:0]                  avs_burstcount,
+   input  wire [8:0]                    avs_burstcount,
    
    // Read
    input  wire                          avs_read,
@@ -90,11 +87,9 @@ module avalon_slave_interface #
 
   // Write Data
   assign wdata = avs_writedata;
-  assign wlast = 1'b0; // Unused in DMAC_IOCHANNEL
+  assign wstrb = avs_byteenable;
+  assign wlast = 1'b0;
   assign wvalid = avs_write;
-
-  // Write Response
-  assign bready = 1'b1;
 
   // Read Address
   assign arvalid = avs_read && !write_busy;

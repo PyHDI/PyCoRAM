@@ -43,31 +43,28 @@ module DMAC_IOCHANNEL #
    // Bus Interface
    //----------------------------------------------------------------------------
    // Write Address
-   input wire               awvalid,
    input wire [W_EXT_A-1:0] awaddr,
    input wire [W_BLEN-1:0]  awlen,
+   input wire               awvalid,
    output reg               awready,
   
    // Write Data
-   input wire               wvalid,
    input wire [W_D-1:0]     wdata,
+   input wire [(W_D/8)-1:0] wstrb,
    input wire               wlast,
+   input wire               wvalid,
    output wire              wready,
 
-   // Write Response
-   output reg               bvalid,
-   input wire               bready,
-   
    // Read Address
-   input wire               arvalid,
    input wire [W_EXT_A-1:0] araddr,
    input wire [W_BLEN-1:0]  arlen,
+   input wire               arvalid,
    output reg               arready,
 
    // Read Data
-   output wire              rvalid,
    output wire [W_D-1:0]    rdata,
    output wire              rlast,
+   output wire              rvalid,
    input wire               rready
    );
 
@@ -139,7 +136,6 @@ module DMAC_IOCHANNEL #
     if(aresetn_rrr == 0) begin
       awready <= 0;
       arready <= 0;
-      bvalid <= 0;
       read_busy <= 0;
       write_busy <= 0;
       read_status_busy <= 0;
@@ -152,7 +148,6 @@ module DMAC_IOCHANNEL #
     // Read Mode (BRAM -> Off-chip)
     //------------------------------------------------------------------------------
     end else if(read_busy) begin
-      bvalid <= 0;
       awready <= 0;
       arready <= 0;
       if(fifo_read_deq) begin
@@ -186,12 +181,8 @@ module DMAC_IOCHANNEL #
         timeout_count <= 0;
         timeout <= 0;
         if(write_count == 1) begin
-          bvalid <= 1;
+          write_busy <= 0;
         end
-      end
-      if(bvalid && bready) begin
-        bvalid <= 0;
-        write_busy <= 0;
       end
 
       // timeout 
@@ -203,16 +194,12 @@ module DMAC_IOCHANNEL #
       end
       if(wvalid && WITH_TIMEOUT && timeout) begin
         write_count <= write_count - 1;
-        if(write_count == 1) begin
-          bvalid <= 1;
-        end
       end
 
     //------------------------------------------------------------------------------
     // Read Stasus Mode
     //------------------------------------------------------------------------------
     end else if(read_status_busy) begin
-      bvalid <= 0;
       awready <= 0;
       arready <= 0;
       timeout_count <= 0;
@@ -228,7 +215,6 @@ module DMAC_IOCHANNEL #
     // New Command
     //------------------------------------------------------------------------------
     end else begin
-      bvalid <= 0;
       awready <= 0;
       arready <= 0;
       read_count <= 0;
