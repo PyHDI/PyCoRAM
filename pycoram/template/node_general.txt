@@ -123,27 +123,35 @@ module pycoram_{{ userlogic_name.lower() }} #
 
    // Master Interface Write Address
    output wire [W_EXT_A-1:0] {{ thread.name }}_{{ iochannel.name }}_awaddr,
+{%- if not lite %}
    output wire [W_BLEN-1:0] {{ thread.name }}_{{ iochannel.name }}_awlen,
+{%- endif %}
    output wire {{ thread.name }}_{{ iochannel.name }}_awvalid,
    input wire {{ thread.name }}_{{ iochannel.name }}_awready,
    
    // Master Interface Write Data
    output wire [{{ iochannel.ext_datawidth }}-1:0] {{ thread.name }}_{{ iochannel.name }}_wdata,
    output wire [({{ iochannel.ext_datawidth }}/8)-1:0] {{ thread.name }}_{{ iochannel.name }}_wstrb,
+{%- if not lite %}
    output wire {{ thread.name }}_{{ iochannel.name }}_wlast,
+{%- endif %}
    output wire {{ thread.name }}_{{ iochannel.name }}_wvalid,
    input wire {{ thread.name }}_{{ iochannel.name }}_wready,
    output wire {{ thread.name }}_{{ iochannel.name }}_bready,
    
    // Master Interface Read Address
    output wire [W_EXT_A-1:0] {{ thread.name }}_{{ iochannel.name }}_araddr,
+{%- if not lite %}
    output wire [W_BLEN-1:0] {{ thread.name }}_{{ iochannel.name }}_arlen,
+{%- endif %}
    output wire {{ thread.name }}_{{ iochannel.name }}_arvalid,
    input wire {{ thread.name }}_{{ iochannel.name }}_arready,
    
    // Master Interface Read Data 
    input wire [{{ iochannel.ext_datawidth }}-1:0] {{ thread.name }}_{{ iochannel.name }}_rdata,
+{%- if not lite %}
    input wire {{ thread.name }}_{{ iochannel.name }}_rlast,
+{%- endif %}
    input wire {{ thread.name }}_{{ iochannel.name }}_rvalid,
    output wire {{ thread.name }}_{{ iochannel.name }}_rready,
 {% endfor %}
@@ -155,26 +163,34 @@ module pycoram_{{ userlogic_name.lower() }} #
 
    // Master Interface Write Address
    output wire [W_EXT_A-1:0] {{ thread.name }}_{{ ioregister.name }}_awaddr,
+{%- if not lite %}
    output wire [W_BLEN-1:0] {{ thread.name }}_{{ ioregister.name }}_awlen,
+{%- endif %}
    output wire {{ thread.name }}_{{ ioregister.name }}_awvalid,
    input wire {{ thread.name }}_{{ ioregister.name }}_awready,
    
    // Master Interface Write Data
    output wire [{{ ioregister.ext_datawidth }}-1:0] {{ thread.name }}_{{ ioregister.name }}_wdata,
    output wire [({{ ioregister.ext_datawidth }}/8)-1:0] {{ thread.name }}_{{ ioregister.name }}_wstrb,
+{%- if not lite %}
    output wire {{ thread.name }}_{{ ioregister.name }}_wlast,
+{%- endif %}
    output wire {{ thread.name }}_{{ ioregister.name }}_wvalid,
    input wire {{ thread.name }}_{{ ioregister.name }}_wready,
    
    // Master Interface Read Address
    output wire [W_EXT_A-1:0] {{ thread.name }}_{{ ioregister.name }}_araddr,
+{%- if not lite %}
    output wire [W_BLEN-1:0] {{ thread.name }}_{{ ioregister.name }}_arlen,
+{%- endif %}
    output wire {{ thread.name }}_{{ ioregister.name }}_arvalid,
    input wire {{ thread.name }}_{{ ioregister.name }}_arready,
    
    // Master Interface Read Data 
    input wire [{{ ioregister.ext_datawidth }}-1:0] {{ thread.name }}_{{ ioregister.name }}_rdata,
+{%- if not lite %}
    input wire {{ thread.name }}_{{ ioregister.name }}_rlast,
+{%- endif %}
    input wire {{ thread.name }}_{{ ioregister.name }}_rvalid,
    output wire {{ thread.name }}_{{ ioregister.name }}_rready,
 {% endfor %}
@@ -210,6 +226,31 @@ module pycoram_{{ userlogic_name.lower() }} #
    input wire URST
    );
 
+{%- for thread in threads | sort(attribute='name') %}
+{% for iochannel in thread.iochannels | sort(attribute='name') %}
+{%- if lite %}
+  wire [W_BLEN-1:0] {{ thread.name }}_{{ iochannel.name }}_awlen;
+  wire {{ thread.name }}_{{ iochannel.name }}_wlast;
+  wire [W_BLEN-1:0] {{ thread.name }}_{{ iochannel.name }}_arlen;
+  wire {{ thread.name }}_{{ iochannel.name }}_rlast;
+  assign {{ thread.name }}_{{ iochannel.name }}_awlen = 0;
+  assign {{ thread.name }}_{{ iochannel.name }}_arlen = 0;
+  assign {{ thread.name }}_{{ iochannel.name }}_wlast = 1;
+{%- endif %}
+{% endfor %}
+
+{% for ioregister in thread.ioregisters | sort(attribute='name') %}
+{%- if lite %}
+  wire [W_BLEN-1:0] {{ thread.name }}_{{ ioregister.name }}_awlen;
+  wire {{ thread.name }}_{{ ioregister.name }}_wlast;
+  wire [W_BLEN-1:0] {{ thread.name }}_{{ ioregister.name }}_arlen;
+  wire {{ thread.name }}_{{ ioregister.name }}_rlast;
+  assign {{ thread.name }}_{{ ioregister.name }}_awlen = 0;
+  assign {{ thread.name }}_{{ ioregister.name }}_arlen = 0;
+  assign {{ thread.name }}_{{ ioregister.name }}_wlast = 1;
+{%- endif %}
+{% endfor %}
+{%- endfor %}
 
   //---------------------------------------------------------------------------
   // User-defined localparam in Top-level User logic
