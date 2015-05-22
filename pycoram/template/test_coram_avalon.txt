@@ -725,6 +725,36 @@ module test;
 {%- for thread in threads | sort(attribute='name') %}
 {% for iochannel in thread.iochannels | sort(attribute='name') %}
   task iochannel_write_{{ thread.name }}_{{ iochannel.name }};
+    input [C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1:0] data;
+    input [C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1:0] addr;
+    reg [31:0] polling_write_{{ thread.name }}_{{ iochannel.name }};
+    begin
+      polling_write_{{ thread.name }}_{{ iochannel.name }} = 'b10;
+      while(polling_write_{{ thread.name }}_{{ iochannel.name }}[1]) begin
+        iochannel_read_nocheck_{{ thread.name }}_{{ iochannel.name }}(polling_write_{{ thread.name }}_{{ iochannel.name }}, 4);
+        nclk();
+      end
+      iochannel_write_nocheck_{{ thread.name }}_{{ iochannel.name }}(data, addr);
+      nclk();
+    end
+  endtask
+
+  task iochannel_read_{{ thread.name }}_{{ iochannel.name }};
+    output [C_{{ thread.name }}_{{ iochannel.name }}_AXI_DATA_WIDTH-1:0] data;
+    input [C_{{ thread.name }}_{{ iochannel.name }}_AXI_ADDR_WIDTH-1:0] addr;
+    reg [31:0] polling_read_{{ thread.name }}_{{ iochannel.name }};
+    begin
+      polling_read_{{ thread.name }}_{{ iochannel.name }} = 'b01;
+      while(polling_read_{{ thread.name }}_{{ iochannel.name }}[0]) begin
+        iochannel_read_nocheck_{{ thread.name }}_{{ iochannel.name }}(polling_read_{{ thread.name }}_{{ iochannel.name }}, 4);
+        nclk();
+      end
+      iochannel_read_nocheck_{{ thread.name }}_{{ iochannel.name }}(data, addr);
+      nclk();
+    end
+  endtask
+
+  task iochannel_write_nocheck_{{ thread.name }}_{{ iochannel.name }};
     input [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] data;
     input [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] addr;
     begin
@@ -746,7 +776,7 @@ module test;
     end
   endtask
 
-  task iochannel_read_{{ thread.name }}_{{ iochannel.name }};
+  task iochannel_read_nocheck_{{ thread.name }}_{{ iochannel.name }};
     output [C_AVS_{{ thread.name }}_{{ iochannel.name }}_DATA_WIDTH-1:0] data;
     input [C_AVS_{{ thread.name }}_{{ iochannel.name }}_ADDR_WIDTH-1:0] addr;
     begin

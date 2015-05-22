@@ -1105,7 +1105,7 @@ module pycoram_{{ userlogic_name.lower() }} #
      .awready({{ thread.name }}_{{ instream.name }}_awready),
 
      .wdata({{ thread.name }}_{{ instream.name }}_wdata),
-     .wstrb({{ thread.name }}_{{ instraem.name }}_wstrb),
+     .wstrb({{ thread.name }}_{{ instream.name }}_wstrb),
      .wlast({{ thread.name }}_{{ instream.name }}_wlast),
      .wvalid({{ thread.name }}_{{ instream.name }}_wvalid),
      .wready({{ thread.name }}_{{ instream.name }}_wready),
@@ -1164,7 +1164,7 @@ module pycoram_{{ userlogic_name.lower() }} #
      .awready({{ thread.name }}_{{ outstream.name }}_awready),
 
      .wdata({{ thread.name }}_{{ outstream.name }}_wdata),
-     .wstrb({{ thread.name }}_{{ outstraem.name }}_wstrb),
+     .wstrb({{ thread.name }}_{{ outstream.name }}_wstrb),
      .wlast({{ thread.name }}_{{ outstream.name }}_wlast),
      .wvalid({{ thread.name }}_{{ outstream.name }}_wvalid),
      .wready({{ thread.name }}_{{ outstream.name }}_wready),
