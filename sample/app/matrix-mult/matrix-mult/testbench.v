@@ -8,30 +8,18 @@ parameter data_offset = 256 * 1024;
 parameter loader_size = 64 * 1024;
 
 integer x, y, d;
+
+reg [31:0] tmp_data;
+
 initial begin
   d = 0;
   for(y=0; y<matrix_size; y=y+1) begin
     for(x=0; x<matrix_size; x=x+1) begin
-      {inst_dram_stub.memory[a_offset + (matrix_size * y + x) * 4 + 3],
-       inst_dram_stub.memory[a_offset + (matrix_size * y + x) * 4 + 2],
-       inst_dram_stub.memory[a_offset + (matrix_size * y + x) * 4 + 1],
-       inst_dram_stub.memory[a_offset + (matrix_size * y + x) * 4 + 0]} =
-          {inst_dram_stub.memory[data_offset + (d % loader_size) * 4 + 3],
-           inst_dram_stub.memory[data_offset + (d % loader_size) * 4 + 2],
-           inst_dram_stub.memory[data_offset + (d % loader_size) * 4 + 1],
-           inst_dram_stub.memory[data_offset + (d % loader_size) * 4 + 0]};
-      {inst_dram_stub.memory[b_offset + (matrix_size * x + y) * 4 + 3],
-       inst_dram_stub.memory[b_offset + (matrix_size * x + y) * 4 + 2],
-       inst_dram_stub.memory[b_offset + (matrix_size * x + y) * 4 + 1],
-       inst_dram_stub.memory[b_offset + (matrix_size * x + y) * 4 + 0]} =
-          {inst_dram_stub.memory[data_offset + ((d + 1) % loader_size) * 4 + 3],
-           inst_dram_stub.memory[data_offset + ((d + 1) % loader_size) * 4 + 2],
-           inst_dram_stub.memory[data_offset + ((d + 1) % loader_size) * 4 + 1],
-           inst_dram_stub.memory[data_offset + ((d + 1) % loader_size) * 4 + 0]};
-      {inst_dram_stub.memory[c_offset + (matrix_size * y + x) * 4 + 3],
-       inst_dram_stub.memory[c_offset + (matrix_size * y + x) * 4 + 2],
-       inst_dram_stub.memory[c_offset + (matrix_size * y + x) * 4 + 1],
-       inst_dram_stub.memory[c_offset + (matrix_size * y + x) * 4 + 0]} = 0;
+      mem_read(data_offset + (d % loader_size) * 4, 4, tmp_data);
+      mem_write(a_offset + (matrix_size * y + x) * 4, 4, tmp_data);
+      mem_read(data_offset + ((d + 1) % loader_size) * 4, 4, tmp_data);
+      mem_write(b_offset + (matrix_size * x + y) * 4, 4, tmp_data);
+      mem_write(c_offset + (matrix_size * x + y) * 4, 4, 0);
       d = d + 2;
     end
   end
