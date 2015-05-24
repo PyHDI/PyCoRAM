@@ -620,8 +620,8 @@ module test;
    .{{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE),
    .{{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST({{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST),
    .{{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK),
-   .{{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE),
 {%- endif %}
+   .{{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE),
    .{{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT({{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT),
 {%- if not lite %}
    .{{ thread.name }}_{{ iochannel.name }}_AXI_AWREGION({{ thread.name }}_{{ iochannel.name }}_AXI_AWREGION),
@@ -698,8 +698,8 @@ module test;
    .{{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE),
    .{{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST({{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST),
    .{{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK),
-   .{{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE),
 {%- endif %}
+   .{{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE),
    .{{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT({{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT),
 {%- if not lite %}
    .{{ thread.name }}_{{ ioregister.name }}_AXI_AWREGION({{ thread.name }}_{{ ioregister.name }}_AXI_AWREGION),
