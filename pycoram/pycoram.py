@@ -91,10 +91,12 @@ class PycoramIp(object):
         if len(self.rtl_files) == 0:
             raise IOError("RTL file not found")
 
+        print("----------------------------------------")
         print("Input files")
         print("  User-logic: %s" % ', '.join(self.rtl_files) )
         print("  Control-thread: %s" % ', '.join(self.controlthreads.keys()) )
-
+        print("----------------------------------------")
+        
         # default values
         configs = {
             'signal_width' : self.signal_width,
@@ -336,6 +338,7 @@ class SystemBuilder(object):
         common_code = ''.join(common_code_list)
 
         # Print settings
+        print("----------------------------------------")
         print("Synthesis Setting")
         for k, v in sorted(configs.items(), key=lambda x:x[0]):
             print("  %s : %s" % (str(k), str(v)))
@@ -820,10 +823,12 @@ def main():
             if configfile is not None: raise IOError("Multiple configuration files")
             configfile = f
 
+    print("----------------------------------------")
     print("Input files")
     print("  Configuration: %s" % configfile)
     print("  User-logic: %s" % ', '.join(userlogic_filelist) )
     print("  Control-thread: %s" % ', '.join(controlthread_filelist) )
+    print("----------------------------------------")
 
     # default values
     configs = {

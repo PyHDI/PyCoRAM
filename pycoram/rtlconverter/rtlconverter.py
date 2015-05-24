@@ -54,6 +54,7 @@ class RtlConverter(object):
 
     def dumpCoramObject(self):
         coram_object = self.getCoramObject()
+        print("----------------------------------------")
         print("CoRAM Objects in User-defined RTL")
         for mode, coram_items in coram_object.items():
             print("  CoRAM %s" % mode)

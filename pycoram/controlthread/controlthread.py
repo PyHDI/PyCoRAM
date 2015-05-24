@@ -134,6 +134,7 @@ class CompileVisitor(ast.NodeVisitor):
             if mv.name not in ioregisters_alias: ioregisters_alias[mv.name] = []
             ioregisters_alias[mv.name].append( mk )
 
+        print("----------------------------------------")
         print("CoRAM Objects in Control-Thread '%s', # FSM = %d" %
               (self.thread_name, self.getFsmCount()))
 
