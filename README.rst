@@ -123,7 +123,7 @@ number depends on your environment).
 
 ::
 
-    pycoram-0.9.0-py3.4.1
+    pycoram-0.9.3-py3.4.1
 
 Getting Started
 ===============
@@ -135,7 +135,7 @@ on your environment)
 
 ::
 
-    TARGET=pycoram-0.9.0-py3.4.1
+    TARGET=pycoram-0.9.3-py3.4.1
 
 You can find the sample projects in 'sample/tests/single\_memory'.
 
@@ -166,8 +166,9 @@ PyCoRAM compiler generates a directory for IP-core
 (pycoram\_userlogic\_v2\_1\_0.{mpd,pao,tcl}) \* IP-XACT file
 (component.xml)
 
-A bit-stream can be synthesized by using Xilinx Platform Studio. Please
-copy the generated IP-core into 'pcores' directory of XPS project.
+A bit-stream can be synthesized by using Xilinx Platform Studio, Xilinx
+Vivado, and Altera Qsys. In case of XPS, please copy the generated
+IP-core into 'pcores' directory of XPS project.
 
 This software has some sample project in 'sample'. To build them, please
 modify 'Makefile', so that the corresponding files and parameters are

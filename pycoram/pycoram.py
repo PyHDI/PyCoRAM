@@ -349,14 +349,14 @@ class SystemBuilder(object):
             self.build_package_axi(configs, synthesized_code, common_code, 
                                    threads, 
                                    top_parameters, top_ioports, userlogic_topmodule,
-                                   userlogic_include, userlogic_define, memimg, usertest)
+                                   memimg, usertest)
             return
             
         if configs['if_type'] == 'avalon':
             self.build_package_avalon(configs, synthesized_code, common_code,
                                       threads, 
                                       top_parameters, top_ioports, userlogic_topmodule,
-                                      userlogic_include, userlogic_define, memimg, usertest)
+                                      memimg, usertest)
             return
 
         raise ValueError("Interface type '%s' is not supported." % configs['if_type'])
@@ -372,7 +372,7 @@ class SystemBuilder(object):
     def build_package_axi(self, configs, synthesized_code, common_code, 
                           threads,
                           top_parameters, top_ioports, userlogic_topmodule, 
-                          userlogic_include, userlogic_define, memimg, usertest):
+                          memimg, usertest):
         code = synthesized_code + common_code
 
         # default values
@@ -633,7 +633,7 @@ class SystemBuilder(object):
     def build_package_avalon(self, configs, synthesized_code, common_code, 
                              threads,
                              top_parameters, top_ioports, userlogic_topmodule, 
-                             userlogic_include, userlogic_define, memimg, usertest):
+                             memimg, usertest):
         # default values
         ext_burstlength = 256
 
