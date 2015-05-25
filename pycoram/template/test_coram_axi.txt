@@ -1394,7 +1394,7 @@ module test;
   //----------------------------------------------------------------------------
   task mem_write;
     input [SIM_ADDR_WIDTH-1:0] addr;
-    input [7:0] size;
+    input [5:0] size;
     input [255:0] data;
     integer i;
     begin
@@ -1406,7 +1406,7 @@ module test;
 
   task mem_read;
     input [SIM_ADDR_WIDTH-1:0] addr;
-    input [7:0] size;
+    input [5:0] size;
     output [255:0] data;
     integer i;
     begin
