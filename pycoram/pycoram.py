@@ -29,6 +29,8 @@ from rtlconverter.rtlconverter import RtlConverter
 from controlthread.coram_module import *
 from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 import pyverilog.vparser.ast as vast
+import pyverilog.dataflow.identifiervisitor as iv
+import pyverilog.dataflow.identifierreplace as ir
 import utils.componentgen
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
@@ -421,9 +423,15 @@ class SystemBuilder(object):
             _dir = ('in' if isinstance(pv, vast.Input) else
                     'out' if isinstance(pv, vast.Output) else
                     'inout')
-            #_vec = None if pv.width is None else asttocode.visit(pv.width.msb) 
             _vec = None if pv.width is None else pwidth - 1
-            ext_ports.append( (_name, _dir, _vec) )
+            _ids = None if pv.width is None else iv.getIdentifiers(pv.width.msb)
+            _d = {}
+            if _ids is not None:
+                for i in _ids:
+                    _d[i] = "(spirit:decode(id('MODELPARAM_VALUE." + i + "')))"
+            _msb = (None if _ids is None else
+                    asttocode.visit(ir.replaceIdentifiers(pv.width.msb, _d)))
+            ext_ports.append( (_name, _dir, _vec, _msb) )
 
         for pk, pv in top_parameters.items():
             r = asttocode.visit(pv)

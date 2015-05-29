@@ -601,11 +601,13 @@ class ComponentGen(object):
             for ioregister in thread.ioregisters:
                 for p in self.mkPortSlave(thread, ioregister, lite=self.lite):
                     ports.appendChild(p)
-        for portname, portdir, portlvalue in self.ext_ports:
+
+        for portname, portdir, portlvalue, portvar in self.ext_ports:
             lvalue = portlvalue if portlvalue is not None else None
+            lvar = portvar if portvar is not None else None
             rvalue = 0 if portlvalue is not None else None
             ports.appendChild(self.mkPortEntry(portname, portdir,
-                                               None, lvalue, None, rvalue))
+                                               lvar, lvalue, None, rvalue))
         return ports
 
     def mkPortMaster(self, thread, obj):
