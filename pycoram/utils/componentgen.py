@@ -10,10 +10,10 @@ PORTLIST = ('AWID', 'AWADDR', 'AWLEN', 'AWSIZE', 'AWBURST', 'AWLOCK',
             'ARCACHE', 'ARPROT', 'ARQOS', 'ARUSER', 'ARVALID', 'ARREADY', 
             'RID', 'RDATA', 'RRESP', 'RLAST', 'RUSER', 'RVALID', 'RREADY' )
 
-PORTLITELIST = ('AWADDR', 'AWPROT', 'AWVALID', 'AWREADY',
+PORTLITELIST = ('AWADDR', 'AWCACHE', 'AWPROT', 'AWVALID', 'AWREADY',
                 'WDATA', 'WSTRB', 'WVALID', 'WREADY', 
                 'BRESP', 'BVALID', 'BREADY', 
-                'ARADDR', 'ARPROT', 'ARVALID', 'ARREADY', 
+                'ARADDR', 'ARCACHE', 'ARPROT', 'ARVALID', 'ARREADY', 
                 'RDATA', 'RRESP', 'RVALID', 'RREADY' )
 
 #-------------------------------------------------------------------------------
