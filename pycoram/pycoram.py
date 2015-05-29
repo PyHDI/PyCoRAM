@@ -421,7 +421,8 @@ class SystemBuilder(object):
             _dir = ('in' if isinstance(pv, vast.Input) else
                     'out' if isinstance(pv, vast.Output) else
                     'inout')
-            _vec = None if pv.width is None else asttocode.visit(pv.width.msb) 
+            #_vec = None if pv.width is None else asttocode.visit(pv.width.msb) 
+            _vec = None if pv.width is None else pwidth - 1
             ext_ports.append( (_name, _dir, _vec) )
 
         for pk, pv in top_parameters.items():
