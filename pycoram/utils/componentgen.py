@@ -10,10 +10,10 @@ PORTLIST = ('AWID', 'AWADDR', 'AWLEN', 'AWSIZE', 'AWBURST', 'AWLOCK',
             'ARCACHE', 'ARPROT', 'ARQOS', 'ARUSER', 'ARVALID', 'ARREADY', 
             'RID', 'RDATA', 'RRESP', 'RLAST', 'RUSER', 'RVALID', 'RREADY' )
 
-PORTLITELIST = ('AWADDR', 'AWCACHE', 'AWPROT', 'AWVALID', 'AWREADY',
+PORTLITELIST = ('AWADDR', 'AWPROT', 'AWVALID', 'AWREADY',
                 'WDATA', 'WSTRB', 'WVALID', 'WREADY', 
                 'BRESP', 'BVALID', 'BREADY', 
-                'ARADDR', 'ARCACHE', 'ARPROT', 'ARVALID', 'ARREADY', 
+                'ARADDR', 'ARPROT', 'ARVALID', 'ARREADY', 
                 'RDATA', 'RRESP', 'RVALID', 'RREADY' )
 
 #-------------------------------------------------------------------------------
@@ -649,7 +649,7 @@ class ComponentGen(object):
         ret.append(self.mkPortEntry(base+'_WDATA', 'out',
                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
         ret.append(self.mkPortEntry(base+'_WSTRB', 'out',
-                                    '('+mkStr(base,'DATA_WIDTH')+'/8-1)', datawidth-1, None, 0))
+                                    '('+mkStr(base,'DATA_WIDTH')+'/8-1)', int(datawidth/8)-1, None, 0))
         ret.append(self.mkPortEntry(base+'_WLAST', 'out',
                                     None, None, None, None))
         ret.append(self.mkPortEntry(base+'_WUSER', 'out',
@@ -748,8 +748,8 @@ class ComponentGen(object):
                                         None, 1, None, 0))
             ret.append(self.mkPortEntry(base+'_AWLOCK', 'in',
                                         None, 1, None, 0))
-        ret.append(self.mkPortEntry(base+'_AWCACHE', 'in',
-                                    None, 3, None, 0))
+            ret.append(self.mkPortEntry(base+'_AWCACHE', 'in',
+                                        None, 3, None, 0))
         ret.append(self.mkPortEntry(base+'_AWPROT', 'in',
                                     None, 2, None, 0))
         if not lite:
@@ -766,7 +766,7 @@ class ComponentGen(object):
         ret.append(self.mkPortEntry(base+'_WDATA', 'in',
                                     '('+mkStr(base,'DATA_WIDTH')+'-1)', datawidth-1, None, 0))
         ret.append(self.mkPortEntry(base+'_WSTRB', 'in',
-                                    '('+mkStr(base,'DATA_WIDTH')+'/8-1)', datawidth-1, None, 0))
+                                    '('+mkStr(base,'DATA_WIDTH')+'/8-1)', int(datawidth/8)-1, None, 0))
         if not lite:
             ret.append(self.mkPortEntry(base+'_WLAST', 'in',
                                         None, None, None, None))
@@ -808,8 +808,8 @@ class ComponentGen(object):
                                         None, 1, None, 0))
             ret.append(self.mkPortEntry(base+'_ARLOCK', 'in',
                                         None, 1, None, 0))
-        ret.append(self.mkPortEntry(base+'_ARCACHE', 'in',
-                                    None, 3, None, 0))
+            ret.append(self.mkPortEntry(base+'_ARCACHE', 'in',
+                                        None, 3, None, 0))
         ret.append(self.mkPortEntry(base+'_ARPROT', 'in',
                                     None, 2, None, 0))
         if not lite:

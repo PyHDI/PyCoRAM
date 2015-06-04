@@ -294,8 +294,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK,
-{%- endif %}
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE,
+{%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS,
@@ -338,8 +338,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST,
    input  wire [1:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK,
-{%- endif %}
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE,
+{%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS,
@@ -377,8 +377,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK,
-{%- endif %}
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE,
+{%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS,
@@ -421,8 +421,8 @@ module pycoram_{{ userlogic_name.lower() }} #
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST,
    input  wire [1:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK,
-{%- endif %}
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE,
+{%- endif %}
    input  wire [2:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT,
 {%- if not lite %}
    input  wire [3:0] {{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS,
@@ -1616,8 +1616,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_AWSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_AWSIZE),
      .S_AXI_AWBURST({{ thread.name }}_{{ iochannel.name }}_AXI_AWBURST),
      .S_AXI_AWLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_AWLOCK),
-{%- endif %}
      .S_AXI_AWCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_AWCACHE),
+{%- endif %}
      .S_AXI_AWPROT({{ thread.name }}_{{ iochannel.name }}_AXI_AWPROT),
 {%- if not lite %}
      .S_AXI_AWQOS({{ thread.name }}_{{ iochannel.name }}_AXI_AWQOS),
@@ -1657,8 +1657,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_ARSIZE({{ thread.name }}_{{ iochannel.name }}_AXI_ARSIZE),
      .S_AXI_ARBURST({{ thread.name }}_{{ iochannel.name }}_AXI_ARBURST),
      .S_AXI_ARLOCK({{ thread.name }}_{{ iochannel.name }}_AXI_ARLOCK),
-{%- endif %}
      .S_AXI_ARCACHE({{ thread.name }}_{{ iochannel.name }}_AXI_ARCACHE),
+{%- endif %}
      .S_AXI_ARPROT({{ thread.name }}_{{ iochannel.name }}_AXI_ARPROT),
 {%- if not lite %}
      .S_AXI_ARQOS({{ thread.name }}_{{ iochannel.name }}_AXI_ARQOS),
@@ -1753,8 +1753,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_AWSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_AWSIZE),
      .S_AXI_AWBURST({{ thread.name }}_{{ ioregister.name }}_AXI_AWBURST),
      .S_AXI_AWLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_AWLOCK),
-{%- endif %}
      .S_AXI_AWCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_AWCACHE),
+{%- endif %}
      .S_AXI_AWPROT({{ thread.name }}_{{ ioregister.name }}_AXI_AWPROT),
 {%- if not lite %}
      .S_AXI_AWQOS({{ thread.name }}_{{ ioregister.name }}_AXI_AWQOS),
@@ -1794,8 +1794,8 @@ module pycoram_{{ userlogic_name.lower() }} #
      .S_AXI_ARSIZE({{ thread.name }}_{{ ioregister.name }}_AXI_ARSIZE),
      .S_AXI_ARBURST({{ thread.name }}_{{ ioregister.name }}_AXI_ARBURST),
      .S_AXI_ARLOCK({{ thread.name }}_{{ ioregister.name }}_AXI_ARLOCK),
-{%- endif %}
      .S_AXI_ARCACHE({{ thread.name }}_{{ ioregister.name }}_AXI_ARCACHE),
+{%- endif %}
      .S_AXI_ARPROT({{ thread.name }}_{{ ioregister.name }}_AXI_ARPROT),
 {%- if not lite %}
      .S_AXI_ARQOS({{ thread.name }}_{{ ioregister.name }}_AXI_ARQOS),

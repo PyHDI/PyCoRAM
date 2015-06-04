@@ -43,7 +43,6 @@ module axi_lite_slave_interface #
    //----------------------------------------------------------------------------
    // Slave Interface Write Address Ports
    input  wire [C_S_AXI_ADDR_WIDTH-1:0]   S_AXI_AWADDR,
-   input  wire [4-1:0]                    S_AXI_AWCACHE,
    input  wire [3-1:0]                    S_AXI_AWPROT,
    input  wire                            S_AXI_AWVALID,
    output wire                            S_AXI_AWREADY,
@@ -61,7 +60,6 @@ module axi_lite_slave_interface #
 
    // Slave Interface Read Address Ports
    input  wire [C_S_AXI_ADDR_WIDTH-1:0]   S_AXI_ARADDR,
-   input  wire [4-1:0]                    S_AXI_ARCACHE,
    input  wire [3-1:0]                    S_AXI_ARPROT,
    input  wire                            S_AXI_ARVALID,
    output wire                            S_AXI_ARREADY,
