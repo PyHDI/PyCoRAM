@@ -1,25 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <assert.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-
-#define UIO_MEM "/dev/uio0"
-#define UIO_PYCORAM "/dev/uio1"
-
-#define UMEM_SIZE (0x10000000)
-#define UMEM_ADDR (0x10000000)
-#define MAP_SIZE (0x00001000)
-
-void cache_clean(char* addr, int size)
-{
-  __clear_cache(addr, addr + size);
-}
+#include <time.h>
+#include <sys/time.h>
+#include "umem.h"
+#include "pycoram.h"
 
 void usage()
 {
-  printf("usage: pycoram_memcpy -s <size> -v <value> -c\n");
+  printf("usage: memcpy [-s <size>] [-v <value>] [-c] [-h]\n");
 }
 
 int main(int argc, char *argv[])
@@ -28,6 +17,7 @@ int main(int argc, char *argv[])
   int value = 0;
   int check = 0;
   unsigned int size = 1024;
+
   while ((c = getopt(argc, argv, "s:v:ch")) != -1) {
     switch(c) {
     case 's':
@@ -49,61 +39,49 @@ int main(int argc, char *argv[])
     }
   }
 
-  int fd_mem = open(UIO_MEM, O_RDWR);
-  if(fd_mem < 1){
-    perror(argv[0]);
-    printf("Invalid UIO device file: '%s'\n", UIO_MEM);
-    return -1;
-  }
-  volatile unsigned int *usermemory = (volatile unsigned int*) mmap(NULL, UMEM_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd_mem, 0);
+  umem_open();
+  pycoram_open();
 
-  int fd_pycoram = open(UIO_PYCORAM, O_RDWR);
-  if(fd_pycoram < 1){
-    perror(argv[0]);
-    printf("Invalid UIO device file: '%s'\n", UIO_PYCORAM);
-    return -1;
-  }
-  volatile unsigned int *pycoram = (volatile unsigned int*) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd_pycoram, 0);
+  volatile int *a = (volatile int*) umem_malloc(sizeof(int) * size);
+  volatile int *b = (volatile int*) umem_malloc(sizeof(int) * size);
 
-  volatile int *a = (volatile int*) &usermemory[0];
-  volatile int *b = (volatile int*) &usermemory[size];
-
-  // initialization of data
   int i;
 
   if(check) goto verify;
 
-  for(i=0; i<size * 2; i++){
-    //printf("write %10d\n", i);
+  // initialization of data
+  for(i=0; i<size; i++){
     a[i] = i + value;
+    b[i] = 0;
   }
 
-  cache_clean((char*)usermemory, size * sizeof(int) * 2);
-  msync((void*)usermemory, UMEM_SIZE, MS_SYNC);
+  umem_cache_clean((char*)a, sizeof(int) * size);
+  umem_cache_clean((char*)b, sizeof(int) * size);
 
-  int src = UMEM_ADDR;
-  int dst = UMEM_ADDR + size * sizeof(int);
+  unsigned int src = umem_get_physical_address((void*)a);
+  unsigned int dst = umem_get_physical_address((void*)b);
 
-  printf("memcpy from 'a' to 'b'\n");
+  printf("memcpy from src to dst\n");
   printf("src  = %08x\n", src);
   printf("dst  = %08x\n", dst);
   printf("size = %8d\n", size);
 
-  *pycoram = (volatile unsigned int) src;
+  pycoram_write_4b(src);
   printf(".");
-  *pycoram = (volatile unsigned int) dst;
+  pycoram_write_4b(dst);
   printf(".");
-  *pycoram = (volatile unsigned int) size * sizeof(int);
+  pycoram_write_4b(size * sizeof(int));
   printf(".\n");
-  volatile int recv = *pycoram;
+  unsigned int recv;
+  pycoram_read_4b(&recv);
 
  verify:
   if(check){
     printf("check only\n");
   }
 
-  cache_clean((char*)usermemory, size * sizeof(int) * 2);
-  msync((void*)usermemory, UMEM_SIZE, MS_INVALIDATE);
+  umem_cache_clean((char*)a, sizeof(int) * size);
+  umem_cache_clean((char*)b, sizeof(int) * size);
 
   int mismatch = 0;
   for(i=0; i<size; i++){
@@ -123,8 +101,8 @@ int main(int argc, char *argv[])
     printf("OK\n");
   }
 
-  munmap((void*) usermemory, UMEM_SIZE);
-  munmap((void*) pycoram, MAP_SIZE);
+  pycoram_close();
+  umem_close();
 
   return 0;
 }
