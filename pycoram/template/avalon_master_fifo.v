@@ -151,7 +151,7 @@ module avalon_master_fifo #
   assign avm_byteenable = {(C_AVM_DATA_WIDTH/8){1'b1}};
   assign avm_burstcount = user_word_size;
 
-  assign avm_read = !user_done && user_read_enable;
+  assign avm_read = !user_done && user_read_enable && !read_addr_done;
   assign avm_write = (!user_done && user_write_enable && !write_empty) ||
                      (write_busy && !write_empty);
   assign avm_writedata = write_data;
@@ -170,6 +170,7 @@ module avalon_master_fifo #
   always @(posedge ACLK) begin
     if(aresetn_rrr == 0) begin
       read_busy <= 0;
+      read_addr_done <= 0;
       write_busy <= 0;
       read_enq <= 0;
       read_data <= 0;
@@ -181,9 +182,11 @@ module avalon_master_fifo #
       //default
       read_enq <= 0;
       user_done <= 0;
+      read_addr_done <= 0;
 
       //----------------------------------------------------------------------
       if(read_busy) begin
+        read_addr_done <= !avm_waitrequest;
         if(avm_readdatavalid) begin
           read_data <= avm_readdata;
           read_enq <= 1;
@@ -208,7 +211,8 @@ module avalon_master_fifo #
       else if(!user_done && user_read_enable) begin // user_done is ack
         read_cnt <= 0;
         user_word_size_buf <= user_word_size;
-        if(!avm_waitrequest) read_busy <= 1;
+        read_busy <= 1;
+        read_addr_done <= !avm_waitrequest;
       end
       //----------------------------------------------------------------------
       else if(!user_done && user_write_enable) begin // user_done is ack

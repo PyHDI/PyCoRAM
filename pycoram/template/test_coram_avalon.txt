@@ -226,6 +226,7 @@ module test;
 {%- endif %}
    .avm_{{ thread.name }}_{{ memory.name }}_address(avm_{{ thread.name }}_{{ memory.name }}_address),
    .avm_{{ thread.name }}_{{ memory.name }}_waitrequest(avm_{{ thread.name }}_{{ memory.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ memory.name }}_byteenable(avm_{{ thread.name }}_{{ memory.name }}_byteenable),
    .avm_{{ thread.name }}_{{ memory.name }}_burstcount(avm_{{ thread.name }}_{{ memory.name }}_burstcount),
    .avm_{{ thread.name }}_{{ memory.name }}_read(avm_{{ thread.name }}_{{ memory.name }}_read),
    .avm_{{ thread.name }}_{{ memory.name }}_readdata(avm_{{ thread.name }}_{{ memory.name }}_readdata),
@@ -240,6 +241,7 @@ module test;
 {%- endif %}
    .avm_{{ thread.name }}_{{ instream.name }}_address(avm_{{ thread.name }}_{{ instream.name }}_address),
    .avm_{{ thread.name }}_{{ instream.name }}_waitrequest(avm_{{ thread.name }}_{{ instream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ instream.name }}_byteenable(avm_{{ thread.name }}_{{ instream.name }}_byteenable),
    .avm_{{ thread.name }}_{{ instream.name }}_burstcount(avm_{{ thread.name }}_{{ instream.name }}_burstcount),
    .avm_{{ thread.name }}_{{ instream.name }}_read(avm_{{ thread.name }}_{{ instream.name }}_read),
    .avm_{{ thread.name }}_{{ instream.name }}_readdata(avm_{{ thread.name }}_{{ instream.name }}_readdata),
@@ -254,6 +256,7 @@ module test;
 {%- endif %}
    .avm_{{ thread.name }}_{{ outstream.name }}_address(avm_{{ thread.name }}_{{ outstream.name }}_address),
    .avm_{{ thread.name }}_{{ outstream.name }}_waitrequest(avm_{{ thread.name }}_{{ outstream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ outstream.name }}_byteenable(avm_{{ thread.name }}_{{ outstream.name }}_byteenable),
    .avm_{{ thread.name }}_{{ outstream.name }}_burstcount(avm_{{ thread.name }}_{{ outstream.name }}_burstcount),
    .avm_{{ thread.name }}_{{ outstream.name }}_read(avm_{{ thread.name }}_{{ outstream.name }}_read),
    .avm_{{ thread.name }}_{{ outstream.name }}_readdata(avm_{{ thread.name }}_{{ outstream.name }}_readdata),
@@ -268,6 +271,7 @@ module test;
 {%- endif %}
    .avs_{{ thread.name }}_{{ iochannel.name }}_address(avs_{{ thread.name }}_{{ iochannel.name }}_address >> {{ log2(iochannel.ext_datawidth/8) }}),
    .avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest(avs_{{ thread.name }}_{{ iochannel.name }}_waitrequest),
+   .avs_{{ thread.name }}_{{ iochannel.name }}_byteenable(avs_{{ thread.name }}_{{ iochannel.name }}_byteenable),
 {% if not lite %}
    .avs_{{ thread.name }}_{{ iochannel.name }}_burstcount(avs_{{ thread.name }}_{{ iochannel.name }}_burstcount),
 {%- endif %}
@@ -284,6 +288,7 @@ module test;
 {%- endif %}
    .avs_{{ thread.name }}_{{ ioregister.name }}_address(avs_{{ thread.name }}_{{ ioregister.name }}_address >> {{ log2(ioregister.ext_datawidth/8) }}),
    .avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest(avs_{{ thread.name }}_{{ ioregister.name }}_waitrequest),
+   .avs_{{ thread.name }}_{{ ioregister.name }}_byteenable(avs_{{ thread.name }}_{{ ioregister.name }}_byteenable),
 {% if not lite %}
    .avs_{{ thread.name }}_{{ ioregister.name }}_burstcount(avs_{{ thread.name }}_{{ ioregister.name }}_burstcount),
 {%- endif %}
@@ -348,6 +353,7 @@ module test;
 {%- endif %}
    .avm_{{ thread.name }}_{{ memory.name }}_address(avm_{{ thread.name }}_{{ memory.name }}_address),
    .avm_{{ thread.name }}_{{ memory.name }}_waitrequest(avm_{{ thread.name }}_{{ memory.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ memory.name }}_byteenable(avm_{{ thread.name }}_{{ memory.name }}_byteenable),
    .avm_{{ thread.name }}_{{ memory.name }}_burstcount(avm_{{ thread.name }}_{{ memory.name }}_burstcount),
    .avm_{{ thread.name }}_{{ memory.name }}_read(avm_{{ thread.name }}_{{ memory.name }}_read),
    .avm_{{ thread.name }}_{{ memory.name }}_readdata(avm_{{ thread.name }}_{{ memory.name }}_readdata),
@@ -365,6 +371,7 @@ module test;
 {%- endif %}
    .avm_{{ thread.name }}_{{ instream.name }}_address(avm_{{ thread.name }}_{{ instream.name }}_address),
    .avm_{{ thread.name }}_{{ instream.name }}_waitrequest(avm_{{ thread.name }}_{{ instream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ instream.name }}_byteenable(avm_{{ thread.name }}_{{ instream.name }}_byteenable),
    .avm_{{ thread.name }}_{{ instream.name }}_burstcount(avm_{{ thread.name }}_{{ instream.name }}_burstcount),
    .avm_{{ thread.name }}_{{ instream.name }}_read(avm_{{ thread.name }}_{{ instream.name }}_read),
    .avm_{{ thread.name }}_{{ instream.name }}_readdata(avm_{{ thread.name }}_{{ instream.name }}_readdata),
@@ -382,6 +389,7 @@ module test;
 {%- endif %}
    .avm_{{ thread.name }}_{{ outstream.name }}_address(avm_{{ thread.name }}_{{ outstream.name }}_address),
    .avm_{{ thread.name }}_{{ outstream.name }}_waitrequest(avm_{{ thread.name }}_{{ outstream.name }}_waitrequest),
+   .avm_{{ thread.name }}_{{ outstream.name }}_byteenable(avm_{{ thread.name }}_{{ outstream.name }}_byteenable),
    .avm_{{ thread.name }}_{{ outstream.name }}_burstcount(avm_{{ thread.name }}_{{ outstream.name }}_burstcount),
    .avm_{{ thread.name }}_{{ outstream.name }}_read(avm_{{ thread.name }}_{{ outstream.name }}_read),
    .avm_{{ thread.name }}_{{ outstream.name }}_readdata(avm_{{ thread.name }}_{{ outstream.name }}_readdata),
@@ -926,6 +934,7 @@ module dram_stub #
 
    input  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ memory.name }}_address,
    output reg                                avm_{{ thread.name }}_{{ memory.name }}_waitrequest,
+   input  wire [C_AVM_{{ thread.name }}_{{ memory.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ memory.name }}_byteenable,
    input  wire [8:0]                         avm_{{ thread.name }}_{{ memory.name }}_burstcount,
 
    input  wire                               avm_{{ thread.name }}_{{ memory.name }}_read,
@@ -941,6 +950,7 @@ module dram_stub #
 
    input  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ instream.name }}_address,
    output reg                                avm_{{ thread.name }}_{{ instream.name }}_waitrequest,
+   input  wire [C_AVM_{{ thread.name }}_{{ instream.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ instream.name }}_byteenable,
    input  wire [8:0]                         avm_{{ thread.name }}_{{ instream.name }}_burstcount,
 
    input  wire                               avm_{{ thread.name }}_{{ instream.name }}_read,
@@ -956,6 +966,7 @@ module dram_stub #
 
    input  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_ADDR_WIDTH-1:0] avm_{{ thread.name }}_{{ outstream.name }}_address,
    output reg                                avm_{{ thread.name }}_{{ outstream.name }}_waitrequest,
+   input  wire [C_AVM_{{ thread.name }}_{{ outstream.name }}_DATA_WIDTH/8-1:0] avm_{{ thread.name }}_{{ outstream.name }}_byteenable,
    input  wire [8:0]                         avm_{{ thread.name }}_{{ outstream.name }}_burstcount,
 
    input  wire                               avm_{{ thread.name }}_{{ outstream.name }}_read,
