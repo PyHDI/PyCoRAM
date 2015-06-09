@@ -72,15 +72,20 @@ module avalon_lite_slave_interface #
   //------------------------------------------------------------------------------
   // User-logic Interface
   //------------------------------------------------------------------------------
+  reg write_busy;
+  
+  reg [C_AVS_DATA_WIDTH-1:0] write_data;
+  reg [C_AVS_DATA_WIDTH/8-1:0] write_strb;
+  reg has_write_data;
+
   // Write Address
-  assign awvalid = avs_write;
+  assign awvalid = avs_write && !write_busy;
   assign awaddr = avs_address;
 
   // Write Data
-  assign wdata = avs_writedata;
-  assign wstrb = avs_byteenable;
-  assign wlast = 1'b0;
-  assign wvalid = avs_write;
+  assign wdata = has_write_data? write_data : avs_writedata;
+  assign wstrb = has_write_data? write_strb : avs_byteenable;
+  assign wvalid = avs_write || has_write_data;
 
   // Read Address
   assign arvalid = avs_read;
@@ -93,12 +98,41 @@ module avalon_lite_slave_interface #
   // Avalon Interface
   //------------------------------------------------------------------------------
   // Common
-  assign avs_waitrequest = ((awvalid || wvalid) && !(awready && wready)) ||
+  assign avs_waitrequest = (!write_busy && !awready) ||
+                           (write_busy && has_write_data) ||
+                           (write_busy && !wready) ||
                            (arvalid && !arready);
     
   // Read
   assign avs_readdata = rdata;
   assign avs_readdatavalid = rvalid;
+  
+  //------------------------------------------------------------------------------
+  always @(posedge ACLK) begin
+    if (aresetn_rrr == 0) begin
+      write_busy <= 0;
+      write_data <= 0;
+      write_strb <= 0;
+      has_write_data <= 0;
+    end else if(write_busy) begin
+      if(has_write_data && wready) begin
+        has_write_data <= 0;
+        write_busy <= 0;
+      end
+    end else begin
+      if(avs_write && awready) begin
+        if(!wready) begin
+          write_data <= avs_writedata;
+          write_strb <= avs_byteenable;
+          has_write_data <= 1;
+          write_busy <= 1;
+        end else begin
+          has_write_data <= 0;
+          write_busy <= 0;
+        end
+      end
+    end
+  end
   
 endmodule
 

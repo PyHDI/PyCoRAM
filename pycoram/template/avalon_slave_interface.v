@@ -80,16 +80,20 @@ module avalon_slave_interface #
   reg write_busy;
   reg [8:0] write_count;
 
+  reg [C_AVS_DATA_WIDTH-1:0] write_data;
+  reg [C_AVS_DATA_WIDTH/8-1:0] write_strb;
+  reg has_write_data;
+
   // Write Address
   assign awvalid = avs_write && !write_busy;
   assign awaddr = avs_address;
   assign awlen = avs_burstcount - 1;
 
   // Write Data
-  assign wdata = avs_writedata;
-  assign wstrb = avs_byteenable;
-  assign wlast = 1'b0;
-  assign wvalid = avs_write;
+  assign wdata = has_write_data? write_data : avs_writedata;
+  assign wstrb = has_write_data? write_strb : avs_byteenable;
+  assign wlast = (write_count == 1) || (!write_busy && avs_write && awlen == 0);
+  assign wvalid = avs_write || has_write_data;
 
   // Read Address
   assign arvalid = avs_read && !write_busy;
@@ -103,7 +107,9 @@ module avalon_slave_interface #
   // Avalon Interface
   //------------------------------------------------------------------------------
   // Common
-  assign avs_waitrequest = ((awvalid || wvalid) && !(awready && wready)) ||
+  assign avs_waitrequest = (!write_busy && !awready) ||
+                           (write_busy && has_write_data) ||
+                           (write_busy && !wready) ||
                            (arvalid && !arready);
     
   // Read
@@ -115,18 +121,36 @@ module avalon_slave_interface #
     if (aresetn_rrr == 0) begin
       write_busy <= 0;
       write_count <= 0;
+      write_data <= 0;
+      write_strb <= 0;
+      has_write_data <= 0;
     end else if(write_busy) begin
-      if(!avs_waitrequest && avs_write) begin
+      if(has_write_data && wready) begin
+        has_write_data <= 0;
+        write_count <= write_count - 1;
+        if(write_count == 1) begin
+          write_busy <= 0;
+        end
+      end else if(avs_write && wready) begin
         write_count <= write_count - 1;
         if(write_count == 1) begin
           write_busy <= 0;
         end
       end
     end else begin
-      if(!avs_waitrequest && awvalid && wvalid) begin
-        write_count <= awlen;
-        if(awlen == 0) write_busy <= 0;
-        else write_busy <= 1;
+      if(avs_write && awready) begin
+        if(!wready) begin
+          write_count <= awlen + 1;
+          write_data <= avs_writedata;
+          write_strb <= avs_byteenable;
+          has_write_data <= 1;
+          write_busy <= 1;
+        end else begin
+          write_count <= awlen;
+          has_write_data <= 0;
+          if(awlen == 0) write_busy <= 0;
+          else write_busy <= 1;
+        end
       end
     end
   end
