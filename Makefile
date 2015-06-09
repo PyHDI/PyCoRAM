@@ -23,7 +23,7 @@ view:
 clean:
 	make clean -C ./pycoram
 	make clean -C ./sample
-	make clean -C ./lib-sample
+	make clean -C ./dsl-sample
 	rm -rf *.pyc __pycache__ pycoram.egg-info build dist
 
 .PHONY: release

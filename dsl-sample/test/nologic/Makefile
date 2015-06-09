@@ -1,4 +1,4 @@
 SCRIPT=build.py
 TOPMODULE=userlogic
 ROOTDIR=../../../
-include $(ROOTDIR)/lib-sample/base.mk
+include $(ROOTDIR)/dsl-sample/base.mk
