@@ -1,3 +1,6 @@
+#ifndef PYCORAM_H
+#define PYCORAM_H
+
 #define UIO_PYCORAM "/dev/uio1"
 #define PYCORAM_SIZE (0x00001000)
 
@@ -37,3 +40,4 @@ void pycoram_close()
   munmap((void*) pycoram_ptr, PYCORAM_SIZE);
 }
 
+#endif

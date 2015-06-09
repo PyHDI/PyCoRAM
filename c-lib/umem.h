@@ -1,3 +1,6 @@
+#ifndef UMEM_H
+#define UMEM_H
+
 #define UIO_MEM "/dev/uio0"
 // ZedBoard (DRAM 512 MB)
 #define UMEM_SIZE (0x10000000)
@@ -73,3 +76,4 @@ void umem_close()
   umem_ptr = NULL;
 }
 
+#endif
