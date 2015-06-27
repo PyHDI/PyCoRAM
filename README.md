@@ -70,6 +70,23 @@ Software
 Installation
 ==============================
 
+On Docker
+------------------------------
+
+Dockerfile is available, so that you can try PyCoRAM on Docker without any installation on your host platform.
+
+```
+cd docker
+sudo docker build -t user/pycoram .
+sudo docker run --name pycoram -i -t user/pycoram /bin/bash
+cd PyCoRAM/sample/test/single_memory/
+make build
+make sim
+```
+
+On your host platform
+------------------------------
+
 If you want to use PyCoRAM as a general library, you can install on your environment by using setup.py.
 
 If Python 2.7 is used,
