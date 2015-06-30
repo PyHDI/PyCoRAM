@@ -15,6 +15,31 @@ Apache License 2.0
 (http://www.apache.org/licenses/LICENSE-2.0)
 
 
+Publication
+==============================
+
+If you use PyCoRAM in your research, please cite our paper.
+
+- Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. [Paper](http://users.ece.cmu.edu/~jhoe/distribution/2013/carl13pycoram.pdf)
+[Slide](http://www.slideshare.net/shtaxxx/pycoramcarl2013)
+
+```
+@inproceedings{Takamaeda:2013:CARL:PyCoRAM,
+author = {Takamaeda-Yamazaki, Shinya and Kise, Kenji and Hoe, James C.},
+title = {{PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing}},
+booktitle={Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013)},
+year = {2013},
+location = {Davis, CA}
+} 
+```
+
+- Zynq + PyCoRAM (+ Debian) (slideshare, in Japanese)
+[Slide](http://www.slideshare.net/shtaxxx/zynqpycoram)
+
+- PyCoRAM for HLS meet up (slideshare, in Japanese)
+[Slide](http://www.slideshare.net/shtaxxx/pycoram20150116hls)
+
+
 What's PyCoRAM?
 ==============================
 
@@ -168,19 +193,6 @@ Description
 * --usertest
     - User-defined test code file (option, if you need).
       The code is copied into testbench script.
-
-
-Publication
-==============================
-
-- Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. [Paper](http://users.ece.cmu.edu/~jhoe/distribution/2013/carl13pycoram.pdf)
-[Slide](http://www.slideshare.net/shtaxxx/pycoramcarl2013)
-
-- Zynq + PyCoRAM (+ Debian) (slideshare, in Japanese)
-[Slide](http://www.slideshare.net/shtaxxx/zynqpycoram)
-
-- PyCoRAM for HLS meet up (slideshare, in Japanese)
-[Slide](http://www.slideshare.net/shtaxxx/pycoram20150116hls)
 
 
 Related Project
