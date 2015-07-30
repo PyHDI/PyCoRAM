@@ -1,6 +1,8 @@
 CC=gcc
-OFLAGS=-O3 -g -pg -Wall
-#OFLAGS=-O0 -g -pg -Wall
+LIB=../../../../../c_lib/
+INCLUDE=-I $(LIB)
+OFLAGS=-O3 -g -pg -Wall $(INCLUDE)
+#OFLAGS=-O0 -g -pg -Wall $(INCLUDE)
 SRCS=main.c
 HEADERS=heap.h umem.h pycoram.h
 OBJS=$(SRCS:.cc=.o)
