@@ -694,22 +694,24 @@ class CodeGenerator(object):
             self._append_fsm_bind(None, 
                                   vast.SystemCall('display',
                                                   (vast.StringConst(("[CoRAM] time:%%d thread:%s ioregister:%s read"
-                                                                     " data:%%d") % (self.threadname, ramname)),
+                                                                     " [%%d]->%%d") % (self.threadname, ramname)),
                                                    vast.SystemCall('stime', ()),
+                                                   vast.Identifier(ramname+'_addr'),
                                                    vast.Identifier(ramname+'_q'))),
-                                  state)
+                                  state+1)
 
         elif bind.value.syscall == 'coram_ioregister_write':
             ramname = bind.value.args[0].name
-            write_data = bind.value.args[1]
+            write_addr = bind.value.args[1]
+            write_data = bind.value.args[2]
             self._append_fsm_bind(None, 
                                   vast.SystemCall('display',
                                                   (vast.StringConst(("[CoRAM] time:%%d thread:%s ioregister:%s write"
-                                                                     " data:%%d") % (self.threadname, ramname)),
+                                                                     " [%%d]<-%%d") % (self.threadname, ramname)),
                                                    vast.SystemCall('stime', ()),
+                                                   write_addr,
                                                    write_data)),
-                                  state,
-                                  vast.Eq(vast.Identifier(ramname+'_we'), vast.IntConst('1')))
+                                  state)
     
     #--------------------------------------------------------------------------
     def _insertFinish(self):
@@ -880,12 +882,15 @@ class CodeGenerator(object):
             already_inserted.add(prefix_str)
 
             datawidth = vast.Width(vast.IntConst(str(mem.datawidth-1)), vast.IntConst('0'))
+            addrwidth = vast.Width(vast.IntConst(str(mem.addrwidth-1)), vast.IntConst('0'))
 
             portlist.append( vast.Ioport(vast.Input(''.join(prefix+['q']), width=datawidth)) )
             portlist.append( vast.Ioport(vast.Output(''.join(prefix+['we'])),
                                          vast.Reg(''.join(prefix+['we']))) )
             portlist.append( vast.Ioport(vast.Output(''.join(prefix+['d']), width=datawidth),
                                          vast.Reg(''.join(prefix+['d']), width=datawidth)) )
+            portlist.append( vast.Ioport(vast.Output(''.join(prefix+['addr']), width=addrwidth),
+                                         vast.Reg(''.join(prefix+['addr']), width=addrwidth)) )
 
         return portlist
 

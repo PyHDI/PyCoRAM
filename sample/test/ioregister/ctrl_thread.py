@@ -1,5 +1,5 @@
 def ctrl_thread():
-    ioregister = CoramIoRegister(idx=0, datawidth=32)
+    ioregister = CoramIoRegister(idx=0, datawidth=32, size=32)
     ram = CoramMemory(idx=0, datawidth=32, size=1024, length=1, scattergather=False)
     channel = CoramChannel(idx=0, datawidth=32, size=16)
     addr = 0
@@ -10,9 +10,9 @@ def ctrl_thread():
         sum = channel.read()
         addr += 512
     print('sum=', sum)
-    ioval = ioregister.read()
+    ioval = ioregister.read(0)
     print('ioval=',ioval)
-    ioregister.write(sum)
+    ioregister.write(0, sum)
     for i in range(10000):
         pass
 

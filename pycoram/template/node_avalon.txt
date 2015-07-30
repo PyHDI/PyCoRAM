@@ -517,10 +517,13 @@ module pycoram_{{ userlogic_name.lower() }} #
 {%- for thread in threads | sort(attribute='name') %}
 {% for ioregister in thread.ioregisters | sort(attribute='name') %}
   wire {{ thread.name }}_{{ ioregister.name }}_clk; // control thread clock
+  wire {{ thread.name }}_{{ ioregister.name }}_rst; // control thread reset
+  wire [{{ ioregister.addrwidth -1 }}:0] {{ thread.name }}_{{ ioregister.name }}_addr; 
   wire [{{ ioregister.datawidth -1 }}:0] {{ thread.name }}_{{ ioregister.name }}_d; 
   wire {{ thread.name }}_{{ ioregister.name }}_we; 
   wire [{{ ioregister.datawidth -1 }}:0] {{ thread.name }}_{{ ioregister.name }}_q; 
   assign {{ thread.name }}_{{ ioregister.name }}_clk = csi_sys_{{ thread.name }}_clk;
+  assign {{ thread.name }}_{{ ioregister.name }}_rst = {{ thread.name }}_CRST;
 {% endfor %}
 {%- endfor %}
 
@@ -784,6 +787,7 @@ module pycoram_{{ userlogic_name.lower() }} #
      .{{ channel.name }}_almost_full({{ thread.name }}_{{ channel.name }}_almost_full),
 {% endfor %}
 {% for register in thread.registers | sort(attribute='name') %}
+     .{{ register.name }}_addr({{ thread.name }}_{{ register.name }}_addr), 
      .{{ register.name }}_d({{ thread.name }}_{{ register.name }}_d), 
      .{{ register.name }}_we({{ thread.name }}_{{ register.name }}_we), 
      .{{ register.name }}_q({{ thread.name }}_{{ register.name }}_q), 
@@ -797,6 +801,7 @@ module pycoram_{{ userlogic_name.lower() }} #
      .{{ iochannel.name }}_almost_full({{ thread.name }}_{{ iochannel.name }}_almost_full),
 {% endfor %}
 {% for ioregister in thread.ioregisters | sort(attribute='name') %}
+     .{{ ioregister.name }}_addr({{ thread.name }}_{{ ioregister.name }}_addr), 
      .{{ ioregister.name }}_d({{ thread.name }}_{{ ioregister.name }}_d), 
      .{{ ioregister.name }}_we({{ thread.name }}_{{ ioregister.name }}_we), 
      .{{ ioregister.name }}_q({{ thread.name }}_{{ ioregister.name }}_q), 
@@ -1047,8 +1052,10 @@ module pycoram_{{ userlogic_name.lower() }} #
   DMAC_IOREGISTER #
   (
    .W_D({{ ioregister.datawidth }}),
+   .W_A({{ ioregister.addrwidth }}),
    .W_EXT_A(W_EXT_A),
    .W_BLEN(W_BLEN),
+   .ADDRMASK_WIDTH({{ ioregister.addroffset }}),
    .MAX_BURST_LEN(MAX_BURST_LEN),
    .FIFO_ADDR_WIDTH(CMD_FIFO_ADDR_WIDTH),
    .ASYNC({%- if single_clock -%} 0 {%- else -%} 1 {%- endif -%})
@@ -1061,6 +1068,7 @@ module pycoram_{{ userlogic_name.lower() }} #
      .coram_clk({{ thread.name }}_{{ ioregister.name }}_clk),
      .coram_rst({{ thread.name }}_{{ ioregister.name }}_rst),
 
+     .coram_addr({{ thread.name }}_{{ ioregister.name }}_addr),
      .coram_d({{ thread.name }}_{{ ioregister.name }}_d),
      .coram_we({{ thread.name }}_{{ ioregister.name }}_we),
      .coram_q({{ thread.name }}_{{ ioregister.name }}_q),

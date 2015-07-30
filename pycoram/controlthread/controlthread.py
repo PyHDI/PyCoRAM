@@ -436,7 +436,7 @@ class CompileVisitor(ast.NodeVisitor):
         instargs = {
             'idx' : None,
             'datawidth' : vast.IntConst('32'),
-            'size' : vast.IntConst('16') if name == CORAM_CHANNEL or name == CORAM_IOCHANNEL else vast.IntConst('1024'),
+            'size' : vast.IntConst('16') if name in (CORAM_CHANNEL, CORAM_REGISTER, CORAM_IOCHANNEL, CORAM_IOREGISTER) else vast.IntConst('1024'),
             'length' : vast.IntConst('1') if name == CORAM_MEMORY else None,
             'scattergather' : vast.IntConst('0') if name == CORAM_MEMORY else None,
             }
@@ -1356,20 +1356,30 @@ class CompileVisitor(ast.NodeVisitor):
 
     #--------------------------------------------------------------------------
     def _coram_ioregister_read(self, node, objname, targ):
-        # read from ioregister
-        tmp = self.getTmpVariable() 
-        ioregister_q_ret = vast.Identifier(tmp)
-        ioregister_q = vast.Identifier(targ.name + '_q')
-        self.setBind(ioregister_q_ret, ioregister_q)
-
         # dummy system call
         left = None
         args = [ vast.Identifier(targ.name) ]
         for a in node.args:
             args.append(self.visit(a))
-        args.append(ioregister_q_ret)
         right = vast.SystemCall('coram_ioregister_read', tuple(args))
         self.setBind(left, right)
+
+        # write address to ioregister
+        ioregister_addr = vast.Identifier(targ.name + '_addr')
+        ioregister_addr_val = args[1]
+        self.setBind(ioregister_addr, ioregister_addr_val)
+        
+        # go to next
+        src_count = self.getFsmCount()
+        dst_count = src_count + 1
+        self.setFsm(src_count, dst_count)
+        self.incFsmCount()
+
+        # read from ioregister
+        tmp = self.getTmpVariable() 
+        ioregister_q_ret = vast.Identifier(tmp)
+        ioregister_q = vast.Identifier(targ.name + '_q')
+        self.setBind(ioregister_q_ret, ioregister_q)
 
         # go to next state
         src_count = self.getFsmCount()
@@ -1390,8 +1400,13 @@ class CompileVisitor(ast.NodeVisitor):
 
         # write data to ioregister
         ioregister_d = vast.Identifier(targ.name + '_d')
-        ioregister_d_val = args[1]
+        ioregister_d_val = args[2]
         self.setBind(ioregister_d, ioregister_d_val)
+        
+        # write address to ioregister
+        ioregister_addr = vast.Identifier(targ.name + '_addr')
+        ioregister_addr_val = args[1]
+        self.setBind(ioregister_addr, ioregister_addr_val)
         
         # assert enable line
         ioregister_we = vast.Identifier(targ.name + '_we')
