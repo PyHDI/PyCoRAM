@@ -18,7 +18,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-int fd_umem;
+int fd_umem = -1;
 volatile char* umem_ptr = NULL;
 unsigned int umem_used = 0;
 
@@ -74,6 +74,8 @@ void umem_close()
   }
   munmap((void*) umem_ptr, UMEM_SIZE);
   umem_ptr = NULL;
+  close(fd_umem);
+  fd_umem = -1;
 }
 
 #endif

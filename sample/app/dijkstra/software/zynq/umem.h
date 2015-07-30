@@ -1,6 +1,13 @@
+#ifndef UMEM_H
+#define UMEM_H
+
 #define UIO_MEM "/dev/uio0"
-#define UMEM_SIZE   (0x10000000)
+// ZedBoard (DRAM 512 MB)
+#define UMEM_SIZE (0x10000000)
 #define UMEM_OFFSET (0x10000000)
+// ZC706 (DRAM 1024 MB)
+//#define UMEM_SIZE (0x20000000)
+//#define UMEM_OFFSET (0x20000000)
 
 #define UMEM_PAGE_SIZE (4*1024)
 
@@ -11,7 +18,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-int fd_umem;
+int fd_umem = -1;
 volatile char* umem_ptr = NULL;
 unsigned int umem_used = 0;
 
@@ -67,5 +74,8 @@ void umem_close()
   }
   munmap((void*) umem_ptr, UMEM_SIZE);
   umem_ptr = NULL;
+  close(fd_umem);
+  fd_umem = -1;
 }
 
+#endif

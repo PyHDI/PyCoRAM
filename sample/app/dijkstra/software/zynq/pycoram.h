@@ -1,3 +1,6 @@
+#ifndef PYCORAM_H
+#define PYCORAM_H
+
 #define UIO_PYCORAM "/dev/uio1"
 #define PYCORAM_SIZE (0x00001000)
 
@@ -8,8 +11,8 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-int fd_pycoram;
-volatile int* pycoram_ptr;
+int fd_pycoram = -1;
+volatile int* pycoram_ptr = NULL;
 
 void pycoram_open()
 {
@@ -34,6 +37,14 @@ void pycoram_read_4b(unsigned int* data)
 
 void pycoram_close()
 {
+  if(pycoram_ptr == NULL){
+    printf("pycoram_close(): UIO is not opened.\n");
+    return;
+  }
   munmap((void*) pycoram_ptr, PYCORAM_SIZE);
+  pycoram_ptr = NULL;
+  close(fd_pycoram);
+  fd_pycoram = -1;
 }
 
+#endif
