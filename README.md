@@ -198,7 +198,7 @@ Description
 Related Project
 ==============================
 
-[Pyverilog](https://github.com/shtaxxx/Pyverilog)
+[Pyverilog](https://github.com/Pyverilog/Pyverilog)
 - Python-based Hardware Design Processing Toolkit for Verilog HDL
 - Used as basic code analyser and generator in PyCoRAM
 
