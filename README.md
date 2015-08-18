@@ -77,7 +77,7 @@ Software
     - 'pip install jinja2' (for Python 2.x) or 'pip3 install jinja2' (for Python 3.x)
 * Pyverilog (Python-based Verilog HDL Design Processing Toolkit)
     - Install from pip: 'pip install pyverilog' for Python2.7 or 'pip3 install pyverilog' for Python3
-    - Install from github into this package: 'cd Pycoram; git clone https://github.com/shtaxxx/Pyverilog.git; cd pycoram; ln -s ../Pyverilog/pyverilog'
+    - Install from github into this package: 'cd Pycoram; git clone https://github.com/PyHDI/Pyverilog.git; cd pycoram; ln -s ../Pyverilog/pyverilog'
 
 ### for RTL simulation
 
@@ -198,7 +198,7 @@ Description
 Related Project
 ==============================
 
-[Pyverilog](https://github.com/Pyverilog/Pyverilog)
+[Pyverilog](https://github.com/PyHDI/Pyverilog)
 - Python-based Hardware Design Processing Toolkit for Verilog HDL
 - Used as basic code analyser and generator in PyCoRAM
 
