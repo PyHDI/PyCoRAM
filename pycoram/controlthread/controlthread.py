@@ -6,6 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import ast
 import inspect
@@ -15,35 +17,19 @@ import re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 
 import utils.version
-
-if sys.version_info[0] >= 3:
-    from controlthread.scope import ScopeFrameList
-    from controlthread.fsm import Fsm
-    from controlthread.coram_module import CoramBase
-    from controlthread.coram_module import CoramMemory
-    from controlthread.coram_module import CoramInStream
-    from controlthread.coram_module import CoramOutStream
-    from controlthread.coram_module import CoramChannel
-    from controlthread.coram_module import CoramRegister
-    from controlthread.coram_module import CoramIoChannel
-    from controlthread.coram_module import CoramIoRegister
-    from controlthread.codegen import CodeGenerator
-    import controlthread.maketree as maketree
-    import controlthread.voperator as voperator
-else:
-    from scope import ScopeFrameList
-    from fsm import Fsm
-    from coram_module import CoramBase
-    from coram_module import CoramMemory
-    from coram_module import CoramInStream
-    from coram_module import CoramOutStream
-    from coram_module import CoramChannel
-    from coram_module import CoramRegister
-    from coram_module import CoramIoChannel
-    from coram_module import CoramIoRegister
-    from codegen import CodeGenerator
-    import maketree as maketree
-    import voperator as voperator
+from controlthread.scope import ScopeFrameList
+from controlthread.fsm import Fsm
+from controlthread.coram_module import CoramBase
+from controlthread.coram_module import CoramMemory
+from controlthread.coram_module import CoramInStream
+from controlthread.coram_module import CoramOutStream
+from controlthread.coram_module import CoramChannel
+from controlthread.coram_module import CoramRegister
+from controlthread.coram_module import CoramIoChannel
+from controlthread.coram_module import CoramIoRegister
+from controlthread.codegen import CodeGenerator
+import controlthread.maketree as maketree
+import controlthread.voperator as voperator
     
 import pyverilog
 import pyverilog.vparser

@@ -6,6 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -16,12 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 
 import utils.version
 
-if sys.version_info[0] >= 3:
-    from rtlconverter.convertvisitor import InstanceConvertVisitor
-    from rtlconverter.convertvisitor import InstanceReplaceVisitor
-else:
-    from convertvisitor import InstanceConvertVisitor
-    from convertvisitor import InstanceReplaceVisitor
+from rtlconverter.convertvisitor import InstanceConvertVisitor
+from rtlconverter.convertvisitor import InstanceReplaceVisitor
 
 import pyverilog.utils.signaltype as signaltype
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
