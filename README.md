@@ -28,8 +28,9 @@ If you use PyCoRAM in your research, please cite our paper.
 author = {Takamaeda-Yamazaki, Shinya and Kise, Kenji and Hoe, James C.},
 title = {{PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing}},
 booktitle={Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013)},
+month={Dec},
 year = {2013},
-location = {Davis, CA}
+location = {Davis, CA},
 } 
 ```
 
