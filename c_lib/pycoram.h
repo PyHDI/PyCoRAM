@@ -26,11 +26,19 @@ void pycoram_open()
 
 void pycoram_write_4b(unsigned int data)
 {
+  volatile unsigned int busy = *(pycoram_ptr + 1);
+  while((busy & 0x2) != 0){
+    busy = *(pycoram_ptr + 1);
+  }
   *pycoram_ptr = (volatile unsigned int) data;
 }
 
 void pycoram_read_4b(unsigned int* data)
 {
+  volatile unsigned int busy = *(pycoram_ptr + 1);
+  while((busy & 0x1) != 0){
+    busy = *(pycoram_ptr + 1);
+  }
   volatile unsigned int r = *pycoram_ptr;
   *data = r;
 }
