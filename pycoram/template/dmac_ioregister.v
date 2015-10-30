@@ -259,8 +259,6 @@ module dmac_ioregister_ram(CLK,
   
   always @(posedge CLK) begin
     if(WE0) mem[ADDR0] <= D0;
-  end
-  always @(posedge CLK) begin
     if(WE1) mem[ADDR1] <= D1;
   end
   assign Q0 = mem[ADDR0];
