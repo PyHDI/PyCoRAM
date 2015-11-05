@@ -1,12 +1,14 @@
 include README.md
 include README.rst
-include docker/Dockerfile
+include LICENSE.txt
 include Makefile
+include docker/Dockerfile
 include default.config
 include base.mk
 include base-libpycoram.mk
 include mem-incr.hex
+recursive-include include *
+recursive-include c_lib *
 recursive-include examples *
 recursive-include tests *
 recursive-include libpycoram_tests *
-recursive-include c_lib *
