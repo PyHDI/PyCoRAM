@@ -14,13 +14,10 @@ import re
 import copy
 import collections
 
-import pyverilog.utils.util as util
-import pyverilog.utils.verror as verror
 import pyverilog.dataflow.dataflow as dataflow
 from pyverilog.vparser.ast import *
 from pyverilog.dataflow.visit import *
 from pyverilog.dataflow.signalvisitor import SignalVisitor
-from pyverilog.utils.scope import ScopeLabel, ScopeChain
 
 #-------------------------------------------------------------------------------
 class InstanceConvertVisitor(SignalVisitor):
