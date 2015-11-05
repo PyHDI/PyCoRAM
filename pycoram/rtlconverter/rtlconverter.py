@@ -10,23 +10,16 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 import os
-import subprocess
-import copy
 import collections
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
+from pycoram.rtlconverter.convertvisitor import InstanceConvertVisitor
+from pycoram.rtlconverter.convertvisitor import InstanceReplaceVisitor
 
-import utils.version
-
-from rtlconverter.convertvisitor import InstanceConvertVisitor
-from rtlconverter.convertvisitor import InstanceReplaceVisitor
-
-import pyverilog.utils.signaltype as signaltype
-from pyverilog.utils.scope import ScopeLabel, ScopeChain
 import pyverilog.vparser.ast as vast
+import pyverilog.utils.signaltype as signaltype
 from pyverilog.vparser.parser import VerilogCodeParser
 from pyverilog.dataflow.modulevisitor import ModuleVisitor
-from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
+from pyverilog.utils.scope import ScopeLabel, ScopeChain
 
 class RtlConverter(object):
     def __init__(self, filelist, topmodule='userlogic', include=None,
@@ -111,9 +104,12 @@ class RtlConverter(object):
                     not (signaltype.isClock(signame) or signaltype.isReset(signame)) and
                     isinstance(svv, vast.Input) or isinstance(svv, vast.Output) or isinstance(svv, vast.Inout)):
                     port = svv
-                    msb_val = instanceconvert_visitor.optimize(instanceconvert_visitor.getTree(port.width.msb, top_scope))
-                    lsb_val = instanceconvert_visitor.optimize(instanceconvert_visitor.getTree(port.width.lsb, top_scope))
-                    width = int(msb_val.value) - int(lsb_val.value) + 1
+                    if port.width is not None:
+                        msb_val = instanceconvert_visitor.optimize(instanceconvert_visitor.getTree(port.width.msb, top_scope))
+                        lsb_val = instanceconvert_visitor.optimize(instanceconvert_visitor.getTree(port.width.lsb, top_scope))
+                        width = int(msb_val.value) - int(lsb_val.value) + 1
+                    else:
+                        width = None
                     self.top_ioports[signame] = (port, width)
                     break
 
@@ -127,57 +123,3 @@ class RtlConverter(object):
         self.coram_object = instanceconvert_visitor.getCoramObject()
 
         return ret
-
-def main():
-    from optparse import OptionParser
-    INFO = "PyCoRAM RTL Converter"
-    VERSION = utils.version.VERSION
-    USAGE = "Usage: python rtlconverter.py -t TOPMODULE file ..."
-
-    def showVersion():
-        print(INFO)
-        print(VERSION)
-        print(USAGE)
-        sys.exit()
-    
-    optparser = OptionParser()
-    optparser.add_option("-v","--version",action="store_true",dest="showversion",
-                         default=False,help="Show the version")
-    optparser.add_option("-t","--top",dest="topmodule",
-                         default="userlogic",help="Top module, Default=userlogic")
-    optparser.add_option("-o","--output",dest="outputfile",
-                         default="out.v",help="Output file name, Default=out.v")
-    optparser.add_option("-I","--include",dest="include",action="append",
-                         default=[],help="Include path")
-    optparser.add_option("-D",dest="define",action="append",
-                         default=[],help="Macro Definition")
-    optparser.add_option("--singleclock",action="store_true",dest="single_clock",
-                         default=False,help="Use single clock mode")
-    (options, args) = optparser.parse_args()
-
-    filelist = args
-    if options.showversion:
-        showVersion()
-
-    for f in filelist:
-        if not os.path.exists(f): raise IOError("file not found: " + f)
-
-    if len(filelist) == 0:
-        showVersion()
-
-    converter = RtlConverter(filelist, options.topmodule,
-                             include=options.include, 
-                             define=options.define,
-                             single_clock=options.single_clock)
-    ast = converter.generate()
-    converter.dumpCoramObject()
-    
-    asttocode = ASTCodeGenerator()
-    code = asttocode.visit(ast)
-
-    f = open(options.outputfile, 'w')
-    f.write(code)
-    f.close()
-
-if __name__ == '__main__':
-    main()

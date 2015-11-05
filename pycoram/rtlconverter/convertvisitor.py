@@ -14,15 +14,13 @@ import re
 import copy
 import collections
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
-
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
-from pyverilog.utils.scope import ScopeLabel, ScopeChain
-from pyverilog.vparser.ast import *
 import pyverilog.dataflow.dataflow as dataflow
+from pyverilog.vparser.ast import *
 from pyverilog.dataflow.visit import *
 from pyverilog.dataflow.signalvisitor import SignalVisitor
+from pyverilog.utils.scope import ScopeLabel, ScopeChain
 
 #-------------------------------------------------------------------------------
 class InstanceConvertVisitor(SignalVisitor):

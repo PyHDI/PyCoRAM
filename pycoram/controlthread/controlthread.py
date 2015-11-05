@@ -9,30 +9,24 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import os
+import sys
 import ast
 import inspect
-import sys
-import re
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
-
-import utils.version
-from controlthread.scope import ScopeFrameList
-from controlthread.fsm import Fsm
-from controlthread.coram_module import CoramBase
-from controlthread.coram_module import CoramMemory
-from controlthread.coram_module import CoramInStream
-from controlthread.coram_module import CoramOutStream
-from controlthread.coram_module import CoramChannel
-from controlthread.coram_module import CoramRegister
-from controlthread.coram_module import CoramIoChannel
-from controlthread.coram_module import CoramIoRegister
-from controlthread.codegen import CodeGenerator
-import controlthread.maketree as maketree
-import controlthread.voperator as voperator
+from pycoram.controlthread.fsm import Fsm
+from pycoram.controlthread.scope import ScopeFrameList
+from pycoram.controlthread.codegen import CodeGenerator
+from pycoram.controlthread.coram_module import CoramBase
+from pycoram.controlthread.coram_module import CoramMemory
+from pycoram.controlthread.coram_module import CoramInStream
+from pycoram.controlthread.coram_module import CoramOutStream
+from pycoram.controlthread.coram_module import CoramChannel
+from pycoram.controlthread.coram_module import CoramRegister
+from pycoram.controlthread.coram_module import CoramIoChannel
+from pycoram.controlthread.coram_module import CoramIoRegister
+import pycoram.controlthread.maketree as maketree
+import pycoram.controlthread.voperator as voperator
     
-import pyverilog
-import pyverilog.vparser
 import pyverilog.vparser.ast as vast
 import pyverilog.dataflow.optimizer as vopt
 
@@ -1899,46 +1893,3 @@ class ControlThreadGenerator(object):
 
     def getStatus(self):
         return self.status
-
-#-------------------------------------------------------------------------------
-def main():
-    from optparse import OptionParser
-    INFO = "Python-to-Verilog Compiler for Control Thread Generation of PyCoRAM"
-    VERSION = utils.version.VERSION
-    USAGE = "Usage: python controlthread.py filelist"
-
-    def showVersion():
-        print(INFO)
-        print(VERSION)
-        print(USAGE)
-        sys.exit()
-    
-    optparser = OptionParser()
-    optparser.add_option("-v","--version",action="store_true",dest="showversion",
-                         default=False,help="Show the version")
-    optparser.add_option("--dump",action="store_true",dest="dump",
-                         default=False,help="Dump the internal information")
-
-    (options, args) = optparser.parse_args()
-
-    filelist = args
-    if options.showversion:
-        showVersion()
-
-    for f in filelist:
-        if not os.path.exists(f): raise IOError("file not found: " + f)
-
-    if len(filelist) == 0:
-        showVersion()
-
-    for filename in filelist:
-        threadgen = ControlThreadGenerator()
-        (thread_name, ext) = os.path.splitext(os.path.basename(filename))
-        output = thread_name + '.v'
-        code = threadgen.compile(thread_name, filename=filename, dump=options.dump)
-        f = open(output, 'w')
-        f.write(code)
-        f.close()
-
-if __name__ == '__main__':
-    main()

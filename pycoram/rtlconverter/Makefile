@@ -1,6 +1,6 @@
 PYTHON=python3
 #OPT=-m pdb
-CONVERTER=rtlconverter.py
+CONVERTER=run_rtlconverter.py
 INCLUDE=-I ../../include/
 SRCS=../../sample/test/single_memory/userlogic.v
 TOPMODULE=userlogic

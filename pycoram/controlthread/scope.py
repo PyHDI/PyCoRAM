@@ -12,7 +12,6 @@ import copy
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))) )
 import pyverilog.vparser.ast as vast
 
 class ScopeName(object):

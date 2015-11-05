@@ -11,28 +11,27 @@ from __future__ import print_function
 import os
 import sys
 import math
-import re
 import copy
 import shutil
 import glob
-import collections
 from jinja2 import Environment, FileSystemLoader
 if sys.version_info[0] < 3:
     import ConfigParser as configparser
 else:
     import configparser
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) )
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+import pycoram.utils.version
+import pycoram.utils.componentgen
+from pycoram.controlthread.controlthread import ControlThreadGenerator
+from pycoram.rtlconverter.rtlconverter import RtlConverter
+from pycoram.controlthread.coram_module import *
 
-import utils.version
-from controlthread.controlthread import ControlThreadGenerator
-from rtlconverter.rtlconverter import RtlConverter
-from controlthread.coram_module import *
-from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 import pyverilog.vparser.ast as vast
-import pyverilog.dataflow.identifiervisitor as iv
-import pyverilog.dataflow.identifierreplace as ir
-import utils.componentgen
+import pyverilog.utils.identifiervisitor as iv
+import pyverilog.utils.identifierreplace as ir
+from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
 
@@ -557,7 +556,7 @@ class SystemBuilder(object):
         f.close()
 
         # component.xml
-        gen = utils.componentgen.ComponentGen()
+        gen = pycoram.utils.componentgen.ComponentGen()
         xml_code = gen.generate(userlogic_topmodule, threads,
                                 lite=configs['io_lite'], 
                                 ext_addrwidth=configs['ext_addrwidth'],
@@ -783,7 +782,7 @@ class SystemBuilder(object):
 def main():
     from optparse import OptionParser
     INFO = "PyCoRAM: Python-based Portable IP-core Synthesis Framework for FPGA-based Computing"
-    VERSION = utils.version.VERSION
+    VERSION = pycoram.utils.version.VERSION
     USAGE = "Usage: python pycoram.py [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+"
 
     def showVersion():
