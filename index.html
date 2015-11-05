@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>PyCoRAM by shtaxxx</title>
+    <title>PyCoRAM by PyHDI</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
@@ -20,266 +20,17 @@
         <p class="header">Python-based Portable IP-core Synthesis Framework for FPGA-based Computing</p>
 
         <ul>
-          <li class="download"><a class="buttons" href="https://github.com/shtaxxx/PyCoRAM/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/shtaxxx/PyCoRAM/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/shtaxxx/PyCoRAM">View On GitHub</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/PyHDI/PyCoRAM/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/PyHDI/PyCoRAM/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/PyHDI/PyCoRAM">View On GitHub</a></li>
         </ul>
 
-        <p class="header">This project is maintained by <a class="header name" href="https://github.com/shtaxxx">shtaxxx</a></p>
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/PyHDI">PyHDI</a></p>
 
 
       </header>
       <section>
         <h1>
-<a id="whats-pycoram" class="anchor" href="#whats-pycoram" aria-hidden="true"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h1>
-
-<p>PyCoRAM is a Python-based portable IP-core synthesis framework with CoRAM (Connected RAM) memory architecture.</p>
-
-<p>PyCoRAM framework generates a portable IP-core package from computing logic descriptions in Verilog HDL and memory access pattern descriptions in Python.
-Designers can easily build an FPGA-based custom accelerator using a generated IP-core with any common IP-cores on vendor-provided EDA tools.
-PyCoRAM framework includes (1) the Verilog-to-Verilog design translation compiler and (2) the Python-to-Verilog high-level synthesis (HLS) compiler for generating control circuits of memory operations.</p>
-
-<p>There are some major differences between PyCoRAM and the original soft-logic implementation of CoRAM.</p>
-
-<ul>
-<li>Memory access pattern representation in Python
-
-<ul>
-<li>The original CoRAM uses C language to represent a memory access pattern (called 'control thread').</li>
-<li>In PyCoRAM, you can easily describe them by using popular lightweight scripting language.</li>
-<li>A Python script of memory access patterns is translated into an RT-level hardware design in Verilog HDL by the Python-to-Verilog high-level synthesis compiler.</li>
-</ul>
-</li>
-<li>Commercial interconnect supports (AMBA AXI4 and Altera Avalon)
-
-<ul>
-<li>The original CoRAM uses CONNECT to generate an on-chip interconnect.</li>
-<li>PyCoRAM compiler generates a IP-core design with AMBA AXI4 or Altera Avalon. Both are commonly used on vendor-provided EDA tools.</li>
-</ul>
-</li>
-<li>Parameterized RTL Design Support
-
-<ul>
-<li>The original CoRAM has some limitations in Verilog HDL description of computing logic, such as no supports of generate statement.</li>
-<li>PyCoRAM has a sophisticated RTL analyzer/translator to convert RTL descriptions into synthesizable IP-core package under memory abstractions of CoRAM.</li>
-</ul>
-</li>
-</ul>
-
-<h1>
-<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h1>
-
-<h2>
-<a id="software" class="anchor" href="#software" aria-hidden="true"><span class="octicon octicon-link"></span></a>Software</h2>
-
-<ul>
-<li>Python (2.7 or later, 3.3 or later)</li>
-<li>Icarus Verilog (0.9.6 or later)
-
-<ul>
-<li>'iverilog -E' command is used for preprocessing Verilog source code.</li>
-</ul>
-</li>
-<li>Jinja2 (2.7 or later)
-
-<ul>
-<li>The code generator uses Jinja2 template engine.</li>
-<li>'pip install jinja2' (for Python 2.x) or 'pip3 install jinja2' (for Python 3.x)</li>
-</ul>
-</li>
-<li>Pyverilog (Python-based Verilog HDL Design Processing Toolkit)
-
-<ul>
-<li>Install from pip: 'pip install pyverilog' for Python2.7 or 'pip3 install pyverilog' for Python3</li>
-<li>Install from github into this package: 'cd Pycoram; git clone <a href="https://github.com/shtaxxx/Pyverilog.git">https://github.com/shtaxxx/Pyverilog.git</a>; cd pycoram; ln -s ../Pyverilog/pyverilog'</li>
-</ul>
-</li>
-</ul>
-
-<h3>
-<a id="for-rtl-simulation" class="anchor" href="#for-rtl-simulation" aria-hidden="true"><span class="octicon octicon-link"></span></a>for RTL simulation</h3>
-
-<ul>
-<li>Icarus Verilog or Synopsys VCS
-
-<ul>
-<li>Icarus Verilog is an open-sourced Verilog simulator</li>
-<li>VCS is a very fast commercial Verilog simulator</li>
-</ul>
-</li>
-</ul>
-
-<h3>
-<a id="for-bitstream-synthesis" class="anchor" href="#for-bitstream-synthesis" aria-hidden="true"><span class="octicon octicon-link"></span></a>for bitstream synthesis</h3>
-
-<ul>
-<li>for Xilinx: Xilinx Platform Studio (14.6 or later)</li>
-<li>for Altera: Qsys (14.0 or later)</li>
-</ul>
-
-<h2>
-<a id="recommended-fpga-board" class="anchor" href="#recommended-fpga-board" aria-hidden="true"><span class="octicon octicon-link"></span></a>(Recommended) FPGA Board</h2>
-
-<ul>
-<li>Digilent Atlys (Xilinx Spartan-6)</li>
-<li>Xilinx ML605 (Xilinx Virtex-6)</li>
-<li>Xilinx VC707 (Xilinx Virtex-7)</li>
-<li>Xilinx ZedBoard (Xilinx Zynq 7020)</li>
-<li>Xilinx ZC706 (Xilinx Zynq 7045)</li>
-<li>Altera DE2-115 (Altera Cyclone-4)</li>
-<li>Altera Cyclone-5 GX Starter Kit</li>
-</ul>
-
-<h1>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h1>
-
-<p>If you want to use PyCoRAM as a general library, you can install on your environment by using setup.py.</p>
-
-<p>If Python 2.7 is used,</p>
-
-<pre><code>python setup.py install
-</code></pre>
-
-<p>If Python 3.x is used,</p>
-
-<pre><code>python3 setup.py install
-</code></pre>
-
-<p>Then you can use the pycoram command from your console (the version number depends on your environment).</p>
-
-<pre><code>pycoram-0.9.0-py3.4.1
-</code></pre>
-
-<h1>
-<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Started</h1>
-
-<p>First, please make sure TARGET in 'base.mk' in 'sample' is correctly defined. If you use the installed pycoram command on your environment, please modify 'TARGET' in base.mk as below (the version number depends on your environment)</p>
-
-<pre><code>TARGET=pycoram-0.9.0-py3.4.1
-</code></pre>
-
-<p>You can find the sample projects in 'sample/tests/single_memory'.</p>
-
-<ul>
-<li>ctrl_thread.py : Control-thread definition in Python</li>
-<li>userlogic.v  : User-defined Verilog code using CoRAM memory blocks</li>
-</ul>
-
-<p>Then type 'make' and 'make run' to simulate sample system.</p>
-
-<pre><code>make build
-make sim
-</code></pre>
-
-<p>Or type commands as below directly.</p>
-
-<pre><code>python pycoram/pycoram.py sample/default.config -t userlogic -I include/ sample/tests/single_memory/ctrl_thread.py sample/tests/single_memory/userlogic.v
-iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
-./a.out
-</code></pre>
-
-<p>PyCoRAM compiler generates a directory for IP-core (pycoram_userlogic_v1_00_a, in this example).</p>
-
-<p>'pycoram_userlogic_v1_00_a.v' includes </p>
-
-<ul>
-<li>IP-core RTL design (hdl/verilog/pycoram_userlogic.v)</li>
-<li>Test bench (test/test_pycoram_userlogic.v) </li>
-<li>XPS setting files (pycoram_userlogic_v2_1_0.{mpd,pao,tcl})</li>
-</ul>
-
-<p>A bit-stream can be synthesized by using Xilinx Platform Studio.
-Please copy the generated IP-core into 'pcores' directory of XPS project.</p>
-
-<p>This software has some sample project in 'sample'.
-To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST)</p>
-
-<h1>
-<a id="pycoram-command-options" class="anchor" href="#pycoram-command-options" aria-hidden="true"><span class="octicon octicon-link"></span></a>PyCoRAM Command Options</h1>
-
-<h2>
-<a id="command" class="anchor" href="#command" aria-hidden="true"><span class="octicon octicon-link"></span></a>Command</h2>
-
-<pre><code>python pycoram.py [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+
-</code></pre>
-
-<h2>
-<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
-
-<ul>
-<li>file
-
-<ul>
-<li>User-logic Verilog file (.v) and control-thread definition file (.py).
-Automatically, .v file is recognized as a user-logic Verilog file, and 
-.py file recongnized as a control-thread definition, respectively.</li>
-</ul>
-</li>
-<li>config
-
-<ul>
-<li>Configuration file which includes memory and device specification </li>
-</ul>
-</li>
-<li>-t
-
-<ul>
-<li>Name of user-defined top module, default is "userlogic".</li>
-</ul>
-</li>
-<li>-I
-
-<ul>
-<li>Include path for input Verilog HDL files.</li>
-</ul>
-</li>
-<li>--memimg
-
-<ul>
-<li>DRAM image file in HEX DRAM (option, if you need).
-The file is copied into test directory.
-If no file is assigned, the array is initialized with incremental values.</li>
-</ul>
-</li>
-<li>--usertest
-
-<ul>
-<li>User-defined test code file (option, if you need).
-The code is copied into testbench script.</li>
-</ul>
-</li>
-</ul>
-
-<h1>
-<a id="publication" class="anchor" href="#publication" aria-hidden="true"><span class="octicon octicon-link"></span></a>Publication</h1>
-
-<ul>
-<li><p>Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. <a href="http://users.ece.cmu.edu/%7Ejhoe/distribution/2013/carl13pycoram.pdf">Paper</a>
-<a href="http://www.slideshare.net/shtaxxx/pycoramcarl2013">Slide</a></p></li>
-<li><p>Zynq + PyCoRAM (+ Debian) (slideshare, in Japanese)
-<a href="http://www.slideshare.net/shtaxxx/zynqpycoram">Slide</a></p></li>
-<li><p>PyCoRAM for HLS meet up (slideshare, in Japanese)
-<a href="http://www.slideshare.net/shtaxxx/pycoram20150116hls">Slide</a></p></li>
-</ul>
-
-<h1>
-<a id="related-project" class="anchor" href="#related-project" aria-hidden="true"><span class="octicon octicon-link"></span></a>Related Project</h1>
-
-<p><a href="http://shtaxxx.github.io/Pyverilog/">Pyverilog</a></p>
-
-<ul>
-<li>Python-based Hardware Design Processing Toolkit for Verilog HDL</li>
-<li>Used as basic code analyser and generator in PyCoRAM</li>
-</ul>
-
-<p><a href="http://www.ece.cmu.edu/coram/doku.php?id=home">CoRAM</a></p>
-
-<ul>
-<li>A General Purpose Memory Architecture for FPGAs</li>
-<li>The original CoRAM developed at CMU</li>
-</ul>
-
-<h1>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h1>
 
 <p>Apache License 2.0
