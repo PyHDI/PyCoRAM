@@ -4,11 +4,6 @@ PYTHON=python3
 #OPT=-m cProfile -s time
 #OPT=-m cProfile -o profile.rslt
 
-## If you installed pycoram in your environment
-#TARGET=pycoram
-## If you directly execute pycoram.py without installation
-TARGET=$(ROOTDIR)/pycoram/pycoram.py
-
 ################################################################################
 IPVER=v1_00_a
 OUTPUTDIR=pycoram_$(TOPMODULE)_$(IPVER)
