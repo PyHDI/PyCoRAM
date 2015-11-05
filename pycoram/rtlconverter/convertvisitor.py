@@ -505,6 +505,7 @@ class InstanceConvertVisitor(SignalVisitor):
             self.additionalport = []
             new_module = self.rename(node.module)
             self.copyModuleInfo(node.module, new_module)
+            
             prev_module_name = node.module
             node.module = new_module
             # Not only InstanceList, module of Instance must be changed
@@ -512,19 +513,23 @@ class InstanceConvertVisitor(SignalVisitor):
                 instance.module = new_module
                 
             self.changeModuleName(node.module, node.module)
+            
             SignalVisitor.visit_InstanceList(self, node)
+            
             if self.additionalport:
                 self.setUsed(node.module)
                 self.updateInstancePort(node, generate=self.frames.isGenerate())
                 tmp.extend(self.additionalport)
+                
             self.additionalport = tmp
             
-            # Not only InstanceList, module of Instance must be restored
             node.module = prev_module_name
+            # Not only InstanceList, module of Instance must be restored
             for instance in node.instances:
                 instance.module = prev_module_name
                 
             self.changeModuleName(node.module, prev_module_name)
+            
         else:
             tmp = self.additionalport
             self.additionalport = []
