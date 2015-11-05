@@ -6,8 +6,8 @@ PYTHON=python3
 
 ## If you installed pycoram in your environment
 #TARGET=pycoram
-## If you directly execute run_pycoram.py without installation
-TARGET=$(ROOTDIR)/pycoram/run_pycoram.py
+## If you directly execute pycoram.py without installation
+TARGET=$(ROOTDIR)/pycoram/pycoram.py
 
 ################################################################################
 IPVER=v1_00_a
@@ -22,7 +22,7 @@ all: sim
 
 .PHONY: build
 build:
-	$(PYTHON) $(OPT) $(TARGET) $(ARGS) $(INPUT) 
+	$(PYTHON) $(OPT) $(SCRIPT)
 
 .PHONY: sim
 sim:

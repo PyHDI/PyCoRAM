@@ -30,6 +30,6 @@ setup(name='pycoram',
       },
       entry_points="""
       [console_scripts]
-      %s = pycoram.pycoram:main
+      %s = pycoram.run_pycoram:main
       """ % script_name,
 )
