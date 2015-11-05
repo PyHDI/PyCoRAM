@@ -11,22 +11,25 @@ def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
 import sys
-script_name = 'pycoram-' + version + '-py' + '.'.join([str(s) for s in sys.version_info[:3]])
+script_name = 'pycoram'
 
 setup(name='pycoram',
       version=version,
       description='Python-based Portable IP-core Synthesis Framework for FPGA-based Computing',
       long_description=read('README.rst'),
-      keywords = 'FPGA, Verilog HDL, High-Level Synthesis, Memory System Abstraction, IP-core, AMBA AXI4, Altera Avalon',
+      keywords = 'FPGA, Verilog HDL, High-Level Synthesis',
       author='Shinya Takamaeda-Yamazaki',
       author_email='shinya.takamaeda_at_gmail_com',
       license="Apache License 2.0",
       url='https://github.com/PyHDI/PyCoRAM',
       packages=find_packages(),
       package_data={ 'pycoram.template' : ['*.*'], },
+      install_requires=[ 'pyverilog', 'Jinja2' ],
+      extras_require={
+          'test' : [ 'pytest', 'pytest-pythonpath' ],
+      },
       entry_points="""
       [console_scripts]
       %s = pycoram.pycoram:main
       """ % script_name,
 )
-

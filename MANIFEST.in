@@ -1,3 +1,9 @@
 include README.md
 include README.rst
 include docker/Dockerfile
+include Makefile
+include default.config
+include base.mk
+include mem-incr.hex
+recursive-include examples *
+recursive-include tests *

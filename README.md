@@ -46,9 +46,7 @@ What's PyCoRAM?
 
 PyCoRAM is a Python-based portable IP-core synthesis framework with CoRAM (Connected RAM) memory architecture.
 
-PyCoRAM framework generates a portable IP-core package from computing logic descriptions in Verilog HDL and memory access pattern descriptions in Python.
-Designers can easily build an FPGA-based custom accelerator using a generated IP-core with any common IP-cores on vendor-provided EDA tools.
-PyCoRAM framework includes (1) the Verilog-to-Verilog design translation compiler and (2) the Python-to-Verilog high-level synthesis (HLS) compiler for generating control circuits of memory operations.
+PyCoRAM framework generates a portable IP-core package from computing logic descriptions in Verilog HDL and memory access pattern descriptions in Python. Designers can easily build an FPGA-based custom accelerator using a generated IP-core with any common IP-cores on vendor-provided EDA tools. PyCoRAM framework includes (1) the Verilog-to-Verilog design translation compiler and (2) the Python-to-Verilog high-level synthesis (HLS) compiler for generating control circuits of memory operations.
 
 There are some major differences between PyCoRAM and the original soft-logic implementation of CoRAM.
 
@@ -64,37 +62,42 @@ There are some major differences between PyCoRAM and the original soft-logic imp
     - PyCoRAM has a sophisticated RTL analyzer/translator to convert RTL descriptions into synthesizable IP-core package under memory abstractions of CoRAM.
     
 
-Requirements
-==============================
-
-Software
---------------------------------------------------------------------------------
-
-* Python (2.7 or later, 3.3 or later)
-* Icarus Verilog (0.9.6 or later)
-    - 'iverilog -E' command is used for preprocessing Verilog source code.
-* Jinja2 (2.7 or later)
-    - The code generator uses Jinja2 template engine.
-    - 'pip install jinja2' (for Python 2.x) or 'pip3 install jinja2' (for Python 3.x)
-* Pyverilog (Python-based Verilog HDL Design Processing Toolkit)
-    - Install from pip: 'pip install pyverilog' for Python2.7 or 'pip3 install pyverilog' for Python3
-    - Install from github into this package: 'cd Pycoram; git clone https://github.com/PyHDI/Pyverilog.git; cd pycoram; ln -s ../Pyverilog/pyverilog'
-
-### for RTL simulation
-
-* Icarus Verilog
-    - Icarus Verilog is an open-sourced Verilog simulator
-* Synopsys VCS (option, if you have) 
-    - VCS is a very fast commercial Verilog simulator
-
-### for bitstream synthesis
-
-* Xilinx: Vivado (2014.4 or later) and Xilinx Platform Studio (14.6 or later)
-* Altera: Qsys (14.0 or later)
-
-
 Installation
 ==============================
+
+Requirements
+--------------------
+
+- Python: 2.7, 3.4 or later
+
+Python3 is recommended.
+
+- Icarus Verilog: 0.9.7 or later
+
+Install on your platform. For exmple, on Ubuntu:
+
+    sudo apt-get install iverilog
+
+- Jinja2: 2.8 or later
+- pytest: 2.8.2 or later
+- pytest-pythonpath: 0.7 or later
+
+Install on your python environment by using pip.
+
+    pip install jinja2 pytest pytest-pythonpath
+
+- Pyverilog: 1.0.0 or later
+
+Install from pip:
+
+    pip install pyverilog
+
+Install
+--------------------
+
+Install Veriloggen.
+
+    python setup.py install
 
 On Docker
 ------------------------------
@@ -105,65 +108,49 @@ Dockerfile is available, so that you can try PyCoRAM on Docker without any insta
 cd docker
 sudo docker build -t user/pycoram .
 sudo docker run --name pycoram -i -t user/pycoram /bin/bash
-cd PyCoRAM/sample/test/single_memory/
+cd PyCoRAM/tests/single_memory/
 make build
 make sim
 ```
-
-On your host platform
-------------------------------
-
-If you want to use PyCoRAM as a general library, you can install on your environment by using setup.py.
-
-If Python 2.7 is used,
-
-    python setup.py install
-
-If Python 3.x is used,
-
-    python3 setup.py install
-
-Then you can use the pycoram command from your console (the version number depends on your environment).
-
-    pycoram-0.9.3-py3.4.1
 
 
 Getting Started
 ==============================
 
-First, please make sure TARGET in 'base.mk' in 'sample' is correctly defined. If you use the installed pycoram command on your environment, please modify 'TARGET' in base.mk as below (the version number depends on your environment)
+You can use the pycoram command from your console.
 
-    TARGET=pycoram-0.9.3-py3.4.1
+    pycoram
 
-You can find the sample projects in 'sample/tests/single\_memory'.
+You can find some examples in 'PyCoRAM/examples/' and 'PyCoRAM/tests'.
 
-* ctrl\_thread.py : Control-thread definition in Python
-* userlogic.v  : User-defined Verilog code using CoRAM memory blocks
+Let's begin PyCoRAM by an example in 'tests/single\_memory'. You will find two source files.
 
-Then type 'make' and 'make run' to simulate sample system.
+- ctrl\_thread.py : Control-thread definition in Python
+- userlogic.v  : User-defined Verilog code using CoRAM memory blocks
+
+Type 'make' to build a PyCoRAM IP-core from the source files. Then type 'make run' to simulate sample system.
 
     make build
     make sim
 
-Or type commands as below directly.
+Instead, you can type commands as below directly at 'PyCoRAM' directory.
 
-    python pycoram/pycoram.py sample/default.config -t userlogic -I include/ sample/tests/single_memory/ctrl_thread.py sample/tests/single_memory/userlogic.v
+    pycoram default.config -t userlogic -I include tests/single_memory/ctrl_thread.py tests/single_memory/userlogic.v
     iverilog -I pycoram_userlogic_v1_00_a/hdl/verilog/ pycoram_userlogic_v1_00_a/test/test_pycoram_userlogic.v 
     ./a.out
 
 PyCoRAM compiler generates a directory for IP-core (pycoram\_userlogic\_v1\_00\_a, in this example).
 
 'pycoram\_userlogic\_v1\_00\_a.v' includes 
-* IP-core RTL design (hdl/verilog/pycoram\_userlogic.v)
-* Test bench (test/test\_pycoram\_userlogic.v) 
-* XPS setting files (pycoram\_userlogic\_v2\_1\_0.{mpd,pao,tcl})
-* IP-XACT file (component.xml)
+- IP-core RTL design (hdl/verilog/pycoram\_userlogic.v)
+- Test bench (test/test\_pycoram\_userlogic.v) 
+- XPS setting files (pycoram\_userlogic\_v2\_1\_0.{mpd,pao,tcl})
+- IP-XACT file (component.xml)
 
 A bit-stream can be synthesized by using Xilinx Platform Studio, Xilinx Vivado, and Altera Qsys.
 In case of XPS, please copy the generated IP-core into 'pcores' directory of XPS project.
 
-This software has some sample project in 'sample'.
-To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST)
+This project has some examples in 'PyCoRAM/examples/' and 'PyCoRAM/tests'. To build them, please modify 'Makefile', so that the corresponding files and parameters are selected (especially INPUT, MEMIMG and USERTEST).
 
 
 PyCoRAM Command Options
@@ -172,7 +159,7 @@ PyCoRAM Command Options
 Command
 ------------------------------
 
-    python pycoram.py [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+
+    pycoram [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+
 
 Description
 ------------------------------
@@ -206,4 +193,3 @@ Related Project
 [CoRAM](http://www.ece.cmu.edu/coram/doku.php?id=home)
 - A General Purpose Memory Architecture for FPGAs
 - The original CoRAM developed at CMU
-

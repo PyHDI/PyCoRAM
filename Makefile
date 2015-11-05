@@ -1,4 +1,4 @@
-TARGET=./sample/test/single_memory/
+TARGET=tests/single_memory/
 
 .PHONY: all
 all: sim
@@ -22,8 +22,8 @@ view:
 .PHONY: clean
 clean:
 	make clean -C ./pycoram
-	make clean -C ./sample
-	make clean -C ./dsl_sample
+	make clean -C ./examples
+	make clean -C ./tests
 	rm -rf *.pyc __pycache__ pycoram.egg-info build dist
 
 .PHONY: release
