@@ -69,6 +69,7 @@ class InstanceConvertVisitor(SignalVisitor):
                 self.new_moduleinfotable.dict[dst].definition.name = dst
         if (src != dst) and (dst not in self.moduleinfotable.dict):
             self.moduleinfotable.dict[dst] = copy.deepcopy(self.moduleinfotable.dict[src])
+            self.moduleinfotable.dict[dst].definition.name = dst
 
     #----------------------------------------------------------------------------
     def changeModuleName(self, dst, name):
@@ -506,6 +507,8 @@ class InstanceConvertVisitor(SignalVisitor):
             self.copyModuleInfo(node.module, new_module)
             prev_module_name = node.module
             node.module = new_module
+            for instance in node.instances:
+                instance.module = new_module
             self.changeModuleName(node.module, node.module)
             SignalVisitor.visit_InstanceList(self, node)
             if self.additionalport:
@@ -514,6 +517,8 @@ class InstanceConvertVisitor(SignalVisitor):
                 tmp.extend(self.additionalport)
             self.additionalport = tmp
             node.module = prev_module_name
+            for instance in node.instances:
+                instance.module = prev_module_name
             self.changeModuleName(node.module, prev_module_name)
         else:
             tmp = self.additionalport
