@@ -1,41 +1,23 @@
 .PHONY: clean
 clean:
-	make clean -C bandwidth
-	make clean -C uart_loader
-	make clean -C simd
-	make clean -C sum
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make clean -C {} 
 
 .PHONY: build
 build:
-	make build -C bandwidth
-	make build -C uart_loader
-	make build -C simd
-	make build -C sum
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make build -C {} 
 
 .PHONY: sim
 sim:
-	make sim -C bandwidth
-	make sim -C uart_loader
-	make sim -C simd
-	make sim -C sum
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make sim -C {} 
 
 .PHONY: vcs_sim
 vcs_sim:
-	make vcs_sim -C bandwidth
-	make vcs_sim -C uart_loader
-	make vcs_sim -C simd
-	make vcs_sim -C sum
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make vcs_sim -C {} 
 
 .PHONY: test
 test:
-	make test -C bandwidth
-	make test -C uart_loader
-	make test -C simd
-	make test -C sum
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make test -C {} 
 
 .PHONY: vcs_test
 vcs_test:
-	make vcs_test -C bandwidth
-	make vcs_test -C uart_loader
-	make vcs_test -C simd
-	make vcs_test -C sum
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make vcs_test -C {} 
