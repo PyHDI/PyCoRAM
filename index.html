@@ -31,6 +31,68 @@
       </header>
       <section>
         <h1>
+<a id="publication" class="anchor" href="#publication" aria-hidden="true"><span class="octicon octicon-link"></span></a>Publication</h1>
+
+<p>If you use PyCoRAM in your research, please cite our paper.</p>
+
+<ul>
+<li>Shinya Takamaeda-Yamazaki, Kenji Kise and James C. Hoe: PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing, The Third Workshop on the Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013) (Co-located with MICRO-46), December 2013. <a href="http://users.ece.cmu.edu/%7Ejhoe/distribution/2013/carl13pycoram.pdf">Paper</a>
+<a href="http://www.slideshare.net/shtaxxx/pycoramcarl2013">Slide</a>
+</li>
+</ul>
+
+<pre><code>@inproceedings{Takamaeda:2013:CARL:PyCoRAM,
+author = {Takamaeda-Yamazaki, Shinya and Kise, Kenji and Hoe, James C.},
+title = {{PyCoRAM: Yet Another Implementation of CoRAM Memory Architecture for Modern FPGA-based Computing}},
+booktitle={Intersections of Computer Architecture and Reconfigurable Logic (CARL 2013)},
+month={Dec},
+year = {2013},
+location = {Davis, CA},
+} 
+</code></pre>
+
+<ul>
+<li><p>Zynq + PyCoRAM (+ Debian) (slideshare, in Japanese)
+<a href="http://www.slideshare.net/shtaxxx/zynqpycoram">Slide</a></p></li>
+<li><p>PyCoRAM for HLS meet up (slideshare, in Japanese)
+<a href="http://www.slideshare.net/shtaxxx/pycoram20150116hls">Slide</a></p></li>
+</ul>
+
+<h1>
+<a id="whats-pycoram" class="anchor" href="#whats-pycoram" aria-hidden="true"><span class="octicon octicon-link"></span></a>What's PyCoRAM?</h1>
+
+<p>PyCoRAM is a Python-based portable IP-core synthesis framework with CoRAM (Connected RAM) memory architecture.</p>
+
+<p>PyCoRAM framework generates a portable IP-core package from computing logic descriptions in Verilog HDL and memory access pattern descriptions in Python. Designers can easily build an FPGA-based custom accelerator using a generated IP-core with any common IP-cores on vendor-provided EDA tools. PyCoRAM framework includes (1) the Verilog-to-Verilog design translation compiler and (2) the Python-to-Verilog high-level synthesis (HLS) compiler for generating control circuits of memory operations.</p>
+
+<p>There are some major differences between PyCoRAM and the original soft-logic implementation of CoRAM.</p>
+
+<ul>
+<li>Memory access pattern representation in Python
+
+<ul>
+<li>The original CoRAM uses C language to represent a memory access pattern (called 'control thread').</li>
+<li>In PyCoRAM, you can easily describe them by using popular lightweight scripting language.</li>
+<li>A Python script of memory access patterns is translated into an RT-level hardware design in Verilog HDL by the Python-to-Verilog high-level synthesis compiler.</li>
+</ul>
+</li>
+<li>Commercial interconnect supports (AMBA AXI4 and Altera Avalon)
+
+<ul>
+<li>The original CoRAM uses CONNECT to generate an on-chip interconnect.</li>
+<li>PyCoRAM compiler generates a IP-core design with AMBA AXI4 or Altera Avalon. Both are commonly used on vendor-provided EDA tools.</li>
+</ul>
+</li>
+<li>Parameterized RTL Design Support
+
+<ul>
+<li>The original CoRAM has some limitations in Verilog HDL description of computing logic, such as no supports of generate statement.</li>
+<li>PyCoRAM has a sophisticated RTL analyzer/translator to convert RTL descriptions into synthesizable IP-core package under memory abstractions of CoRAM.</li>
+</ul>
+</li>
+</ul>
+
+<h1>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h1>
 
 <p>Apache License 2.0
