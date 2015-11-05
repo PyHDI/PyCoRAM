@@ -6,4 +6,5 @@ include default.config
 include base.mk
 include mem-incr.hex
 recursive-include examples *
+recursive-include libpycoram_examples *
 recursive-include tests *
