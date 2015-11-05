@@ -4,10 +4,11 @@ PYTHON=python3
 #OPT=-m cProfile -s time
 #OPT=-m cProfile -o profile.rslt
 
-## If you installed pycoram in your environment
-#TARGET=pycoram
-## If you directly execute run_pycoram.py without installation
-TARGET=$(PYTHON) $(OPT) $(ROOTDIR)/pycoram/run_pycoram.py
+# If you installed pycoram in your environment
+TARGET=pycoram
+
+# If you directly execute run_pycoram.py without installation
+#TARGET=$(PYTHON) $(OPT) $(ROOTDIR)/pycoram/run_pycoram.py
 
 ################################################################################
 IPVER=v1_00_a
