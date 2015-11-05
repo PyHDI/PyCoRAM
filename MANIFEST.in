@@ -9,3 +9,4 @@ include mem-incr.hex
 recursive-include examples *
 recursive-include tests *
 recursive-include libpycoram_tests *
+recursive-include c_lib *
