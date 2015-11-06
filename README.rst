@@ -125,7 +125,7 @@ Install from pip:
 Install
 -------
 
-Install Veriloggen.
+Install PyCoRAM.
 
 ::
 
