@@ -4,6 +4,9 @@ def ctrl_thread():
     channel = CoramChannel(idx=0, datawidth=32, size=16)
     addr = 0
     sum = 0
+
+    # initialization of IO register RAM
+    ioregister.write(0, 0) # ioregister[0] = 0
     
     ioval = 0
     while ioval == 0:
