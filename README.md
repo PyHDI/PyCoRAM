@@ -79,12 +79,10 @@ Install on your platform. For exmple, on Ubuntu:
     sudo apt-get install iverilog
 
 - Jinja2: 2.8 or later
-- pytest: 2.8.2 or later
-- pytest-pythonpath: 0.7 or later
 
 Install on your python environment by using pip.
 
-    pip install jinja2 pytest pytest-pythonpath
+    pip install jinja2
 
 - Pyverilog: 1.0.0 or later
 
