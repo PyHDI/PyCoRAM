@@ -7,6 +7,10 @@ all: sim
 build:
 	make build -C $(TARGET)
 
+.PHONY: lbuild
+lbuild:
+	make lbuild -C $(TARGET)
+
 .PHONY: sim
 sim:
 	make sim -C $(TARGET)

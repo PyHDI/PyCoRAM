@@ -6,6 +6,10 @@ clean:
 build:
 	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make build -C {} 
 
+.PHONY: lbuild
+lbuild:
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make lbuild -C {} 
+
 .PHONY: sim
 sim:
 	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make sim -C {} 

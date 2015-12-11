@@ -11,6 +11,7 @@ from __future__ import print_function
 import os
 import sys
 import glob
+from optparse import OptionParser
 if sys.version_info[0] < 3:
     import ConfigParser as configparser
 else:
@@ -23,7 +24,6 @@ import pycoram.utils.version
 
 #---------------------------------------------------------------------------
 def main():
-    from optparse import OptionParser
     INFO = "PyCoRAM: Python-based Portable IP-core Synthesis Framework for FPGA-based Computing"
     VERSION = pycoram.utils.version.VERSION
     USAGE = "Usage: python pycoram.py [config] [-t topmodule] [-I includepath]+ [--memimg=filename] [--usertest=filename] [file]+"
