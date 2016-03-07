@@ -223,7 +223,7 @@ module axi_master_fifo #
   assign M_AXI_AWCACHE = 4'b0011;
   assign M_AXI_AWPROT = 3'h0;
   assign M_AXI_AWQOS = 4'h0;
-  assign M_AXI_AWUSER = 'b0;
+  assign M_AXI_AWUSER = 'b1;
   assign M_AXI_AWVALID = awvalid;
   
   //----------------------------------------------------------------------------
@@ -261,7 +261,7 @@ module axi_master_fifo #
   assign M_AXI_ARCACHE = 4'b0011;
   assign M_AXI_ARPROT = 3'h0;
   assign M_AXI_ARQOS = 4'h0;
-  assign M_AXI_ARUSER = 'b0;
+  assign M_AXI_ARUSER = 'b1;
   assign M_AXI_ARVALID = arvalid;
 
   //----------------------------------------------------------------------------    

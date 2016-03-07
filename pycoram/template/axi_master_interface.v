@@ -160,7 +160,7 @@ module axi_master_interface #
   assign M_AXI_AWCACHE = 4'b0011;
   assign M_AXI_AWPROT = 3'h0;
   assign M_AXI_AWQOS = 4'h0;
-  assign M_AXI_AWUSER = 'b0;
+  assign M_AXI_AWUSER = 'b1;
   assign M_AXI_AWVALID = awvalid;
   assign awready = M_AXI_AWREADY;
   
@@ -170,7 +170,7 @@ module axi_master_interface #
   assign M_AXI_WDATA = wdata;
   assign M_AXI_WSTRB = wstrb;
   assign M_AXI_WLAST = wlast;
-  assign M_AXI_WUSER = 'b0;
+  assign M_AXI_WUSER = 'b1;
   assign M_AXI_WVALID = wvalid;
   assign wready = M_AXI_WREADY;
   
