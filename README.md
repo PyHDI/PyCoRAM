@@ -5,7 +5,7 @@ Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 
 Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
-E-mail: shinya\_at\_is.naist.jp
+E-mail: takamaeda\_at\_ist.hokudai.ac.jp
 
 
 License
